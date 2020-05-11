@@ -15,6 +15,20 @@ module "labels" {
   label_order = var.label_order
 }
 
+ module "iam-role" {
+  source = "git::https://github.com/clouddrove/terraform-aws-iam-role.git?ref=tags/0.12.3"
+
+  name               = var.name
+  application        = var.application
+  environment        = var.environment
+  label_order        = var.label_order
+  enabled            = var.enabled
+  assume_role_policy = data.aws_iam_policy_document.assume_role_ec2.*.json
+
+  policy_enabled = true
+  policy         = "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role"
+}
+
 data "aws_iam_policy_document" "assume_role_ec2" {
   count = local.ec2_enabled ? 1 : 0
 
@@ -27,22 +41,6 @@ data "aws_iam_policy_document" "assume_role_ec2" {
       identifiers = ["ec2.amazonaws.com"]
     }
   }
-}
-
-#Module      : IAM ROLE
-#Description : Provides an IAM role.
-resource "aws_iam_role" "default" {
-  count              = local.ec2_enabled ? 1 : 0
-  name               = module.labels.id
-  assume_role_policy = join("", data.aws_iam_policy_document.assume_role_ec2.*.json)
-}
-
-#Module      : IAM ROLE POLICY ATTACHMENT NODE
-#Description : Attaches a Managed IAM Policy to an IAM role.
-resource "aws_iam_role_policy_attachment" "amazon_eks_worker_node_policy" {
-  count      = local.ec2_enabled ? 1 : 0
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role"
-  role       = join("", aws_iam_role.default.*.name)
 }
 
 resource "aws_iam_instance_profile" "default" {

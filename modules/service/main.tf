@@ -44,7 +44,6 @@ resource "aws_ecs_service" "default" {
   }
 
   load_balancer {
-    elb_name         = var.elb_name
     target_group_arn = var.target_group_arn
     container_name   = var.container_name
     container_port   = var.container_port
