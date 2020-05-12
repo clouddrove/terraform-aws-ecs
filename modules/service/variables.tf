@@ -50,7 +50,7 @@ variable "delimiter" {
 
 variable "enabled" {
   type        = bool
-  default     = true
+  default     = false
   description = "Whether to create the resources. Set to `false` to prevent the module from creating any resources."
 }
 
@@ -66,7 +66,13 @@ variable "fargate_enabled" {
   description = "Whether fargate launch type is enabled or not."
 }
 
-variable "cluster_name" {
+variable "ec2_cluster_name" {
+  type        = string
+  default     = ""
+  description = "The name of the ECS cluster."
+}
+
+variable "fargate_cluster_name" {
   type        = string
   default     = ""
   description = "The name of the ECS cluster."
@@ -78,7 +84,7 @@ variable "deployment_maximum_percent" {
   description = "The upper limit (as a percentage of the service's desiredCount) of the number of running tasks that can be running in a service during a deployment."
 }
 
-variable "deployment_minimum_health_percent" {
+variable "deployment_minimum_healthy_percent" {
   type        = number
   default     = 100
   description = "The lower limit (as a percentage of the service's desiredCount) of the number of running tasks that must remain running and healthy in a service during a deployment."
@@ -92,41 +98,41 @@ variable "desired_count" {
 
 variable "enable_ecs_managed_tags" {
   type        = bool
-  default     = true
+  default     = false
   description = "Specifies whether to enable Amazon ECS managed tags for the tasks within the service."
 }
 
 variable "health_check_grace_period_seconds" {
   type        = number
-  default     = 5000
+  default     = 360
   description = "Seconds to ignore failing load balancer health checks on newly instantiated tasks to prevent premature shutdown, up to 2147483647."
-}
-
-variable "launch_type" {
-  type        = string
-  default     = "EC2"
-  description = "The launch type on which to run your service. The valid values are EC2 and FARGATE. Defaults to EC2."
 }
 
 variable "propagate_tags" {
   type        = string
-  default     = "TASK_DEFINITION"
+  default     = ""
   description = " Specifies whether to propagate the tags from the task definition or the service to the tasks. The valid values are SERVICE and TASK_DEFINITION."
 }
 
 variable "scheduling_strategy" {
   type        = string
-  default     = "REPLICA"
+  default     = ""
   description = "The scheduling strategy to use for the service. The valid values are REPLICA and DAEMON."
 }
 
-variable "task_definition" {
+variable "ec2_task_definition" {
   type        = string
   default     = ""
   description = "The family and revision (family:revision) or full ARN of the task definition that you want to run in your service."
 }
 
-variable "capacity_provider" {
+variable "fargate_task_definition" {
+  type        = string
+  default     = ""
+  description = "The family and revision (family:revision) or full ARN of the task definition that you want to run in your service."
+}
+
+variable "ec2_capacity_provider" {
   type        = string
   default     = ""
   description = "The name of the capacity provider."
@@ -169,14 +175,14 @@ variable "container_port" {
 }
 
 variable "subnets" {
-  type        = list
+  type        = list(string)
   default     = []
   description = "The subnets associated with the task or service."
 }
 
 variable "security_groups" {
-  type        = string
-  default     = ""
+  type        = list(string)
+  default     = []
   description = "The security groups associated with the task or service."
 }
 
@@ -184,4 +190,16 @@ variable "assign_public_ip" {
   type        = bool
   default     = false
   description = "Assign a public IP address to the ENI (Fargate launch type only). Valid values are true or false. Default false."
+}
+
+variable "platform_version" {
+  type        = string
+  default     = "LATEST"
+  description = "The platform version on which to run your service."
+}
+
+variable "network_mode" {
+  type        = string
+  default     = ""
+  description = "The Docker networking mode to use for the containers in the task. The valid values are none, bridge, awsvpc, and host."
 }

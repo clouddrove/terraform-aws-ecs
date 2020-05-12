@@ -50,8 +50,14 @@ variable "delimiter" {
 
 variable "enabled" {
   type        = bool
-  default     = true
+  default     = false
   description = "Whether to create the resources. Set to `false` to prevent the module from creating any resources."
+}
+
+variable "vpc_id" {
+  type        = string
+  default     = ""
+  description = "VPC ID for the ECS cluster."
 }
 
 variable "image_id" {
@@ -122,7 +128,7 @@ variable "max_size" {
 
 variable "min_size" {
   type        = number
-  default     = 1
+  default     = 0
   description = "The minimum size of the autoscale group."
 }
 
@@ -302,7 +308,7 @@ variable "cpu_utilization_low_evaluation_periods" {
 
 variable "cpu_utilization_low_period_seconds" {
   type        = number
-  default     = 200
+  default     = 180
   description = "The period in seconds over which the specified statistic is applied."
 }
 
@@ -342,7 +348,14 @@ variable "kms_key_arn" {
   description = "AWS Key Management Service (AWS KMS) customer master key (CMK) to use when creating the encrypted volume. encrypted must be set to true when this is set."
 }
 
-###Spot
+variable "ec2_capacity_provider" {
+  type        = string
+  default     = ""
+  description = "The name of the capacity provider."
+}
+
+## Spot
+
 variable "spot_enabled" {
   type        = bool
   default     = false
@@ -375,25 +388,25 @@ variable "spot_instance_type" {
 
 variable "spot_max_size" {
   type        = number
-  default     = "1"
+  default     = 3
   description = "The maximum size of the spot autoscale group."
 }
 
 variable "spot_min_size" {
   type        = number
-  default     = "1"
+  default     = 0
   description = "The minimum size of the spot autoscale group."
 }
 
 variable "scheduler_down" {
   type        = string
-  default     = "0 19 * * MON-FRI" # 21:00  CET
+  default     = "0 19 * * MON-FRI" 
   description = "What is the recurrency for scaling up operations ?"
 }
 
 variable "scheduler_up" {
   type        = string
-  default     = "0 6 * * MON-FRI" # 07:00 CET
+  default     = "0 6 * * MON-FRI"
   description = "What is the recurrency for scaling down operations ?"
 }
 
@@ -469,22 +482,22 @@ variable "additional_security_group_ids" {
   description = "Additional list of security groups that will be attached to the autoscaling group."
 }
 
-variable "cluster_name" {
+variable "ecs_settings_enabled" {
   type        = string
   default     = ""
-  description = "The name of the ECS cluster."
-}
-
-variable "ecs_settings_enabled" {
-  type        = bool
-  default     = false
   description = "Whether ecs setting is enabled or not."
 }
 
-variable "capacity_providers" {
+variable "fargate_capacity_provider" {
+  type        = list(string)
+  default     = []
+  description = "The name of the capacity provider."
+}
+
+variable "default_fargate_capacity_provider" {
   type        = string
   default     = ""
-  description = "The name of the capacity provider."
+  description = "The name of the default capacity provider."
 }
 
 variable "base" {
@@ -497,4 +510,27 @@ variable "weight" {
   type        = number
   default     = 1
   description = "The relative percentage of the total number of launched tasks that should use the specified capacity provider."
+}
+
+variable "retention_in_days" {
+  type        = number
+  default     = 30
+  description = "The retention of cloud watch logs."
+}
+
+variable "ecs_logging" {
+  default     = "[\"json-file\",\"awslogs\"]"
+  description = "Adding logging option to ECS that the Docker containers can use. It is possible to add fluentd as well"
+}
+
+variable "cloudwatch_prefix" {
+  type        = string
+  default     = ""
+  description = "The prefix of cloudwatch logs."
+}
+
+variable "lb_security_group" {
+  type        = string
+  default     = ""
+  description = "The LB security groups."
 }

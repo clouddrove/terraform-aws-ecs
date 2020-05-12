@@ -50,7 +50,7 @@ variable "delimiter" {
 
 variable "enabled" {
   type        = bool
-  default     = true
+  default     = false
   description = "Whether to create the resources. Set to `false` to prevent the module from creating any resources."
 }
 
@@ -122,7 +122,7 @@ variable "max_size" {
 
 variable "min_size" {
   type        = number
-  default     = 1
+  default     = 0
   description = "The minimum size of the autoscale group."
 }
 
@@ -302,7 +302,7 @@ variable "cpu_utilization_low_evaluation_periods" {
 
 variable "cpu_utilization_low_period_seconds" {
   type        = number
-  default     = 200
+  default     = 180
   description = "The period in seconds over which the specified statistic is applied."
 }
 
@@ -342,7 +342,8 @@ variable "kms_key_arn" {
   description = "AWS Key Management Service (AWS KMS) customer master key (CMK) to use when creating the encrypted volume. encrypted must be set to true when this is set."
 }
 
-###Spot
+## Spot
+
 variable "spot_enabled" {
   type        = bool
   default     = false
@@ -375,25 +376,25 @@ variable "spot_instance_type" {
 
 variable "spot_max_size" {
   type        = number
-  default     = "1"
+  default     = 3
   description = "The maximum size of the spot autoscale group."
 }
 
 variable "spot_min_size" {
   type        = number
-  default     = "1"
+  default     = 0
   description = "The minimum size of the spot autoscale group."
 }
 
 variable "scheduler_down" {
   type        = string
-  default     = "0 19 * * MON-FRI" # 21:00  CET
+  default     = "0 19 * * MON-FRI"
   description = "What is the recurrency for scaling up operations ?"
 }
 
 variable "scheduler_up" {
   type        = string
-  default     = "0 6 * * MON-FRI" # 07:00 CET
+  default     = "0 6 * * MON-FRI"
   description = "What is the recurrency for scaling down operations ?"
 }
 

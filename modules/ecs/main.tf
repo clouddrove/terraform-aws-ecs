@@ -15,23 +15,21 @@ module "labels" {
   label_order = var.label_order
 }
 
- module "iam-role" {
+module "iam-role" {
   source = "git::https://github.com/clouddrove/terraform-aws-iam-role.git?ref=tags/0.12.3"
 
-  name               = var.name
+  name               = format("%s-cluster", var.name)
   application        = var.application
   environment        = var.environment
   label_order        = var.label_order
   enabled            = var.enabled
-  assume_role_policy = data.aws_iam_policy_document.assume_role_ec2.*.json
+  assume_role_policy = data.aws_iam_policy_document.assume_role_ec2.json
 
   policy_enabled = true
-  policy         = "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role"
+  policy_arn     = "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role"
 }
 
 data "aws_iam_policy_document" "assume_role_ec2" {
-  count = local.ec2_enabled ? 1 : 0
-
   statement {
     effect  = "Allow"
     actions = ["sts:AssumeRole"]
@@ -46,7 +44,7 @@ data "aws_iam_policy_document" "assume_role_ec2" {
 resource "aws_iam_instance_profile" "default" {
   count = local.ec2_enabled ? 1 : 0
   name  = format("%s-instance-profile", module.labels.id)
-  role  = join("", aws_iam_role.default.*.name)
+  role  = module.iam-role.name
 }
 
 #Module      : SECURITY GROUP
@@ -88,7 +86,7 @@ resource "aws_security_group_rule" "ingress_alb" {
 }
 
 module "autoscale_group" {
-  source = "../autoscaling"
+  source = "../auto-scaling"
 
   enabled     = local.ec2_enabled
   name        = var.name
@@ -179,43 +177,43 @@ data "template_file" "ec2" {
   template = file("${path.module}/user-data.tpl")
 
   vars = {
-    cluster_name = var.cluster_name
+    cluster_name      = local.ec2_enabled ? join("", aws_ecs_cluster.ec2.*.name) : join("", aws_ecs_cluster.fargate.*.name)
+    ecs_logging       = var.ecs_logging
+    cloudwatch_prefix = var.cloudwatch_prefix
   }
 }
 
 resource "aws_ecs_cluster" "ec2" {
-  count = local.ec2_enabled ? 1 : 0
-  name  = format("%s-cluster", module.labels.id)
-  tags  = module.labels.tags
+  count              = local.ec2_enabled ? 1 : 0
+  name               = format("%s-cluster", module.labels.id)
+  tags               = module.labels.tags
 
   setting {
-    name = "containerInsights"
+    name  = "containerInsights"
     value = var.ecs_settings_enabled
   }
 
-  depends_on = [
-    module.autoscale_group
-  ]
+  # default_capacity_provider_strategy {
+  #   capacity_provider = var.ec2_capacity_provider
+  #   weight            = var.weight
+  #   base              = var.base
+  # }
 }
 
 resource "aws_ecs_cluster" "fargate" {
   count              = local.fargate_enabled ? 1 : 0
   name               = format("%s-cluster", module.labels.id)
-  capacity_providers = var.capacity_providers
+  capacity_providers = var.fargate_capacity_provider
   tags               = module.labels.tags
 
   setting {
-    name = "containerInsights"
+    name  = "containerInsights"
     value = var.ecs_settings_enabled
   }
 
-  default_capacity_providers {
-    capacity_provider = var.capacity_providers
+  default_capacity_provider_strategy {
+    capacity_provider = var.default_fargate_capacity_provider
     weight            = var.weight
     base              = var.base
   }
-
-  depends_on = [
-    module.autoscale_group
-  ]
 }

@@ -32,6 +32,7 @@ resource "aws_launch_template" "on_demand" {
       volume_type = var.volume_type
     }
   }
+
   image_id                             = var.image_id
   instance_initiated_shutdown_behavior = var.instance_initiated_shutdown_behavior
   instance_type                        = var.instance_type
@@ -87,6 +88,7 @@ resource "aws_launch_template" "spot" {
       volume_type = var.volume_type
     }
   }
+  
   image_id                             = var.spot_image_id
   instance_initiated_shutdown_behavior = var.instance_initiated_shutdown_behavior
   instance_type                        = var.spot_instance_type
@@ -128,6 +130,7 @@ resource "aws_launch_template" "spot" {
       }
     )
   }
+
   instance_market_options {
     market_type = "spot"
     spot_options {
@@ -136,12 +139,14 @@ resource "aws_launch_template" "spot" {
       spot_instance_type             = "one-time"
     }
   }
+
   tags = merge(
     module.labels.tags,
     {
       "Market_Type" = "spot"
     }
   )
+
   lifecycle {
     create_before_destroy = true
   }
@@ -184,6 +189,7 @@ resource "aws_autoscaling_group" "default" {
       propagate_at_launch = true
     }
   ])
+
   lifecycle {
     create_before_destroy = true
   }

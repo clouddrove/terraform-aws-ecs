@@ -45,13 +45,30 @@ output "autoscaling_group_default_cooldown" {
 
 output "autoscaling_group_health_check_grace_period" {
   description = "Time after instance comes into service before checking health"
-  value = join(
-    "",
-    aws_autoscaling_group.default.*.health_check_grace_period,
-  )
+  value       = aws_autoscaling_group.default.*.health_check_grace_period
 }
 
 output "autoscaling_group_health_check_type" {
   description = "`EC2` or `ELB`. Controls how health checking is done"
   value       = join("", aws_autoscaling_group.default.*.health_check_type)
+}
+
+output "spot_autoscaling_group_id" {
+  description = "The autoscaling group id"
+  value       = join("", aws_autoscaling_group.spot.*.id)
+}
+
+output "spot_autoscaling_group_name" {
+  description = "The autoscaling group name"
+  value       = join("", aws_autoscaling_group.spot.*.name)
+}
+
+output "spot_autoscaling_group_arn" {
+  description = "The ARN for this AutoScaling Group"
+  value       = join("", aws_autoscaling_group.spot.*.arn)
+}
+
+output "tags" {
+  description = "The tags of the autoscaling group"
+  value       = module.labels.tags
 }
