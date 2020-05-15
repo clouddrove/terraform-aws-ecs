@@ -42,20 +42,20 @@ module "subnets" {
 module "sg_ssh" {
   source = "git::https://github.com/clouddrove/terraform-aws-security-group.git?ref=tags/0.12.4"
 
-  name        = "sg_ssh"
+  name        = "sg-ssh"
   application = "clouddrove"
   environment = "test"
   label_order = ["environment", "application", "name"]
 
   vpc_id        = module.vpc.vpc_id
-  allowed_ip    = ["49.36.133.174/32", module.vpc.vpc_cidr_block]
+  allowed_ip    = ["49.36.129.122/32", module.vpc.vpc_cidr_block]
   allowed_ports = [22]
 }
 
 module "sg_lb" {
   source = "git::https://github.com/clouddrove/terraform-aws-security-group.git?ref=tags/0.12.4"
 
-  name        = "sg_lb"
+  name        = "sg-lb"
   application = "clouddrove"
   environment = "test"
   label_order = ["environment", "application", "name"]
@@ -63,28 +63,6 @@ module "sg_lb" {
   vpc_id        = module.vpc.vpc_id
   allowed_ip    = ["0.0.0.0/0"]
   allowed_ports = [80]
-}
-
-module "lb" {
-  source                     = "git::https://github.com/clouddrove/terraform-aws-alb.git?ref=tags/0.12.5"
-  name                       = "alb"
-  application                = "clouddrove"
-  environment                = "test"
-  label_order                = ["environment", "name", "application"]
-  internal                   = false
-  load_balancer_type         = "application"
-  security_groups            = [module.sg_lb.security_group_ids]
-  subnets                    = module.subnets.public_subnet_id
-  enable_deletion_protection = false
-  target_type                = "instance"
-  vpc_id                     = module.vpc.vpc_id
-  target_group_protocol      = "HTTP"
-  target_group_port          = 80
-  http_enabled               = true
-  https_enabled              = false
-  https_port                 = 443
-  target_id                  = []
-  listener_type              = "forward"
 }
 
 module "kms_key" {
@@ -125,7 +103,7 @@ module "ecs" {
   source = "../../"
 
   ## Tags
-  name        = "ecs"
+  name        = "ecs-ec2"
   application = "clouddrove"
   environment = "test"
   label_order = ["environment", "application", "name"]
@@ -140,16 +118,17 @@ module "ecs" {
   autoscaling_policies_enabled = true  
   key_name                     = module.keypair.name
   image_id                     = "ami-0a74b180a0c97ecd1"
-  instance_type                = "t2.medium"
-  min_size                     = 0
+  instance_type                = "t3.medium"
+  min_size                     = 1
   max_size                     = 3
-  volume_size                  = 25
-  target_group_arns            = [module.lb.main_target_group_arn]
+  volume_size                  = 30
   lb_security_group            = module.sg_lb.security_group_ids
   service_lb_security_group    = [module.sg_lb.security_group_ids]
-  target_group_arn             = module.lb.main_target_group_arn
   cloudwatch_prefix            = "ecs-logs"
-  ecs_settings_enabled         = "enabled"
+  
+  ## ECS Cluster
+  ec2_cluster_enabled  = true  
+  ecs_settings_enabled = "enabled"
 
   ## Schedule
   scheduler_down = "0 19 * * MON-FRI"
@@ -171,19 +150,20 @@ module "ecs" {
   kms_key_arn    = module.kms_key.key_arn
 
   ## Service
-  desired_count       = 2
-  propagate_tags      = "SERVICE"
+  ec2_service_enabled = true
+  desired_count       = 1
+  propagate_tags      = "TASK_DEFINITION"
+  lb_subnet           = module.subnets.public_subnet_id
   scheduling_strategy = "REPLICA"
-  weight              = 1
-  base                = 1
   container_name      = "nginx"
   container_port      = 80
+  target_type         = "instance"
 
   ## Task Definition
-  ec2_enabled  = true
-  network_mode = "bridge"
-  ipc_mode     = "task"
-  pid_mode     = "task"
-  cpu          = 2
-  memory       = 300
+  ec2_td_enabled  = true
+  network_mode    = "bridge"
+  ipc_mode        = "task"
+  pid_mode        = "task"
+  cpu             = 512
+  memory          = 1024
 }

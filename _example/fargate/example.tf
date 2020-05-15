@@ -44,28 +44,6 @@ module "sg_lb" {
   allowed_ports = [80]
 }
 
-module "lb" {
-  source                     = "git::https://github.com/clouddrove/terraform-aws-alb.git?ref=tags/0.12.5"
-  name                       = "alb"
-  application                = "clouddrove"
-  environment                = "test"
-  label_order                = ["environment", "name", "application"]
-  internal                   = false
-  load_balancer_type         = "application"
-  security_groups            = module.sg_lb.security_group_ids
-  subnets                    = module.subnets.public_subnet_id
-  enable_deletion_protection = false
-  target_type                = "ip"
-  vpc_id                     = module.vpc.vpc_id
-  target_group_protocol      = "HTTP"
-  target_group_port          = 80
-  http_enabled               = true
-  https_enabled              = false
-  https_port                 = 443
-  target_id                  = []
-  listener_type              = "forward"
-}
-
 module "ecs" {
   source = "../../"
 
@@ -81,25 +59,31 @@ module "ecs" {
   subnet_ids = module.subnets.private_subnet_id
 
   ## Ec2
-  target_group_arns                 = module.alb.main_target_group_arn
-  lb_security_group                 = [module.sg_lb.security_group_ids]
-  fargate_capacity_provider         = ["FARGATE"]
-  default_fargate_capacity_provider = "FARGATE"
+  lb_security_group         = module.sg_lb.security_group_ids
+  service_lb_security_group = [module.sg_lb.security_group_ids]
+
+  ## Fargate Cluster
+  fargate_cluster_enabled = true  
+  ecs_settings_enabled    = "enabled"
+  fargate_cluster_cp      = ["FARGATE", "FARGATE_SPOT"]
 
   ## Service
-  desired_count       = 2
-  propagate_tags      = "SERVICE"
-  scheduling_strategy = "REPLICA"
-  weight              = 1
-  base                = 1
-  container_name      = "nginx"
-  container_port      = 80
+  fargate_service_enabled          = true
+  desired_count                    = 2
+  propagate_tags                   = "TASK_DEFINITION"
+  lb_subnet                        = module.subnets.public_subnet_id
+  scheduling_strategy              = "REPLICA"
+  container_name                   = "nginx"
+  container_port                   = 80
+  target_type                      = "ip"
+  weight_simple                    = 1
+  weight_spot                      = 2
+  base                             = 1
+  fargate_capacity_provider_simple = "FARGATE"
+  fargate_capacity_provider_spot   = "FARGATE_SPOT"
 
   ## Task Definition
-  fargate_enabled = true
-  network_mode    = "awsvpc"
-  ipc_mode        = "task"
-  pid_mode        = "task"
-  cpu             = 2
-  memory          = 300
+  fargate_td_enabled = true
+  cpu                = 512
+  memory             = 1024
 }

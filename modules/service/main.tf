@@ -1,6 +1,6 @@
 locals {
-  ec2_enabled     = var.enabled && var.ec2_enabled ? true : false
-  fargate_enabled = var.enabled && var.fargate_enabled ? true : false
+  ec2_enabled     = var.enabled && var.ec2_service_enabled ? true : false
+  fargate_enabled = var.enabled && var.fargate_service_enabled ? true : false
 }
 
 module "labels" {
@@ -40,6 +40,30 @@ data "aws_iam_policy_document" "assume_role_ec2" {
   }
 }
 
+module "lb" {
+  source                     = "git::https://github.com/clouddrove/terraform-aws-alb.git?ref=tags/0.12.5"
+  name                       = format("%s-alb", var.name)
+  application                = var.application
+  environment                = var.environment
+  label_order                = var.label_order
+  internal                   = false
+  load_balancer_type         = "application"
+  security_groups            = var.security_groups
+  subnets                    = var.lb_subnet
+  enable_deletion_protection = false
+  target_type                = var.target_type
+  vpc_id                     = var.vpc_id
+  target_group_protocol      = "HTTP"
+  target_group_port          = 80
+  http_enabled               = false
+  https_enabled              = true
+  https_port                 = 80
+  target_id                  = []
+  listener_type              = "forward"
+  listener_protocol          = "HTTP"
+  listener_ssl_policy        = ""
+}
+
 resource "aws_ecs_service" "ec2" {
   count                              = local.ec2_enabled ? 1 : 0
   name                               = module.labels.id
@@ -49,6 +73,7 @@ resource "aws_ecs_service" "ec2" {
   desired_count                      = var.desired_count
   enable_ecs_managed_tags            = var.enable_ecs_managed_tags
   health_check_grace_period_seconds  = var.health_check_grace_period_seconds
+  launch_type                        = "EC2"
   iam_role                           = var.network_mode == "bridge" ? module.iam-role-ec2.arn : ""
   propagate_tags                     = var.propagate_tags
   scheduling_strategy                = var.scheduling_strategy
@@ -56,22 +81,20 @@ resource "aws_ecs_service" "ec2" {
   
   tags = module.labels.tags
 
-  capacity_provider_strategy {
-    capacity_provider = var.ec2_capacity_provider
-    weight            = var.weight
-    base              = var.base
-  }
-
   deployment_controller {
     type = var.type
   }
 
   load_balancer {
-    target_group_arn = var.target_group_arn
+    target_group_arn = module.lb.main_target_group_arn
     container_name   = var.container_name
     container_port   = var.container_port
   }
 
+  depends_on = [
+    module.iam-role-ec2,
+    module.lb
+  ]
 }
 
 resource "aws_ecs_service" "fargate" {
@@ -83,7 +106,6 @@ resource "aws_ecs_service" "fargate" {
   desired_count                      = var.desired_count
   enable_ecs_managed_tags            = var.enable_ecs_managed_tags
   health_check_grace_period_seconds  = var.health_check_grace_period_seconds
-  launch_type                        = "FARGATE"
   platform_version                   = var.platform_version
   propagate_tags                     = var.propagate_tags
   scheduling_strategy                = var.scheduling_strategy
@@ -95,8 +117,19 @@ resource "aws_ecs_service" "fargate" {
     type = var.type
   }
 
+  capacity_provider_strategy {
+    capacity_provider = var.fargate_capacity_provider_simple
+    weight            = var.weight_simple
+    base              = var.base
+  }
+
+  capacity_provider_strategy {
+    capacity_provider = var.fargate_capacity_provider_spot
+    weight            = var.weight_spot
+  }
+
   load_balancer {
-    target_group_arn = var.target_group_arn
+    target_group_arn = module.lb.main_target_group_arn
     container_name   = var.container_name
     container_port   = var.container_port
   }
@@ -106,4 +139,8 @@ resource "aws_ecs_service" "fargate" {
     security_groups  = var.security_groups
     assign_public_ip = var.assign_public_ip
   }
+
+  depends_on = [
+    module.lb
+  ]
 }

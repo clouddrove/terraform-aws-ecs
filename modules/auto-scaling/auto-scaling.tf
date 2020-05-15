@@ -1,8 +1,8 @@
 locals {
   autoscaling_enabled               = var.enabled && var.autoscaling_policies_enabled ? true : false
-  spot_autoscaling_enabled          = var.enabled && var.autoscaling_policies_enabled && var.spot_enabled ? true : false
+  spot_autoscaling_enabled          = var.enabled && var.spot_enabled ? true : false
   autoscaling_enabled_schedule      = var.enabled && var.autoscaling_policies_enabled && var.schedule_enabled ? true : false
-  autoscaling_enabled_spot_schedule = var.enabled && var.autoscaling_policies_enabled && var.spot_schedule_enabled ? true : false
+  autoscaling_enabled_spot_schedule = var.enabled && var.spot_enabled && var.spot_schedule_enabled ? true : false
 }
 
 #Module      : AUTOSCALING POLICY UP
@@ -63,7 +63,7 @@ resource "aws_cloudwatch_metric_alarm" "cpu_high" {
   comparison_operator = "GreaterThanOrEqualToThreshold"
   evaluation_periods  = var.cpu_utilization_high_evaluation_periods
   metric_name         = "CPUUtilization"
-  namespace           = "AWS/EC2"
+  namespace           = "AWS/ECS"
   period              = var.cpu_utilization_high_period_seconds
   statistic           = var.cpu_utilization_high_statistic
   threshold           = var.cpu_utilization_high_threshold_percent
@@ -85,7 +85,7 @@ resource "aws_cloudwatch_metric_alarm" "cpu_high_spot" {
   comparison_operator = "GreaterThanOrEqualToThreshold"
   evaluation_periods  = var.cpu_utilization_high_evaluation_periods
   metric_name         = "CPUUtilization"
-  namespace           = "AWS/EC2"
+  namespace           = "AWS/ECS"
   period              = var.cpu_utilization_high_period_seconds
   statistic           = var.cpu_utilization_high_statistic
   threshold           = var.cpu_utilization_high_threshold_percent
@@ -107,7 +107,7 @@ resource "aws_cloudwatch_metric_alarm" "cpu_low" {
   comparison_operator = "LessThanOrEqualToThreshold"
   evaluation_periods  = var.cpu_utilization_low_evaluation_periods
   metric_name         = "CPUUtilization"
-  namespace           = "AWS/EC2"
+  namespace           = "AWS/ECS"
   period              = var.cpu_utilization_low_period_seconds
   statistic           = var.cpu_utilization_low_statistic
   threshold           = var.cpu_utilization_low_threshold_percent
@@ -129,7 +129,7 @@ resource "aws_cloudwatch_metric_alarm" "cpu_low_spot" {
   comparison_operator = "LessThanOrEqualToThreshold"
   evaluation_periods  = var.cpu_utilization_low_evaluation_periods
   metric_name         = "CPUUtilization"
-  namespace           = "AWS/EC2"
+  namespace           = "AWS/ECS"
   period              = var.cpu_utilization_low_period_seconds
   statistic           = var.cpu_utilization_low_statistic
   threshold           = var.cpu_utilization_low_threshold_percent

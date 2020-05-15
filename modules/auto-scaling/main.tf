@@ -16,139 +16,143 @@ module "labels" {
   label_order = var.label_order
 }
 
-#Module      : LAUNCH TEMPLATE
+module "iam-role" {
+  source = "git::https://github.com/clouddrove/terraform-aws-iam-role.git?ref=tags/0.12.3"
+
+  name               = format("%s-instance-role", var.name)
+  application        = var.application
+  environment        = var.environment
+  label_order        = var.label_order
+  enabled            = var.enabled
+  assume_role_policy = data.aws_iam_policy_document.assume_role_ec2.json
+
+  policy_enabled = true
+  policy_arn     = "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role"
+}
+
+data "aws_iam_policy_document" "assume_role_ec2" {
+  statement {
+    effect  = "Allow"
+    actions = ["sts:AssumeRole"]
+
+    principals {
+      type        = "Service"
+      identifiers = ["ec2.amazonaws.com"]
+    }
+  }
+}
+
+resource "aws_iam_instance_profile" "default" {
+  count = var.enabled ? 1 : 0
+  name  = format("%s-instance-profile", module.labels.id)
+  role  = module.iam-role.name
+}
+
+#Module      : SECURITY GROUP
+#Description : Provides a security group resource.
+resource "aws_security_group" "default" {
+  count       = var.enabled ? 1 : 0
+  name        = module.labels.id
+  description = "Security Group for ECS instances"
+  vpc_id      = var.vpc_id
+  tags        = module.labels.tags
+}
+
+#Module      : SECURITY GROUP RULE EGRESS
+#Description : Provides a security group rule resource. Represents a single egress group rule,
+#              which can be added to external Security Groups.
+resource "aws_security_group_rule" "egress" {
+  count             = var.enabled ? 1 : 0
+  description       = "Allow all egress traffic"
+  from_port         = 0
+  to_port           = 0
+  protocol          = "-1"
+  cidr_blocks       = ["0.0.0.0/0"]
+  security_group_id = join("", aws_security_group.default.*.id)
+  type              = "egress"
+}
+
+#Module      : SECURITY GROUP RULE INGRESS
+#Description : Provides a security group rule resource. Represents a single egress group rule,
+#              which can be added to external Security Groups.
+resource "aws_security_group_rule" "ingress_alb" {
+  count                    = var.enabled ? 1 : 0
+  description              = "Allow instances to receive traffic from ALB"
+  from_port                = 0
+  to_port                  = 65535
+  protocol                 = "-1"
+  security_group_id        = join("", aws_security_group.default.*.id)
+  source_security_group_id = var.lb_security_group
+  type                     = "ingress"
+}
+
+data "template_file" "ec2" {
+  count    = var.enabled && var.autoscaling_policies_enabled ? 1 : 0
+  template = file("${path.module}/user-data-simple.tpl")
+
+  vars = {
+    cluster_name      = var.cluster_name
+    ecs_logging       = var.ecs_logging
+    cloudwatch_prefix = var.cloudwatch_prefix
+  }
+}
+
+data "template_file" "ec2-spot" {
+  count    = var.enabled && var.spot_enabled ? 1 : 0
+  template = file("${path.module}/user-data-spot.tpl")
+
+  vars = {
+    cluster_name      = var.cluster_name
+    ecs_logging       = var.ecs_logging
+    cloudwatch_prefix = var.cloudwatch_prefix
+  }
+}
+
+#Module      : LAUNCH CONFIGURATION
 #Description : Provides an EC2 launch template resource. Can be used to create instances or
 #              auto scaling groups.
-resource "aws_launch_template" "on_demand" {
+resource "aws_launch_configuration" "default" {
   count = var.enabled && var.autoscaling_policies_enabled ? 1 : 0
 
-  name_prefix = format("%s%s", module.labels.id, var.delimiter)
-  block_device_mappings {
-    device_name = "/dev/sda1"
-    ebs {
-      volume_size = var.volume_size
-      encrypted   = var.ebs_encryption
-      kms_key_id  = var.kms_key_arn
-      volume_type = var.volume_type
-    }
+  name_prefix                 = format("%s%s", module.labels.id, var.delimiter)
+  image_id                    = var.image_id
+  instance_type               = var.instance_type
+  iam_instance_profile        = join("", aws_iam_instance_profile.default.*.name)
+  key_name                    = var.key_name
+  security_groups             = compact(concat([join("", aws_security_group.default.*.id)], var.additional_security_group_ids))
+  associate_public_ip_address = var.associate_public_ip_address
+  user_data_base64            = base64encode(join("", data.template_file.ec2.*.rendered))
+  enable_monitoring           = var.enable_monitoring
+  ebs_optimized               = var.ebs_optimized
+
+  root_block_device {
+    volume_type           = var.volume_type
+    volume_size           = var.volume_size
+    encrypted             = var.ebs_encryption
+    delete_on_termination = true
   }
+}
 
-  image_id                             = var.image_id
-  instance_initiated_shutdown_behavior = var.instance_initiated_shutdown_behavior
-  instance_type                        = var.instance_type
-  key_name                             = var.key_name
-  user_data                            = var.user_data_base64
-
-  iam_instance_profile {
-    name = var.iam_instance_profile_name
-  }
-
-  monitoring {
-    enabled = var.enable_monitoring
-  }
-
-  network_interfaces {
-    description                 = module.labels.id
-    device_index                = 0
-    associate_public_ip_address = var.associate_public_ip_address
-    delete_on_termination       = true
-    security_groups             = var.security_group_ids
-  }
-
-  tag_specifications {
-    resource_type = "volume"
-    tags          = module.labels.tags
-  }
-
-  tag_specifications {
-    resource_type = "instance"
-    tags          = module.labels.tags
-  }
-
-  tags = module.labels.tags
-
-  lifecycle {
-    create_before_destroy = true
-  }
-} 
-
-#Module      : LAUNCH TEMPLATE
-#Description : Provides an EC2 launch template resource. Can be used to create instances or
-#              auto scaling groups.
-resource "aws_launch_template" "spot" {
+resource "aws_launch_configuration" "spot" {
   count = var.enabled && var.spot_enabled ? 1 : 0
 
-  name_prefix = format("%s%s-spot", module.labels.id, var.delimiter)
-  block_device_mappings {
-    device_name = "/dev/sda1"
-    ebs {
-      volume_size = var.volume_size
-      encrypted   = var.ebs_encryption
-      kms_key_id  = var.kms_key_arn
-      volume_type = var.volume_type
-    }
-  }
-  
-  image_id                             = var.spot_image_id
-  instance_initiated_shutdown_behavior = var.instance_initiated_shutdown_behavior
-  instance_type                        = var.spot_instance_type
-  key_name                             = var.key_name
-  user_data                            = var.user_data_base64
+  name_prefix                 = format("%s%s", module.labels.id, var.delimiter)
+  image_id                    = var.spot_image_id
+  instance_type               = var.spot_instance_type
+  iam_instance_profile        = join("", aws_iam_instance_profile.default.*.name)
+  key_name                    = var.key_name
+  security_groups             = compact(concat([join("", aws_security_group.default.*.id)], var.additional_security_group_ids))
+  associate_public_ip_address = var.associate_public_ip_address
+  user_data_base64            = base64encode(join("", data.template_file.ec2-spot.*.rendered))
+  enable_monitoring           = var.enable_monitoring
+  ebs_optimized               = var.ebs_optimized
+  spot_price                  = var.spot_price
 
-  iam_instance_profile {
-    name = var.iam_instance_profile_name
-  }
-
-  monitoring {
-    enabled = var.enable_monitoring
-  }
-
-  network_interfaces {
-    description                 = module.labels.id
-    device_index                = 0
-    associate_public_ip_address = var.associate_public_ip_address
-    delete_on_termination       = true
-    security_groups             = var.security_group_ids
-  }
-
-  tag_specifications {
-    resource_type = "volume"
-    tags = merge(
-      module.labels.tags,
-      {
-        "Market_Type" = "spot"
-      }
-    )
-  }
-
-  tag_specifications {
-    resource_type = "instance"
-    tags = merge(
-      module.labels.tags,
-      {
-        "Market_Type" = "spot"
-      }
-    )
-  }
-
-  instance_market_options {
-    market_type = "spot"
-    spot_options {
-      instance_interruption_behavior = var.instance_interruption_behavior
-      max_price                      = var.max_price
-      spot_instance_type             = "one-time"
-    }
-  }
-
-  tags = merge(
-    module.labels.tags,
-    {
-      "Market_Type" = "spot"
-    }
-  )
-
-  lifecycle {
-    create_before_destroy = true
+  root_block_device {
+    volume_type           = var.volume_type
+    volume_size           = var.volume_size
+    encrypted             = var.ebs_encryption
+    delete_on_termination = true
   }
 }
 
@@ -175,11 +179,7 @@ resource "aws_autoscaling_group" "default" {
   wait_for_capacity_timeout = var.wait_for_capacity_timeout
   protect_from_scale_in     = var.protect_from_scale_in
   service_linked_role_arn   = var.service_linked_role_arn
-
-  launch_template {
-    id      = join("", aws_launch_template.on_demand.*.id)
-    version = aws_launch_template.on_demand[0].latest_version
-  }
+  launch_configuration      = join("", aws_launch_configuration.default.*.name)
 
   tags = flatten([
     for key in keys(module.labels.tags) :
@@ -193,6 +193,10 @@ resource "aws_autoscaling_group" "default" {
   lifecycle {
     create_before_destroy = true
   }
+
+  depends_on = [
+    aws_launch_configuration.default
+  ]
 }
 
 #Module      : AUTOSCALING GROUP
@@ -218,11 +222,7 @@ resource "aws_autoscaling_group" "spot" {
   wait_for_capacity_timeout = var.wait_for_capacity_timeout
   protect_from_scale_in     = var.protect_from_scale_in
   service_linked_role_arn   = var.service_linked_role_arn
-
-  launch_template {
-    id      = join("", aws_launch_template.spot.*.id)
-    version = aws_launch_template.spot[0].latest_version
-  }
+  launch_configuration      = join("", aws_launch_configuration.spot.*.name)
 
   tags = flatten([
     for key in keys(module.labels.tags) :
@@ -236,4 +236,8 @@ resource "aws_autoscaling_group" "spot" {
   lifecycle {
     create_before_destroy = true
   }
+
+  depends_on = [
+    aws_launch_configuration.spot
+  ]
 }

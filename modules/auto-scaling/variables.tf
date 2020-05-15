@@ -60,22 +60,10 @@ variable "image_id" {
   description = "The EC2 image ID to launch."
 }
 
-variable "instance_initiated_shutdown_behavior" {
-  type        = string
-  default     = "terminate"
-  description = "Shutdown behavior for the instances. Can be `stop` or `terminate`."
-}
-
 variable "instance_type" {
   type        = string
-  default     = ""
+  default     = "t2.medium"
   description = "Instance type to launch."
-}
-
-variable "iam_instance_profile_name" {
-  type        = string
-  default     = ""
-  description = "The IAM instance profile name to associate with launched instances."
 }
 
 variable "key_name" {
@@ -84,34 +72,28 @@ variable "key_name" {
   description = "The SSH key name that should be used for the instance."
 }
 
-variable "security_group_ids" {
-  type        = list(string)
-  default     = []
-  description = "A list of associated security group IDs."
-}
-
 variable "associate_public_ip_address" {
   type        = bool
   default     = false
   description = "Associate a public IP address with an instance in a VPC."
 }
 
-variable "user_data_base64" {
+variable "ebs_optimized" {
+  type        = bool
+  default     = true
+  description = "If true, the launched EC2 instance will be EBS-optimized."
+}
+
+variable "cluster_name" {
   type        = string
   default     = ""
-  description = "The Base64-encoded user data to provide when launching the instances."
+  description = "The name of the ECS cluster."
 }
 
 variable "enable_monitoring" {
   type        = bool
   default     = true
   description = "Enable/disable detailed monitoring."
-}
-
-variable "block_device_mappings" {
-  type        = list(string)
-  default     = []
-  description = "Specify volumes to attach to the instance besides the volumes specified by the AMI."
 }
 
 variable "max_size" {
@@ -179,7 +161,6 @@ variable "suspended_processes" {
   default     = []
   description = "A list of processes to suspend for the AutoScaling Group. The allowed values are `Launch`, `Terminate`, `HealthCheck`, `ReplaceUnhealthy`, `AZRebalance`, `AlarmNotification`, `ScheduledActions`, `AddToLoadBalancer`. Note that if you suspend either the `Launch` or `Terminate` process types, it can prevent your autoscaling group from functioning properly."
 }
-
 
 variable "metrics_granularity" {
   type        = string
@@ -342,6 +323,41 @@ variable "kms_key_arn" {
   description = "AWS Key Management Service (AWS KMS) customer master key (CMK) to use when creating the encrypted volume. encrypted must be set to true when this is set."
 }
 
+variable "lb_security_group" {
+  type        = string
+  default     = ""
+  description = "The LB security groups."
+}
+
+variable "vpc_id" {
+  type        = string
+  default     = ""
+  description = "VPC ID for the EKS cluster."
+}
+
+variable "ecs_logging" {
+  default     = "[\"json-file\",\"awslogs\"]"
+  description = "Adding logging option to ECS that the Docker containers can use. It is possible to add fluentd as well"
+}
+
+variable "cloudwatch_prefix" {
+  type        = string
+  default     = ""
+  description = "The prefix of cloudwatch logs."
+}
+
+variable "additional_security_group_ids" {
+  type        = list(string)
+  default     = []
+  description = "Additional list of security groups that will be attached to the autoscaling group."
+}
+
+variable "retention_in_days" {
+  type        = number
+  default     = 30
+  description = "The retention of cloud watch logs."
+}
+
 ## Spot
 
 variable "spot_enabled" {
@@ -362,7 +378,7 @@ variable "instance_interruption_behavior" {
   description = "The behavior when a Spot Instance is interrupted. Can be hibernate, stop, or terminate. (Default: terminate)."
 }
 
-variable "max_price" {
+variable "spot_price" {
   type        = string
   default     = ""
   description = "The maximum hourly price you're willing to pay for the Spot Instances."

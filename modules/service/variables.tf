@@ -54,13 +54,13 @@ variable "enabled" {
   description = "Whether to create the resources. Set to `false` to prevent the module from creating any resources."
 }
 
-variable "ec2_enabled" {
+variable "ec2_service_enabled" {
   type        = bool
   default     = false
   description = "Whether EC2 launch type is enabled."
 }
 
-variable "fargate_enabled" {
+variable "fargate_service_enabled" {
   type        = bool
   default     = false
   description = "Whether fargate launch type is enabled or not."
@@ -104,7 +104,7 @@ variable "enable_ecs_managed_tags" {
 
 variable "health_check_grace_period_seconds" {
   type        = number
-  default     = 360
+  default     = 60
   description = "Seconds to ignore failing load balancer health checks on newly instantiated tasks to prevent premature shutdown, up to 2147483647."
 }
 
@@ -132,7 +132,13 @@ variable "fargate_task_definition" {
   description = "The family and revision (family:revision) or full ARN of the task definition that you want to run in your service."
 }
 
-variable "ec2_capacity_provider" {
+variable "fargate_capacity_provider_simple" {
+  type        = string
+  default     = ""
+  description = "The name of the capacity provider."
+}
+
+variable "fargate_capacity_provider_spot" {
   type        = string
   default     = ""
   description = "The name of the capacity provider."
@@ -144,7 +150,13 @@ variable "base" {
   description = "The number of tasks, at a minimum, to run on the specified capacity provider."
 }
 
-variable "weight" {
+variable "weight_simple" {
+  type        = number
+  default     = 1
+  description = "The relative percentage of the total number of launched tasks that should use the specified capacity provider."
+}
+
+variable "weight_spot" {
   type        = number
   default     = 1
   description = "The relative percentage of the total number of launched tasks that should use the specified capacity provider."
@@ -156,12 +168,6 @@ variable "type" {
   description = "Type of deployment controller. Valid values: CODE_DEPLOY, ECS. Default: ECS."
 }
 
-variable "target_group_arn" {
-  type        = string
-  default     = ""
-  description = "(Required for ALB/NLB) The ARN of the Load Balancer target group to associate with the service."
-}
-
 variable "container_name" {
   type        = string
   default     = ""
@@ -170,7 +176,7 @@ variable "container_name" {
 
 variable "container_port" {
   type        = number
-  default     = 80
+  default     = 0
   description = "The port on the container to associate with the load balancer."
 }
 
@@ -178,6 +184,18 @@ variable "subnets" {
   type        = list(string)
   default     = []
   description = "The subnets associated with the task or service."
+}
+
+variable "lb_subnet" {
+  type        = list(string)
+  default     = []
+  description = "The subnet associated with the load balancer."
+}
+
+variable "vpc_id" {
+  type        = string
+  default     = ""
+  description = "VPC ID for the EKS cluster."
 }
 
 variable "security_groups" {
@@ -202,4 +220,10 @@ variable "network_mode" {
   type        = string
   default     = ""
   description = "The Docker networking mode to use for the containers in the task. The valid values are none, bridge, awsvpc, and host."
+}
+
+variable "target_type" {
+  type        = string
+  default     = ""
+  description = "The target type for load balancer."
 }

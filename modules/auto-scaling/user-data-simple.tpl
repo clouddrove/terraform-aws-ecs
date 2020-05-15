@@ -2,11 +2,10 @@
 
 yum install -y awslogs jq aws-cli
 
-echo ECS_CLUSTER=${cluster_name} >> /etc/ecs/ecs.config
-echo ECS_AVAILABLE_LOGGING_DRIVERS=${ecs_logging} >> /etc/ecs/ecs.config
+echo "ECS_CLUSTER=${cluster_name}" >> /etc/ecs/ecs.config
+echo "ECS_AVAILABLE_LOGGING_DRIVERS=${ecs_logging}" >> /etc/ecs/ecs.config
 
 cat > /etc/awslogs/awslogs.conf <<- EOF
-
 [general]
 state_file = /var/lib/awslogs/agent-state        
  
@@ -55,14 +54,14 @@ sed -i -e "s/region = us-east-1/region = $region/g" /etc/awslogs/awscli.conf
 container_instance_id=$(curl 169.254.169.254/latest/meta-data/local-ipv4)
 sed -i -e "s/{container_instance_id}/$container_instance_id/g" /etc/awslogs/awslogs.conf
 
-cat > /etc/init/awslogjob.conf <<- EOF
+cat > /etc/init.d/awslogjob.conf <<- EOF
 
 #upstart-job
 description "Configure and start CloudWatch Logs agent on Amazon ECS container instance"
 author "Amazon Web Services"
 start on started ecs
 script
-	exec 2>> /var/log/ecs/cloudwatch-logs-start.log
+	exec 2>>/var/log/ecs/cloudwatch-logs-start.log
 	set -x
 	
 	until curl -s http://localhost:51678/v1/metadata

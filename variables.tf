@@ -54,12 +54,6 @@ variable "enabled" {
   description = "Whether to create the resources. Set to `false` to prevent the module from creating any resources."
 }
 
-variable "vpc_id" {
-  type        = string
-  default     = ""
-  description = "VPC ID for the EKS cluster."
-}
-
 variable "image_id" {
   type        = string
   default     = ""
@@ -68,7 +62,7 @@ variable "image_id" {
 
 variable "instance_type" {
   type        = string
-  default     = ""
+  default     = "t2.medium"
   description = "Instance type to launch."
 }
 
@@ -126,10 +120,10 @@ variable "target_group_arns" {
   description = "A list of aws_alb_target_group ARNs, for use with Application Load Balancing."
 }
 
-variable "target_group_arn" {
-  type        = string
-  default     = ""
-  description = "A string of aws_alb_target_group ARNs, for use with Application Load Balancing."
+variable "ebs_optimized" {
+  type        = bool
+  default     = true
+  description = "If true, the launched EC2 instance will be EBS-optimized."
 }
 
 variable "wait_for_capacity_timeout" {
@@ -174,6 +168,41 @@ variable "ebs_encryption" {
   description = "Enables EBS encryption on the volume (Default: false). Cannot be used with snapshot_id."
 }
 
+variable "vpc_id" {
+  type        = string
+  default     = ""
+  description = "VPC ID for the EKS cluster."
+}
+
+variable "additional_security_group_ids" {
+  type        = list(string)
+  default     = []
+  description = "Additional list of security groups that will be attached to the autoscaling group."
+}
+
+variable "retention_in_days" {
+  type        = number
+  default     = 30
+  description = "The retention of cloud watch logs."
+}
+
+variable "ecs_logging" {
+  default     = "[\"json-file\",\"awslogs\"]"
+  description = "Adding logging option to ECS that the Docker containers can use. It is possible to add fluentd as well"
+}
+
+variable "cloudwatch_prefix" {
+  type        = string
+  default     = ""
+  description = "The prefix of cloudwatch logs."
+}
+
+variable "lb_security_group" {
+  type        = string
+  default     = ""
+  description = "The LB security groups."
+}
+
 variable "kms_key_arn" {
   type        = string
   default     = ""
@@ -194,7 +223,7 @@ variable "spot_image_id" {
   description = "The Spot EC2 image ID to launch."
 }
 
-variable "max_price" {
+variable "spot_price" {
   type        = string
   default     = ""
   description = "The maximum hourly price you're willing to pay for the Spot Instances."
@@ -202,7 +231,7 @@ variable "max_price" {
 
 variable "spot_instance_type" {
   type        = string
-  default     = ""
+  default     = "t2.medium"
   description = "Sport instance type to launch."
 }
 
@@ -290,16 +319,18 @@ variable "spot_schedule_enabled" {
   description = "AutoScaling Schedule resource for spot"
 }
 
-variable "fargate_enabled" {
+## ECS Cluster
+
+variable "ec2_cluster_enabled" {
   type        = bool
   default     = false
-  description = "Whether fargate is enabled or not."
+  description = "Whether ec2 cluster is enabled or not."
 }
 
-variable "additional_security_group_ids" {
-  type        = list(string)
-  default     = []
-  description = "Additional list of security groups that will be attached to the autoscaling group."
+variable "fargate_cluster_enabled" {
+  type        = bool
+  default     = false
+  description = "Whether fargate cluster is enabled or not."
 }
 
 variable "ecs_settings_enabled" {
@@ -308,71 +339,24 @@ variable "ecs_settings_enabled" {
   description = "Whether ecs setting is enabled or not."
 }
 
-variable "fargate_capacity_provider" {
+variable "fargate_cluster_cp" {
   type        = list(string)
   default     = []
   description = "The name of the capacity provider."
 }
 
-variable "default_fargate_capacity_provider" {
-  type        = string
-  default     = ""
-  description = "The name of the default capacity provider."
-}
+## Service Variables
 
-variable "base" {
-  type        = number
-  default     = 1
-  description = "The number of tasks, at a minimum, to run on the specified capacity provider."
-}
-
-variable "weight" {
-  type        = number
-  default     = 1
-  description = "The relative percentage of the total number of launched tasks that should use the specified capacity provider."
-}
-
-variable "retention_in_days" {
-  type        = number
-  default     = 30
-  description = "The retention of cloud watch logs."
-}
-
-variable "ecs_logging" {
-  default     = "[\"json-file\",\"awslogs\"]"
-  description = "Adding logging option to ECS that the Docker containers can use. It is possible to add fluentd as well"
-}
-
-variable "cloudwatch_prefix" {
-  type        = string
-  default     = ""
-  description = "The prefix of cloudwatch logs."
-}
-
-variable "lb_security_group" {
-  type        = string
-  default     = ""
-  description = "The LB security groups."
-}
-
-## Service and Task Definition Variables
-
-variable "ec2_enabled" {
+variable "ec2_service_enabled" {
   type        = bool
   default     = false
   description = "Whether EC2 launch type is enabled."
 }
 
-variable "ec2_cluster_name" {
-  type        = string
-  default     = ""
-  description = "The name of the ECS cluster."
-}
-
-variable "fargate_cluster_name" {
-  type        = string
-  default     = ""
-  description = "The name of the ECS cluster."
+variable "fargate_service_enabled" {
+  type        = bool
+  default     = false
+  description = "Whether fargate is enabled or not."
 }
 
 variable "deployment_maximum_percent" {
@@ -441,22 +425,66 @@ variable "assign_public_ip" {
   description = "Assign a public IP address to the ENI (Fargate launch type only). Valid values are true or false. Default false."
 }
 
+variable "fargate_capacity_provider_simple" {
+  type        = string
+  default     = ""
+  description = "The name of the capacity provider."
+}
+
+variable "fargate_capacity_provider_spot" {
+  type        = string
+  default     = ""
+  description = "The name of the capacity provider."
+}
+
 variable "platform_version" {
   type        = string
   default     = "LATEST"
   description = "The platform version on which to run your service."
 }
 
+variable "base" {
+  type        = number
+  default     = 1
+  description = "The number of tasks, at a minimum, to run on the specified capacity provider."
+}
+
+variable "weight_simple" {
+  type        = number
+  default     = 1
+  description = "The relative percentage of the total number of launched tasks that should use the specified capacity provider."
+}
+
+variable "weight_spot" {
+  type        = number
+  default     = 1
+  description = "The relative percentage of the total number of launched tasks that should use the specified capacity provider."
+}
+
+variable "service_lb_security_group" {
+  type        = list(string)
+  default     = []
+  description = "The service LB security groups."
+}
+
+variable "lb_subnet" {
+  type        = list(string)
+  default     = []
+  description = "The subnet associated with the load balancer."
+}
+
+variable "target_type" {
+  type        = string
+  default     = ""
+  description = "The target type for load balancer."
+}
+
+## Task Definition Variables
+
 variable "task_role_arn" {
   type        = string
   default     = ""
   description = "The ARN of IAM role that allows your Amazon ECS container task to make calls to other AWS services."
-}
-
-variable "execution_role_arn" {
-  type        = string
-  default     = ""
-  description = "The Amazon Resource Name (ARN) of the task execution role that the Amazon ECS container agent and the Docker daemon can assume."
 }
 
 variable "network_mode" {
@@ -479,18 +507,24 @@ variable "pid_mode" {
 
 variable "cpu" {
   type        = number
-  default     = 2
+  default     = 1
   description = "The number of cpu units used by the task. If the requires_compatibilities is FARGATE this field is required."
 }
 
 variable "memory" {
   type        = number
-  default     = 500
+  default     = 2048
   description = "The amount (in MiB) of memory used by the task. If the requires_compatibilities is FARGATE this field is required."
 }
 
-variable "service_lb_security_group" {
-  type        = list(string)
-  default     = []
-  description = "The service LB security groups."
+variable "ec2_td_enabled" {
+  type        = bool
+  default     = false
+  description = "Whether EC2 task definition is enabled."
+}
+
+variable "fargate_td_enabled" {
+  type        = bool
+  default     = false
+  description = "Whether fargate task definition is enabled."
 }

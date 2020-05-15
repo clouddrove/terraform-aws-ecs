@@ -54,13 +54,13 @@ variable "enabled" {
   description = "Whether to create the resources. Set to `false` to prevent the module from creating any resources."
 }
 
-variable "ec2_enabled" {
+variable "ec2_td_enabled" {
   type        = bool
   default     = false
   description = "Whether EC2 launch type is enabled."
 }
 
-variable "fargate_enabled" {
+variable "fargate_td_enabled" {
   type        = bool
   default     = false
   description = "Whether fargate launch type is enabled or not."
@@ -70,12 +70,6 @@ variable "task_role_arn" {
   type        = string
   default     = ""
   description = "The ARN of IAM role that allows your Amazon ECS container task to make calls to other AWS services."
-}
-
-variable "execution_role_arn" {
-  type        = string
-  default     = ""
-  description = "The Amazon Resource Name (ARN) of the task execution role that the Amazon ECS container agent and the Docker daemon can assume."
 }
 
 variable "network_mode" {
@@ -98,12 +92,12 @@ variable "pid_mode" {
 
 variable "cpu" {
   type        = number
-  default     = 2
+  default     = 1
   description = "The number of cpu units used by the task. If the requires_compatibilities is FARGATE this field is required."
 }
 
 variable "memory" {
   type        = number
-  default     = 500
+  default     = 2048
   description = "The amount (in MiB) of memory used by the task. If the requires_compatibilities is FARGATE this field is required."
 }

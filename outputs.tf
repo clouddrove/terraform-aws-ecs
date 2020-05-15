@@ -1,74 +1,79 @@
-output "launch_template_id" {
-  description = "The ID of the launch template"
-  value       = module.ecs.launch_template_id
+output "launch_configuration_id" {
+  description = "The ID of the launch configuration"
+  value       = module.auto-scaling.launch_configuration_id
 }
 
-output "launch_template_arn" {
-  description = "The ARN of the launch template"
-  value       = module.ecs.launch_template_arn
+output "launch_configuration_arn" {
+  description = "The ARN of the launch configuration"
+  value       = module.auto-scaling.launch_configuration_arn
 }
 
 output "autoscaling_group_id" {
   description = "The autoscaling group id"
-  value       = module.ecs.autoscaling_group_id
+  value       = module.auto-scaling.autoscaling_group_id
 }
 
 output "autoscaling_group_name" {
   description = "The autoscaling group name"
-  value       = module.ecs.autoscaling_group_name
+  value       = module.auto-scaling.autoscaling_group_name
 }
 
 output "autoscaling_group_arn" {
   description = "The ARN for this AutoScaling Group"
-  value       = module.ecs.autoscaling_group_arn
+  value       = module.auto-scaling.autoscaling_group_arn
 }
 
 output "autoscaling_group_min_size" {
   description = "The minimum size of the autoscale group"
-  value       = module.ecs.autoscaling_group_min_size
+  value       = module.auto-scaling.autoscaling_group_min_size
 }
 
 output "autoscaling_group_max_size" {
   description = "The maximum size of the autoscale group"
-  value       = module.ecs.autoscaling_group_max_size
+  value       = module.auto-scaling.autoscaling_group_max_size
 }
 
 output "autoscaling_group_desired_capacity" {
   description = "The number of Amazon EC2 instances that should be running in the group"
-  value       = module.ecs.autoscaling_group_desired_capacity
+  value       = module.auto-scaling.autoscaling_group_desired_capacity
 }
 
 output "autoscaling_group_default_cooldown" {
   description = "Time between a scaling activity and the succeeding scaling activity"
-  value       = module.ecs.autoscaling_group_default_cooldown
+  value       = module.auto-scaling.autoscaling_group_default_cooldown
 }
 
 output "autoscaling_group_health_check_grace_period" {
   description = "Time after instance comes into service before checking health"
   value = join(
     "",
-    module.ecs.autoscaling_group_health_check_grace_period,
+    module.auto-scaling.autoscaling_group_health_check_grace_period,
   )
 }
 
 output "autoscaling_group_health_check_type" {
   description = "`EC2` or `ELB`. Controls how health checking is done"
-  value       = module.ecs.autoscaling_group_health_check_type
+  value       = module.auto-scaling.autoscaling_group_health_check_type
 }
 
 output "spot_autoscaling_group_id" {
   description = "The spot autoscaling group id"
-  value       = module.ecs.spot_autoscaling_group_id
+  value       = module.auto-scaling.spot_autoscaling_group_id
 }
 
 output "spot_autoscaling_group_name" {
   description = "The spot autoscaling group name"
-  value       = module.ecs.spot_autoscaling_group_name
+  value       = module.auto-scaling.spot_autoscaling_group_name
 }
 
 output "spot_autoscaling_group_arn" {
   description = "The ARN for this AutoScaling Group"
-  value       = module.ecs.spot_autoscaling_group_arn
+  value       = module.auto-scaling.spot_autoscaling_group_arn
+}
+
+output "auto_scaling_tags" {
+  description = "The tags of the autoscaling group"
+  value       = module.auto-scaling.tags
 }
 
 output "ecs_tags" {
@@ -79,6 +84,11 @@ output "ecs_tags" {
 output "ec2_cluster_id" {
   description = "The Amazon Resource Name (ARN) that identifies the cluster"
   value       = module.ecs.ec2_id
+}
+
+output "ec2_cluster_name" {
+  description = "The name of the ECS cluster"
+  value       = module.ecs.ec2_name
 }
 
 output "ec2_cluster_arn" {
