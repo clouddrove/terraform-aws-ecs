@@ -45,19 +45,3 @@ resource "aws_cloudwatch_log_group" "messages" {
   kms_key_id        = var.kms_key_arn
   tags              = module.labels.tags
 }
-
-resource "aws_cloudwatch_log_group" "ec2-container" {
-  count             = var.enabled ? 1 : 0
-  name              = "ec2-container-logs"
-  retention_in_days = var.retention_in_days
-  kms_key_id        = var.kms_key_arn
-  tags              = module.labels.tags
-}
-
-resource "aws_cloudwatch_log_group" "fargate-container" {
-  count             = var.enabled ? 1 : 0
-  name              = "fargate-container-logs"
-  retention_in_days = var.retention_in_days
-  kms_key_id        = var.kms_key_arn
-  tags              = module.labels.tags
-}

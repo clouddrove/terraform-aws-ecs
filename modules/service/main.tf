@@ -21,7 +21,7 @@ module "iam-role-ec2" {
   application        = var.application
   environment        = var.environment
   label_order        = var.label_order
-  enabled            = local.ec2_enabled && var.network_mode == "bridge" ? true : false
+  enabled            = var.enabled
   assume_role_policy = data.aws_iam_policy_document.assume_role_ec2.json
 
   policy_enabled = true
@@ -51,6 +51,7 @@ module "lb" {
   security_groups            = var.security_groups
   subnets                    = var.lb_subnet
   enable_deletion_protection = false
+  enable                     = var.enabled
   target_type                = var.target_type
   vpc_id                     = var.vpc_id
   target_group_protocol      = "HTTP"
@@ -74,7 +75,7 @@ resource "aws_ecs_service" "ec2" {
   enable_ecs_managed_tags            = var.enable_ecs_managed_tags
   health_check_grace_period_seconds  = var.health_check_grace_period_seconds
   launch_type                        = "EC2"
-  iam_role                           = var.network_mode == "bridge" ? module.iam-role-ec2.arn : ""
+  iam_role                           = module.iam-role-ec2.arn
   propagate_tags                     = var.propagate_tags
   scheduling_strategy                = var.scheduling_strategy
   task_definition                    = var.ec2_task_definition
@@ -89,6 +90,16 @@ resource "aws_ecs_service" "ec2" {
     target_group_arn = module.lb.main_target_group_arn
     container_name   = var.container_name
     container_port   = var.container_port
+  }
+
+  dynamic "network_configuration" {
+    for_each = var.ec2_awsvpc_enabled ? [1] : []
+
+    content {
+      subnets          = var.subnets
+      security_groups  = var.security_groups
+      assign_public_ip = var.assign_public_ip
+    }
   }
 
   depends_on = [

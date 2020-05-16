@@ -88,22 +88,10 @@ resource "aws_security_group_rule" "ingress_alb" {
 
 data "template_file" "ec2" {
   count    = var.enabled && var.autoscaling_policies_enabled ? 1 : 0
-  template = file("${path.module}/user-data-simple.tpl")
+  template = file("${path.module}/user-data.tpl")
 
   vars = {
     cluster_name      = var.cluster_name
-    ecs_logging       = var.ecs_logging
-    cloudwatch_prefix = var.cloudwatch_prefix
-  }
-}
-
-data "template_file" "ec2-spot" {
-  count    = var.enabled && var.spot_enabled ? 1 : 0
-  template = file("${path.module}/user-data-spot.tpl")
-
-  vars = {
-    cluster_name      = var.cluster_name
-    ecs_logging       = var.ecs_logging
     cloudwatch_prefix = var.cloudwatch_prefix
   }
 }
@@ -134,7 +122,7 @@ resource "aws_launch_configuration" "default" {
 }
 
 resource "aws_launch_configuration" "spot" {
-  count = var.enabled && var.spot_enabled ? 1 : 0
+  count = var.enabled && var.autoscaling_policies_enabled && var.spot_enabled ? 1 : 0
 
   name_prefix                 = format("%s%s", module.labels.id, var.delimiter)
   image_id                    = var.spot_image_id
@@ -143,7 +131,7 @@ resource "aws_launch_configuration" "spot" {
   key_name                    = var.key_name
   security_groups             = compact(concat([join("", aws_security_group.default.*.id)], var.additional_security_group_ids))
   associate_public_ip_address = var.associate_public_ip_address
-  user_data_base64            = base64encode(join("", data.template_file.ec2-spot.*.rendered))
+  user_data_base64            = base64encode(join("", data.template_file.ec2.*.rendered))
   enable_monitoring           = var.enable_monitoring
   ebs_optimized               = var.ebs_optimized
   spot_price                  = var.spot_price
@@ -202,7 +190,7 @@ resource "aws_autoscaling_group" "default" {
 #Module      : AUTOSCALING GROUP
 #Description : Provides an AutoScaling Group resource.
 resource "aws_autoscaling_group" "spot" {
-  count = var.enabled && var.spot_enabled ? 1 : 0
+  count = var.enabled && var.autoscaling_policies_enabled && var.spot_enabled ? 1 : 0
 
   name_prefix               = format("%s%sspot%s", module.labels.id, var.delimiter, var.delimiter)
   vpc_zone_identifier       = var.subnet_ids

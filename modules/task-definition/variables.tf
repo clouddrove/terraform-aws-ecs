@@ -101,3 +101,15 @@ variable "memory" {
   default     = 2048
   description = "The amount (in MiB) of memory used by the task. If the requires_compatibilities is FARGATE this field is required."
 }
+
+variable "retention_in_days" {
+  type        = number
+  default     = 30
+  description = "The retention of cloud watch logs."
+}
+
+variable "kms_key_arn" {
+  type        = string
+  default     = ""
+  description = "AWS Key Management Service (AWS KMS) customer master key (CMK) to use when creating the encrypted volume. encrypted must be set to true when this is set."
+}

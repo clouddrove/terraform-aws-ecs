@@ -31,11 +31,10 @@ module "subnets" {
   label_order = ["environment", "application", "name"]
   enabled     = true
 
-  nat_gateway_enabled = true      
   availability_zones  = ["eu-west-1a", "eu-west-1b"]
   vpc_id              = module.vpc.vpc_id
   cidr_block          = module.vpc.vpc_cidr_block
-  type                = "public-private"      
+  type                = "public"      
   igw_id              = module.vpc.igw_id
 }
 
@@ -103,7 +102,7 @@ module "ecs" {
   source = "../../"
 
   ## Tags
-  name        = "ecs-ec2"
+  name        = "ecs-awsvpc"
   application = "clouddrove"
   environment = "test"
   label_order = ["environment", "application", "name"]
@@ -111,13 +110,13 @@ module "ecs" {
 
   ## Network
   vpc_id                          = module.vpc.vpc_id
-  subnet_ids                      = module.subnets.private_subnet_id
+  subnet_ids                      = module.subnets.public_subnet_id
   additional_security_group_ids   = [module.sg_ssh.security_group_ids]
 
   ## Ec2
   autoscaling_policies_enabled = true  
   key_name                     = module.keypair.name
-  image_id                     = "ami-0a74b180a0c97ecd1"
+  image_id                     = "ami-001085c9389955bb6"
   instance_type                = "t3.medium"
   min_size                     = 1
   max_size                     = 3
@@ -140,10 +139,24 @@ module "ecs" {
   scale_up_desired   = 2
   scale_down_desired = 1
 
+  spot_schedule_enabled   = true
+  spot_min_size_scaledown = 0
+  spot_max_size_scaledown = 1
+  spot_scale_up_desired   = 2
+  spot_scale_down_desired = 1
+
+  ## Spot
+  spot_enabled  = true
+  spot_min_size = 1
+  spot_max_size = 3
+
+  spot_price         = "0.05"
+  spot_instance_type = "m5.large"
+
   ## Health Checks
-  cpu_utilization_high_threshold_percent = 80
-  cpu_utilization_low_threshold_percent  = 20
-  health_check_type                      = "EC2"
+  memory_reservation_high_threshold_percent = 75
+  memory_reservation_low_threshold_percent  = 50
+  health_check_type                         = "EC2"
 
   ## EBS Encryption
   ebs_encryption = true
@@ -151,17 +164,19 @@ module "ecs" {
 
   ## Service
   ec2_service_enabled = true
-  desired_count       = 1
+  ec2_awsvpc_enabled  = true
+  assign_public_ip    = true
+  desired_count       = 6
   propagate_tags      = "TASK_DEFINITION"
   lb_subnet           = module.subnets.public_subnet_id
   scheduling_strategy = "REPLICA"
   container_name      = "nginx"
   container_port      = 80
-  target_type         = "instance"
+  target_type         = "ip"
 
   ## Task Definition
   ec2_td_enabled  = true
-  network_mode    = "bridge"
+  network_mode    = "awsvpc"
   ipc_mode        = "task"
   pid_mode        = "task"
   cpu             = 512

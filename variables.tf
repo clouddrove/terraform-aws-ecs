@@ -80,7 +80,7 @@ variable "security_group_ids" {
 
 variable "associate_public_ip_address" {
   type        = bool
-  default     = false
+  default     = true
   description = "Associate a public IP address with an instance in a VPC."
 }
 
@@ -138,15 +138,15 @@ variable "autoscaling_policies_enabled" {
   description = "Whether to create `aws_autoscaling_policy` and `aws_cloudwatch_metric_alarm` resources to control Auto Scaling."
 }
 
-variable "cpu_utilization_high_threshold_percent" {
+variable "memory_reservation_high_threshold_percent" {
   type        = number
-  default     = 90
+  default     = 75
   description = "The value against which the specified statistic is compared."
 }
 
-variable "cpu_utilization_low_threshold_percent" {
+variable "memory_reservation_low_threshold_percent" {
   type        = number
-  default     = 10
+  default     = 25
   description = "The value against which the specified statistic is compared."
 }
 
@@ -184,11 +184,6 @@ variable "retention_in_days" {
   type        = number
   default     = 30
   description = "The retention of cloud watch logs."
-}
-
-variable "ecs_logging" {
-  default     = "[\"json-file\",\"awslogs\"]"
-  description = "Adding logging option to ECS that the Docker containers can use. It is possible to add fluentd as well"
 }
 
 variable "cloudwatch_prefix" {
@@ -477,6 +472,12 @@ variable "target_type" {
   type        = string
   default     = ""
   description = "The target type for load balancer."
+}
+
+variable "ec2_awsvpc_enabled" {
+  type        = bool
+  default     = false
+  description = "AWSVPC network mode is enabled or not."
 }
 
 ## Task Definition Variables

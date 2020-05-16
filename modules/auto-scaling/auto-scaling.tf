@@ -1,8 +1,8 @@
 locals {
   autoscaling_enabled               = var.enabled && var.autoscaling_policies_enabled ? true : false
-  spot_autoscaling_enabled          = var.enabled && var.spot_enabled ? true : false
+  spot_autoscaling_enabled          = var.enabled && var.autoscaling_policies_enabled && var.spot_enabled ? true : false
   autoscaling_enabled_schedule      = var.enabled && var.autoscaling_policies_enabled && var.schedule_enabled ? true : false
-  autoscaling_enabled_spot_schedule = var.enabled && var.spot_enabled && var.spot_schedule_enabled ? true : false
+  autoscaling_enabled_spot_schedule = var.enabled && var.autoscaling_policies_enabled && var.spot_enabled && var.spot_schedule_enabled ? true : false
 }
 
 #Module      : AUTOSCALING POLICY UP
@@ -54,92 +54,92 @@ resource "aws_autoscaling_policy" "scale_down_spot" {
   autoscaling_group_name = join("", aws_autoscaling_group.spot.*.name)
 }
 
-#Module      : CLOUDWATCH METRIC ALARM CPU HIGH
+#Module      : CLOUDWATCH METRIC ALARM MEMORY HIGH
 #Description : Provides a CloudWatch Metric Alarm resource.
-resource "aws_cloudwatch_metric_alarm" "cpu_high" {
+resource "aws_cloudwatch_metric_alarm" "memory_high" {
   count      = local.autoscaling_enabled ? 1 : 0
-  alarm_name = format("%s%scpu%sutilization%shigh", module.labels.id, var.delimiter, var.delimiter, var.delimiter)
+  alarm_name = format("%s%smemory%sreservation%shigh", module.labels.id, var.delimiter, var.delimiter, var.delimiter)
 
   comparison_operator = "GreaterThanOrEqualToThreshold"
-  evaluation_periods  = var.cpu_utilization_high_evaluation_periods
-  metric_name         = "CPUUtilization"
+  evaluation_periods  = var.memory_reservation_high_evaluation_periods
+  metric_name         = "MemoryReservation"
   namespace           = "AWS/ECS"
-  period              = var.cpu_utilization_high_period_seconds
-  statistic           = var.cpu_utilization_high_statistic
-  threshold           = var.cpu_utilization_high_threshold_percent
+  period              = var.memory_reservation_high_period_seconds
+  statistic           = var.memory_reservation_high_statistic
+  threshold           = var.memory_reservation_high_threshold_percent
   tags                = module.labels.tags
 
   dimensions = {
-    AutoScalingGroupName = join("", aws_autoscaling_group.default.*.name)
+    ClusterName = var.cluster_name
   }
 
-  alarm_description = format("Scale up if CPU utilization is above%s for %s seconds", var.cpu_utilization_high_threshold_percent, var.cpu_utilization_high_period_seconds)
+  alarm_description = format("Scale up if memory reservation is above %s for %s seconds", var.memory_reservation_high_threshold_percent, var.memory_reservation_high_period_seconds)
   alarm_actions     = [join("", aws_autoscaling_policy.scale_up.*.arn)]
 }
-#Module      : CLOUDWATCH METRIC ALARM CPU HIGH
+#Module      : CLOUDWATCH METRIC ALARM MEMORY HIGH
 #Description : Provides a CloudWatch Metric Alarm resource.
-resource "aws_cloudwatch_metric_alarm" "cpu_high_spot" {
+resource "aws_cloudwatch_metric_alarm" "memory_high_spot" {
   count      = local.spot_autoscaling_enabled ? 1 : 0
-  alarm_name = format("%s%scpu%sutilization%shigh-spot", module.labels.id, var.delimiter, var.delimiter, var.delimiter)
+  alarm_name = format("%s%smemory%sreservation%shigh-spot", module.labels.id, var.delimiter, var.delimiter, var.delimiter)
 
   comparison_operator = "GreaterThanOrEqualToThreshold"
-  evaluation_periods  = var.cpu_utilization_high_evaluation_periods
-  metric_name         = "CPUUtilization"
+  evaluation_periods  = var.memory_reservation_high_evaluation_periods
+  metric_name         = "MemoryReservation"
   namespace           = "AWS/ECS"
-  period              = var.cpu_utilization_high_period_seconds
-  statistic           = var.cpu_utilization_high_statistic
-  threshold           = var.cpu_utilization_high_threshold_percent
+  period              = var.memory_reservation_high_period_seconds
+  statistic           = var.memory_reservation_high_statistic
+  threshold           = var.memory_reservation_high_threshold_percent
   tags                = module.labels.tags
 
   dimensions = {
-    AutoScalingGroupName = join("", aws_autoscaling_group.spot.*.name)
+    ClusterName = var.cluster_name
   }
 
-  alarm_description = format("Scale up if CPU utilization is above%s for %s seconds", var.cpu_utilization_high_threshold_percent, var.cpu_utilization_high_period_seconds)
+  alarm_description = format("Scale up if memory reservation is above %s for %s seconds", var.memory_reservation_high_threshold_percent, var.memory_reservation_high_period_seconds)
   alarm_actions     = [join("", aws_autoscaling_policy.scale_up_spot.*.arn)]
 }
 
-#Module      : CLOUDWATCH METRIC ALARM CPU LOW
+#Module      : CLOUDWATCH METRIC ALARM MEMORY LOW
 #Description : Provides a CloudWatch Metric Alarm resource.
-resource "aws_cloudwatch_metric_alarm" "cpu_low" {
+resource "aws_cloudwatch_metric_alarm" "memory_low" {
   count               = local.autoscaling_enabled ? 1 : 0
-  alarm_name          = format("%s%scpu%sutilization%slow", module.labels.id, var.delimiter, var.delimiter, var.delimiter)
+  alarm_name          = format("%s%smemory%sreservation%slow", module.labels.id, var.delimiter, var.delimiter, var.delimiter)
   comparison_operator = "LessThanOrEqualToThreshold"
-  evaluation_periods  = var.cpu_utilization_low_evaluation_periods
-  metric_name         = "CPUUtilization"
+  evaluation_periods  = var.memory_reservation_low_evaluation_periods
+  metric_name         = "MemoryReservation"
   namespace           = "AWS/ECS"
-  period              = var.cpu_utilization_low_period_seconds
-  statistic           = var.cpu_utilization_low_statistic
-  threshold           = var.cpu_utilization_low_threshold_percent
+  period              = var.memory_reservation_low_period_seconds
+  statistic           = var.memory_reservation_low_statistic
+  threshold           = var.memory_reservation_low_threshold_percent
   tags                = module.labels.tags
 
   dimensions = {
-    AutoScalingGroupName = join("", aws_autoscaling_group.default.*.name)
+    ClusterName = var.cluster_name
   }
 
-  alarm_description = format("Scale down if CPU utilization is above%s for %s seconds", var.cpu_utilization_high_threshold_percent, var.cpu_utilization_high_period_seconds)
+  alarm_description = format("Scale down if memory reservation is above %s for %s seconds", var.memory_reservation_high_threshold_percent, var.memory_reservation_high_period_seconds)
   alarm_actions     = [join("", aws_autoscaling_policy.scale_down.*.arn)]
 }
 
-#Module      : CLOUDWATCH METRIC ALARM CPU LOW
+#Module      : CLOUDWATCH METRIC ALARM MEMORY LOW
 #Description : Provides a CloudWatch Metric Alarm resource.
-resource "aws_cloudwatch_metric_alarm" "cpu_low_spot" {
+resource "aws_cloudwatch_metric_alarm" "memory_low_spot" {
   count               = local.spot_autoscaling_enabled ? 1 : 0
-  alarm_name          = format("%s%scpu%sutilization%slow-spot", module.labels.id, var.delimiter, var.delimiter, var.delimiter)
+  alarm_name          = format("%s%smemory%sreservation%slow-spot", module.labels.id, var.delimiter, var.delimiter, var.delimiter)
   comparison_operator = "LessThanOrEqualToThreshold"
-  evaluation_periods  = var.cpu_utilization_low_evaluation_periods
-  metric_name         = "CPUUtilization"
+  evaluation_periods  = var.memory_reservation_low_evaluation_periods
+  metric_name         = "MemoryReservation"
   namespace           = "AWS/ECS"
-  period              = var.cpu_utilization_low_period_seconds
-  statistic           = var.cpu_utilization_low_statistic
-  threshold           = var.cpu_utilization_low_threshold_percent
+  period              = var.memory_reservation_low_period_seconds
+  statistic           = var.memory_reservation_low_statistic
+  threshold           = var.memory_reservation_low_threshold_percent
   tags                = module.labels.tags
 
   dimensions = {
-    AutoScalingGroupName = join("", aws_autoscaling_group.spot.*.name)
+    ClusterName = var.cluster_name
   }
 
-  alarm_description = format("Scale down if CPU utilization is above%s for %s seconds", var.cpu_utilization_high_threshold_percent, var.cpu_utilization_high_period_seconds)
+  alarm_description = format("Scale down if memory reservation is above %s for %s seconds", var.memory_reservation_high_threshold_percent, var.memory_reservation_high_period_seconds)
   alarm_actions     = [join("", aws_autoscaling_policy.scale_down_spot.*.arn)]
 }
 

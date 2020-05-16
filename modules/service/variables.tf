@@ -216,10 +216,10 @@ variable "platform_version" {
   description = "The platform version on which to run your service."
 }
 
-variable "network_mode" {
-  type        = string
-  default     = ""
-  description = "The Docker networking mode to use for the containers in the task. The valid values are none, bridge, awsvpc, and host."
+variable "ec2_awsvpc_enabled" {
+  type        = bool
+  default     = false
+  description = "AWSVPC network mode is enabled or not."
 }
 
 variable "target_type" {

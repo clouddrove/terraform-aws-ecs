@@ -74,7 +74,7 @@ variable "key_name" {
 
 variable "associate_public_ip_address" {
   type        = bool
-  default     = false
+  default     = true
   description = "Associate a public IP address with an instance in a VPC."
 }
 
@@ -200,13 +200,13 @@ variable "service_linked_role_arn" {
 
 variable "autoscaling_policies_enabled" {
   type        = bool
-  default     = true
+  default     = false
   description = "Whether to create `aws_autoscaling_policy` and `aws_cloudwatch_metric_alarm` resources to control Auto Scaling."
 }
 
 variable "scale_up_cooldown_seconds" {
   type        = number
-  default     = 150
+  default     = 60
   description = "The amount of time, in seconds, after a scaling activity completes and before the next scaling activity can start."
 }
 
@@ -230,7 +230,7 @@ variable "scale_up_policy_type" {
 
 variable "scale_down_cooldown_seconds" {
   type        = number
-  default     = 300
+  default     = 60
   description = "The amount of time, in seconds, after a scaling activity completes and before the next scaling activity can start."
 }
 
@@ -251,49 +251,49 @@ variable "scale_down_policy_type" {
   description = "The scalling policy type, either `SimpleScaling`, `StepScaling` or `TargetTrackingScaling`."
 }
 
-variable "cpu_utilization_high_evaluation_periods" {
+variable "memory_reservation_high_evaluation_periods" {
   type        = number
-  default     = 2
+  default     = 1
   description = "The number of periods over which data is compared to the specified threshold."
 }
 
-variable "cpu_utilization_high_period_seconds" {
+variable "memory_reservation_high_period_seconds" {
   type        = number
-  default     = 300
+  default     = 120
   description = "The period in seconds over which the specified statistic is applied."
 }
 
-variable "cpu_utilization_high_threshold_percent" {
+variable "memory_reservation_high_threshold_percent" {
   type        = number
-  default     = 90
+  default     = 80
   description = "The value against which the specified statistic is compared."
 }
 
-variable "cpu_utilization_high_statistic" {
+variable "memory_reservation_high_statistic" {
   type        = string
   default     = "Average"
   description = "The statistic to apply to the alarm's associated metric. Either of the following is supported: `SampleCount`, `Average`, `Sum`, `Minimum`, `Maximum`."
 }
 
-variable "cpu_utilization_low_evaluation_periods" {
+variable "memory_reservation_low_evaluation_periods" {
   type        = number
-  default     = 2
+  default     = 1
   description = "The number of periods over which data is compared to the specified threshold."
 }
 
-variable "cpu_utilization_low_period_seconds" {
+variable "memory_reservation_low_period_seconds" {
   type        = number
-  default     = 180
+  default     = 60
   description = "The period in seconds over which the specified statistic is applied."
 }
 
-variable "cpu_utilization_low_threshold_percent" {
+variable "memory_reservation_low_threshold_percent" {
   type        = number
-  default     = 10
+  default     = 20
   description = "The value against which the specified statistic is compared."
 }
 
-variable "cpu_utilization_low_statistic" {
+variable "memory_reservation_low_statistic" {
   type        = string
   default     = "Average"
   description = "The statistic to apply to the alarm's associated metric. Either of the following is supported: `SampleCount`, `Average`, `Sum`, `Minimum`, `Maximum`."
@@ -301,13 +301,13 @@ variable "cpu_utilization_low_statistic" {
 
 variable "volume_size" {
   type        = number
-  default     = 100
+  default     = 50
   description = "The size of ebs volume."
 }
 
 variable "volume_type" {
   type        = string
-  default     = "standard"
+  default     = "gp2"
   description = "The type of volume. Can be `standard`, `gp2`, or `io1`. (Default: `standard`)."
 }
 
@@ -333,11 +333,6 @@ variable "vpc_id" {
   type        = string
   default     = ""
   description = "VPC ID for the EKS cluster."
-}
-
-variable "ecs_logging" {
-  default     = "[\"json-file\",\"awslogs\"]"
-  description = "Adding logging option to ECS that the Docker containers can use. It is possible to add fluentd as well"
 }
 
 variable "cloudwatch_prefix" {

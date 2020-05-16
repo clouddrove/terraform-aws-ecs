@@ -43,7 +43,7 @@ data "aws_iam_policy_document" "assume_role_td" {
 resource "aws_ecs_task_definition" "ec2" {
   count                    = local.ec2_enabled ? 1 : 0
   family                   = module.labels.id
-  container_definitions    = file("${path.module}/templates/td-ec2.json")
+  container_definitions    = var.network_mode == "bridge" ? file("${path.module}/templates/td-ec2.json") : file("${path.module}/templates/td-ec2-awsvpc.json")
   task_role_arn            = var.task_role_arn
   execution_role_arn       = module.iam-role-td.arn
   network_mode             = var.network_mode
@@ -53,6 +53,14 @@ resource "aws_ecs_task_definition" "ec2" {
   memory                   = var.memory
   requires_compatibilities = ["EC2"]
   tags                     = module.labels.tags
+}
+
+resource "aws_cloudwatch_log_group" "ec2-container" {
+  count             = local.ec2_enabled ? 1 : 0
+  name              = "ec2-container-logs"
+  retention_in_days = var.retention_in_days
+  kms_key_id        = var.kms_key_arn
+  tags              = module.labels.tags
 }
 
 resource "aws_ecs_task_definition" "fargate" {
@@ -66,4 +74,12 @@ resource "aws_ecs_task_definition" "fargate" {
   memory                   = var.memory
   requires_compatibilities = ["FARGATE"]
   tags                     = module.labels.tags
+}
+
+resource "aws_cloudwatch_log_group" "fargate-container" {
+  count             = local.fargate_enabled ? 1 : 0
+  name              = "fargate-container-logs"
+  retention_in_days = var.retention_in_days
+  kms_key_id        = var.kms_key_arn
+  tags              = module.labels.tags
 }

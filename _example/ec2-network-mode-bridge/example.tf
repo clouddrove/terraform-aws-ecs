@@ -31,11 +31,10 @@ module "subnets" {
   label_order = ["environment", "application", "name"]
   enabled     = true
 
-  nat_gateway_enabled = true      
   availability_zones  = ["eu-west-1a", "eu-west-1b"]
   vpc_id              = module.vpc.vpc_id
   cidr_block          = module.vpc.vpc_cidr_block
-  type                = "public-private"      
+  type                = "public"      
   igw_id              = module.vpc.igw_id
 }
 
@@ -48,7 +47,7 @@ module "sg_ssh" {
   label_order = ["environment", "application", "name"]
 
   vpc_id        = module.vpc.vpc_id
-  allowed_ip    = ["49.36.133.174/32", module.vpc.vpc_cidr_block]
+  allowed_ip    = ["49.36.129.122/32", module.vpc.vpc_cidr_block]
   allowed_ports = [22]
 }
 
@@ -103,7 +102,7 @@ module "ecs" {
   source = "../../"
 
   ## Tags
-  name        = "ecs-spot"
+  name        = "ecs-bridge"
   application = "clouddrove"
   environment = "test"
   label_order = ["environment", "application", "name"]
@@ -111,17 +110,21 @@ module "ecs" {
 
   ## Network
   vpc_id                          = module.vpc.vpc_id
-  subnet_ids                      = module.subnets.private_subnet_id
+  subnet_ids                      = module.subnets.public_subnet_id
   additional_security_group_ids   = [module.sg_ssh.security_group_ids]
 
   ## Ec2
+  autoscaling_policies_enabled = true  
   key_name                     = module.keypair.name
-  spot_image_id                = "ami-0850e1e3427308d2e"
+  image_id                     = "ami-001085c9389955bb6"
+  instance_type                = "t3.medium"
+  min_size                     = 1
+  max_size                     = 3
   volume_size                  = 30
   lb_security_group            = module.sg_lb.security_group_ids
   service_lb_security_group    = [module.sg_lb.security_group_ids]
   cloudwatch_prefix            = "ecs-logs"
-
+  
   ## ECS Cluster
   ec2_cluster_enabled  = true  
   ecs_settings_enabled = "enabled"
@@ -129,6 +132,12 @@ module "ecs" {
   ## Schedule
   scheduler_down = "0 19 * * MON-FRI"
   scheduler_up   = "0 6 * * MON-FRI"
+
+  schedule_enabled   = true
+  min_size_scaledown = 0
+  max_size_scaledown = 1
+  scale_up_desired   = 2
+  scale_down_desired = 1
 
   spot_schedule_enabled   = true
   spot_min_size_scaledown = 0
@@ -138,16 +147,16 @@ module "ecs" {
 
   ## Spot
   spot_enabled  = true
-  spot_max_size = 3
   spot_min_size = 1
+  spot_max_size = 3
 
-  spot_price         = "0.10"
+  spot_price         = "0.05"
   spot_instance_type = "m5.large"
 
   ## Health Checks
-  cpu_utilization_high_threshold_percent = 80
-  cpu_utilization_low_threshold_percent  = 20
-  health_check_type                      = "EC2"
+  memory_reservation_high_threshold_percent = 75
+  memory_reservation_low_threshold_percent  = 50
+  health_check_type                         = "EC2"
 
   ## EBS Encryption
   ebs_encryption = true
@@ -155,7 +164,7 @@ module "ecs" {
 
   ## Service
   ec2_service_enabled = true
-  desired_count       = 1
+  desired_count       = 6
   propagate_tags      = "TASK_DEFINITION"
   lb_subnet           = module.subnets.public_subnet_id
   scheduling_strategy = "REPLICA"
