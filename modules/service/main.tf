@@ -21,7 +21,7 @@ module "iam-role-ec2" {
   application        = var.application
   environment        = var.environment
   label_order        = var.label_order
-  enabled            = var.enabled
+  enabled            = var.enabled && var.network_mode == "bridge" ? true : false
   assume_role_policy = data.aws_iam_policy_document.assume_role_ec2.json
 
   policy_enabled = true
@@ -75,7 +75,7 @@ resource "aws_ecs_service" "ec2" {
   enable_ecs_managed_tags            = var.enable_ecs_managed_tags
   health_check_grace_period_seconds  = var.health_check_grace_period_seconds
   launch_type                        = "EC2"
-  iam_role                           = module.iam-role-ec2.arn
+  iam_role                           = var.network_mode == "bridge" ? module.iam-role-ec2.arn : ""
   propagate_tags                     = var.propagate_tags
   scheduling_strategy                = var.scheduling_strategy
   task_definition                    = var.ec2_task_definition
@@ -131,12 +131,12 @@ resource "aws_ecs_service" "fargate" {
   capacity_provider_strategy {
     capacity_provider = var.fargate_capacity_provider_simple
     weight            = var.weight_simple
-    base              = var.base
   }
 
   capacity_provider_strategy {
     capacity_provider = var.fargate_capacity_provider_spot
     weight            = var.weight_spot
+    base              = var.base
   }
 
   load_balancer {

@@ -57,7 +57,7 @@ resource "aws_ecs_task_definition" "ec2" {
 
 resource "aws_cloudwatch_log_group" "ec2-container" {
   count             = local.ec2_enabled ? 1 : 0
-  name              = "ec2-container-logs"
+  name              = format("%s-ec2-container-logs", module.labels.id)
   retention_in_days = var.retention_in_days
   kms_key_id        = var.kms_key_arn
   tags              = module.labels.tags
@@ -78,7 +78,7 @@ resource "aws_ecs_task_definition" "fargate" {
 
 resource "aws_cloudwatch_log_group" "fargate-container" {
   count             = local.fargate_enabled ? 1 : 0
-  name              = "fargate-container-logs"
+  name              = format("%s-fargate-container-logs", module.labels.id)
   retention_in_days = var.retention_in_days
   kms_key_id        = var.kms_key_arn
   tags              = module.labels.tags

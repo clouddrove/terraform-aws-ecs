@@ -145,7 +145,7 @@ resource "aws_cloudwatch_metric_alarm" "memory_low_spot" {
 
 #Module      : AWS AUTOSCALING SCHEDULE
 #Description : Provides an AutoScaling Schedule resource.
-resource "aws_autoscaling_schedule" "scaledown" {
+resource "aws_autoscaling_schedule" "scale_down" {
   count                  = local.autoscaling_enabled_schedule ? 1 : 0
   autoscaling_group_name = aws_autoscaling_group.default[0].name
   scheduled_action_name  = format("%s-scheduler-down", module.labels.id)
@@ -157,7 +157,7 @@ resource "aws_autoscaling_schedule" "scaledown" {
 
 #Module      : AWS AUTOSCALING SCHEDULE
 #Description : Provides an AutoScaling Schedule resource.
-resource "aws_autoscaling_schedule" "scaleup" {
+resource "aws_autoscaling_schedule" "scale_up" {
   count                  = local.autoscaling_enabled_schedule ? 1 : 0
   autoscaling_group_name = aws_autoscaling_group.default[0].name
   scheduled_action_name  = format("%s-scheduler-up", module.labels.id)

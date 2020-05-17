@@ -227,3 +227,9 @@ variable "target_type" {
   default     = ""
   description = "The target type for load balancer."
 }
+
+variable "network_mode" {
+  type        = string
+  default     = ""
+  description = "The Docker networking mode to use for the containers in the task. The valid values are none, bridge, awsvpc, and host."
+}

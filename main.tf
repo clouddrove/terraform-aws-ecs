@@ -9,7 +9,6 @@ module "auto-scaling" {
   attributes                                = var.attributes
   tags                                      = var.tags
   image_id                                  = var.image_id
-  spot_image_id                             = var.spot_image_id
   instance_type                             = var.instance_type
   vpc_id                                    = var.vpc_id
   subnet_ids                                = var.subnet_ids
@@ -46,11 +45,8 @@ module "auto-scaling" {
   autoscaling_policies_enabled              = var.autoscaling_policies_enabled
   memory_reservation_high_threshold_percent = var.memory_reservation_high_threshold_percent
   memory_reservation_low_threshold_percent  = var.memory_reservation_low_threshold_percent
-  kms_key_arn                               = var.kms_key_arn
-  cloudwatch_prefix                         = var.cloudwatch_prefix
   additional_security_group_ids             = var.additional_security_group_ids
   lb_security_group                         = var.lb_security_group
-  retention_in_days                         = var.retention_in_days
   cluster_name                              = module.ecs.ec2_name
 }
 
@@ -111,6 +107,7 @@ module "service" {
   lb_subnet                          = var.lb_subnet
   vpc_id                             = var.vpc_id
   target_type                        = var.target_type
+  network_mode                       = var.network_mode
 }
 
 module "task-definition" {

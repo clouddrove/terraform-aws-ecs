@@ -235,6 +235,7 @@ variable "scale_down_cooldown_seconds" {
 }
 
 variable "scale_down_scaling_adjustment" {
+  type        = number
   default     = -1
   description = "The number of instances by which to scale. `scale_down_scaling_adjustment` determines the interpretation of this number (e.g. as an absolute number or as a percentage of the existing Auto Scaling group size). A positive increment adds to the current capacity and a negative value removes from the current capacity."
 }
@@ -317,12 +318,6 @@ variable "ebs_encryption" {
   description = "Enables EBS encryption on the volume (Default: false). Cannot be used with snapshot_id."
 }
 
-variable "kms_key_arn" {
-  type        = string
-  default     = ""
-  description = "AWS Key Management Service (AWS KMS) customer master key (CMK) to use when creating the encrypted volume. encrypted must be set to true when this is set."
-}
-
 variable "lb_security_group" {
   type        = string
   default     = ""
@@ -335,22 +330,10 @@ variable "vpc_id" {
   description = "VPC ID for the EKS cluster."
 }
 
-variable "cloudwatch_prefix" {
-  type        = string
-  default     = ""
-  description = "The prefix of cloudwatch logs."
-}
-
 variable "additional_security_group_ids" {
   type        = list(string)
   default     = []
   description = "Additional list of security groups that will be attached to the autoscaling group."
-}
-
-variable "retention_in_days" {
-  type        = number
-  default     = 30
-  description = "The retention of cloud watch logs."
 }
 
 ## Spot
@@ -359,12 +342,6 @@ variable "spot_enabled" {
   type        = bool
   default     = false
   description = "Whether to create the spot instance. Set to `false` to prevent the module from creating any  spot instances."
-}
-
-variable "spot_image_id" {
-  type        = string
-  default     = ""
-  description = "The Spot EC2 image ID to launch."
 }
 
 variable "instance_interruption_behavior" {

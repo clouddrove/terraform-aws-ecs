@@ -117,7 +117,7 @@ module "ecs" {
   autoscaling_policies_enabled = true  
   key_name                     = module.keypair.name
   image_id                     = "ami-001085c9389955bb6"
-  instance_type                = "t3.medium"
+  instance_type                = "m5.large"
   min_size                     = 1
   max_size                     = 3
   volume_size                  = 30
@@ -150,8 +150,8 @@ module "ecs" {
   spot_min_size = 1
   spot_max_size = 3
 
-  spot_price         = "0.05"
-  spot_instance_type = "m5.large"
+  spot_price         = "0.0786"
+  spot_instance_type = "m5.xlarge"
 
   ## Health Checks
   memory_reservation_high_threshold_percent = 75
@@ -165,7 +165,6 @@ module "ecs" {
   ## Service
   ec2_service_enabled = true
   ec2_awsvpc_enabled  = true
-  assign_public_ip    = true
   desired_count       = 6
   propagate_tags      = "TASK_DEFINITION"
   lb_subnet           = module.subnets.public_subnet_id

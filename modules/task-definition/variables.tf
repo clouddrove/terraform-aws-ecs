@@ -92,13 +92,13 @@ variable "pid_mode" {
 
 variable "cpu" {
   type        = number
-  default     = 1
+  default     = 512
   description = "The number of cpu units used by the task. If the requires_compatibilities is FARGATE this field is required."
 }
 
 variable "memory" {
   type        = number
-  default     = 2048
+  default     = 1024
   description = "The amount (in MiB) of memory used by the task. If the requires_compatibilities is FARGATE this field is required."
 }
 

@@ -150,8 +150,8 @@ module "ecs" {
   spot_min_size = 1
   spot_max_size = 3
 
-  spot_price         = "0.05"
-  spot_instance_type = "m5.large"
+  spot_price         = "0.0786"
+  spot_instance_type = "m5.xlarge"
 
   ## Health Checks
   memory_reservation_high_threshold_percent = 75

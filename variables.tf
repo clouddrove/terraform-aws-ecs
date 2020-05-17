@@ -152,7 +152,7 @@ variable "memory_reservation_low_threshold_percent" {
 
 variable "volume_size" {
   type        = number
-  default     = 100
+  default     = 50
   description = "The size of ebs volume."
 }
 
@@ -210,12 +210,6 @@ variable "spot_enabled" {
   type        = bool
   default     = false
   description = "Whether to create the spot instance. Set to `false` to prevent the module from creating any  spot instances."
-}
-
-variable "spot_image_id" {
-  type        = string
-  default     = ""
-  description = "The Spot EC2 image ID to launch."
 }
 
 variable "spot_price" {
@@ -508,13 +502,13 @@ variable "pid_mode" {
 
 variable "cpu" {
   type        = number
-  default     = 1
+  default     = 512
   description = "The number of cpu units used by the task. If the requires_compatibilities is FARGATE this field is required."
 }
 
 variable "memory" {
   type        = number
-  default     = 2048
+  default     = 1024
   description = "The amount (in MiB) of memory used by the task. If the requires_compatibilities is FARGATE this field is required."
 }
 

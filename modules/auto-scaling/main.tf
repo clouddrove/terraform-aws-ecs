@@ -91,8 +91,7 @@ data "template_file" "ec2" {
   template = file("${path.module}/user-data.tpl")
 
   vars = {
-    cluster_name      = var.cluster_name
-    cloudwatch_prefix = var.cloudwatch_prefix
+    cluster_name = var.cluster_name
   }
 }
 
@@ -125,7 +124,7 @@ resource "aws_launch_configuration" "spot" {
   count = var.enabled && var.autoscaling_policies_enabled && var.spot_enabled ? 1 : 0
 
   name_prefix                 = format("%s%s", module.labels.id, var.delimiter)
-  image_id                    = var.spot_image_id
+  image_id                    = var.image_id
   instance_type               = var.spot_instance_type
   iam_instance_profile        = join("", aws_iam_instance_profile.default.*.name)
   key_name                    = var.key_name

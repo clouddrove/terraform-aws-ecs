@@ -33,7 +33,7 @@ module "subnets" {
 module "sg_lb" {
   source = "git::https://github.com/clouddrove/terraform-aws-security-group.git?ref=tags/0.12.4"
 
-  name        = "sg_lb"
+  name        = "sg-lb"
   application = "clouddrove"
   environment = "test"
   label_order = ["environment", "application", "name"]
@@ -68,7 +68,8 @@ module "ecs" {
 
   ## Service
   fargate_service_enabled          = true
-  desired_count                    = 2
+  desired_count                    = 4
+  assign_public_ip                 = true
   propagate_tags                   = "TASK_DEFINITION"
   lb_subnet                        = module.subnets.public_subnet_id
   scheduling_strategy              = "REPLICA"
