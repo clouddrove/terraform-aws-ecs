@@ -76,7 +76,7 @@ variable "key_name" {
 
 variable "associate_public_ip_address" {
   type        = bool
-  default     = true
+  default     = false
   description = "Associate a public IP address with an instance in a VPC."
 }
 
@@ -84,6 +84,12 @@ variable "ebs_optimized" {
   type        = bool
   default     = true
   description = "If true, the launched EC2 instance will be EBS-optimized."
+}
+
+variable "fargate_cluster_enabled" {
+  type        = bool
+  default     = false
+  description = "Whether fargate cluster is enabled or not."
 }
 
 variable "cluster_name" {

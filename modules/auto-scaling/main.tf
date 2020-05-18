@@ -25,7 +25,7 @@ module "iam-role" {
   application        = var.application
   environment        = var.environment
   label_order        = var.label_order
-  enabled            = var.enabled
+  enabled            = var.enabled && var.fargate_cluster_enabled == false ? true : false
   assume_role_policy = data.aws_iam_policy_document.assume_role_ec2.json
 
   policy_enabled = true
@@ -73,7 +73,7 @@ data "aws_iam_policy_document" "iam_policy_ec2" {
 #Module      : IAM INSTANCE PROFILE
 #Description : IAM instance profile for ECS Instance.
 resource "aws_iam_instance_profile" "default" {
-  count = var.enabled ? 1 : 0
+  count = var.enabled && var.fargate_cluster_enabled == false ? 1 : 0
   name  = format("%s-instance-profile", module.labels.id)
   role  = module.iam-role.name
 }

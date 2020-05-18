@@ -31,11 +31,12 @@ module "subnets" {
   label_order = ["environment", "application", "name"]
   enabled     = true
 
-  availability_zones = ["eu-west-1a", "eu-west-1b"]
-  vpc_id             = module.vpc.vpc_id
-  cidr_block         = module.vpc.vpc_cidr_block
-  type               = "public"      
-  igw_id             = module.vpc.igw_id
+  nat_gateway_enabled = true
+  availability_zones  = ["eu-west-1a", "eu-west-1b"]
+  vpc_id              = module.vpc.vpc_id
+  cidr_block          = module.vpc.vpc_cidr_block
+  type                = "public-private"      
+  igw_id              = module.vpc.igw_id
 }
 
 module "sg_ssh" {
@@ -106,11 +107,11 @@ module "ecs" {
   application = "clouddrove"
   environment = "test"
   label_order = ["environment", "application", "name"]
-  enabled     = true
+  enabled     = false      # set to true after VPC, Subnets, Security Groups, KMS Key and Key Pair gets created
 
   ## Network
   vpc_id                        = module.vpc.vpc_id
-  subnet_ids                    = module.subnets.public_subnet_id
+  subnet_ids                    = module.subnets.private_subnet_id
   additional_security_group_ids = [module.sg_ssh.security_group_ids]
 
   ## Ec2
