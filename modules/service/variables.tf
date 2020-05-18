@@ -48,6 +48,8 @@ variable "delimiter" {
   description = "Delimiter to be used between `organization`, `environment`, `name` and `attributes`."
 }
 
+## Service 
+
 variable "enabled" {
   type        = bool
   default     = false

@@ -17,6 +17,7 @@ resource "aws_autoscaling_policy" "scale_up" {
   autoscaling_group_name = join("", aws_autoscaling_group.default.*.name)
 
 }
+
 #Module      : AUTOSCALING POLICY UP
 #Description : Provides an AutoScaling Scaling Policy resource.
 resource "aws_autoscaling_policy" "scale_up_spot" {
@@ -76,6 +77,7 @@ resource "aws_cloudwatch_metric_alarm" "memory_high" {
   alarm_description = format("Scale up if memory reservation is above %s for %s seconds", var.memory_reservation_high_threshold_percent, var.memory_reservation_high_period_seconds)
   alarm_actions     = [join("", aws_autoscaling_policy.scale_up.*.arn)]
 }
+
 #Module      : CLOUDWATCH METRIC ALARM MEMORY HIGH
 #Description : Provides a CloudWatch Metric Alarm resource.
 resource "aws_cloudwatch_metric_alarm" "memory_high_spot" {

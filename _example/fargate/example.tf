@@ -23,11 +23,11 @@ module "subnets" {
   label_order = ["environment", "application", "name"]
   enabled     = true
 
-  availability_zones  = ["eu-west-1a", "eu-west-1b"]
-  vpc_id              = module.vpc.vpc_id
-  cidr_block          = module.vpc.vpc_cidr_block
-  type                = "public"      
-  igw_id              = module.vpc.igw_id
+  availability_zones = ["eu-west-1a", "eu-west-1b"]
+  vpc_id             = module.vpc.vpc_id
+  cidr_block         = module.vpc.vpc_cidr_block
+  type               = "public"      
+  igw_id             = module.vpc.igw_id
 }
 
 module "sg_lb" {
