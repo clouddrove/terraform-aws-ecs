@@ -16,6 +16,8 @@ module "labels" {
   label_order = var.label_order
 }
 
+#Module      : IAM ROLE
+#Description : IAM Role for EC2 Instance.
 module "iam-role" {
   source = "git::https://github.com/clouddrove/terraform-aws-iam-role.git?ref=tags/0.12.3"
 
@@ -27,7 +29,7 @@ module "iam-role" {
   assume_role_policy = data.aws_iam_policy_document.assume_role_ec2.json
 
   policy_enabled = true
-  policy_arn     = "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role"
+  policy         = data.aws_iam_policy_document.iam_policy_ec2.json
 }
 
 data "aws_iam_policy_document" "assume_role_ec2" {
@@ -42,10 +44,52 @@ data "aws_iam_policy_document" "assume_role_ec2" {
   }
 }
 
+data "aws_iam_policy_document" "iam_policy_ec2" {
+  statement {
+    effect  = "Allow"
+    actions = [
+      "ec2:DescribeTags",
+      "ecs:CreateCluster",
+      "ecs:DeregisterContainerInstance",
+      "ecs:DiscoverPollEndpoint",
+      "ecs:Poll",
+      "ecs:RegisterContainerInstance",
+      "ecs:StartTelemetrySession",
+      "ecs:UpdateContainerInstancesState",
+      "ecs:Submit*",
+      "ecr:GetAuthorizationToken",
+      "ecr:BatchCheckLayerAvailability",
+      "ecr:GetDownloadUrlForLayer",
+      "ecr:BatchGetImage",
+      "logs:CreateLogGroup",
+      "logs:CreateLogStream",
+      "logs:PutLogEvents"
+    ]
+
+    resources = ["*"]
+  }
+}
+
+#Module      : IAM INSTANCE PROFILE
+#Description : IAM instance profile for ECS Instance.
 resource "aws_iam_instance_profile" "default" {
   count = var.enabled ? 1 : 0
   name  = format("%s-instance-profile", module.labels.id)
   role  = module.iam-role.name
+}
+
+#Module      : NULL RESOURCE
+#Description : Executing null resource for applying VPC trunking to IAM container instance role.
+resource "null_resource" "default" {
+  count = var.enabled && var.network_mode == "awsvpc" ? 1 : 0
+  
+  provisioner "local-exec" {
+    command = "aws ecs put-account-setting --name awsvpcTrunking --value enabled --principal-arn ${module.iam-role.arn} --region ${var.region}"
+  }
+
+  depends_on = [
+    aws_autoscaling_group.default
+  ]
 }
 
 #Module      : SECURITY GROUP
@@ -87,11 +131,12 @@ resource "aws_security_group_rule" "ingress_alb" {
 }
 
 data "template_file" "ec2" {
-  count    = var.enabled && var.autoscaling_policies_enabled ? 1 : 0
+  count    = local.autoscaling_enabled ? 1 : 0
   template = file("${path.module}/user-data.tpl")
 
   vars = {
-    cluster_name = var.cluster_name
+    cluster_name      = var.cluster_name
+    cloudwatch_prefix = var.cloudwatch_prefix
   }
 }
 
@@ -99,7 +144,7 @@ data "template_file" "ec2" {
 #Description : Provides an EC2 launch template resource. Can be used to create instances or
 #              auto scaling groups.
 resource "aws_launch_configuration" "default" {
-  count = var.enabled && var.autoscaling_policies_enabled ? 1 : 0
+  count = local.autoscaling_enabled ? 1 : 0
 
   name_prefix                 = format("%s%s", module.labels.id, var.delimiter)
   image_id                    = var.image_id
@@ -121,9 +166,9 @@ resource "aws_launch_configuration" "default" {
 }
 
 resource "aws_launch_configuration" "spot" {
-  count = var.enabled && var.autoscaling_policies_enabled && var.spot_enabled ? 1 : 0
+  count = local.spot_autoscaling_enabled ? 1 : 0
 
-  name_prefix                 = format("%s%s", module.labels.id, var.delimiter)
+  name_prefix                 = format("%sspot%s", module.labels.id, var.delimiter)
   image_id                    = var.image_id
   instance_type               = var.spot_instance_type
   iam_instance_profile        = join("", aws_iam_instance_profile.default.*.name)
@@ -146,7 +191,7 @@ resource "aws_launch_configuration" "spot" {
 #Module      : AUTOSCALING GROUP
 #Description : Provides an AutoScaling Group resource.
 resource "aws_autoscaling_group" "default" {
-  count = var.enabled && var.autoscaling_policies_enabled ? 1 : 0
+  count = local.autoscaling_enabled ? 1 : 0
 
   name_prefix               = format("%s%s", module.labels.id, var.delimiter)
   vpc_zone_identifier       = var.subnet_ids
@@ -182,14 +227,15 @@ resource "aws_autoscaling_group" "default" {
   }
 
   depends_on = [
-    aws_launch_configuration.default
+    aws_launch_configuration.default,
+    module.iam-role
   ]
 }
 
 #Module      : AUTOSCALING GROUP
 #Description : Provides an AutoScaling Group resource.
 resource "aws_autoscaling_group" "spot" {
-  count = var.enabled && var.autoscaling_policies_enabled && var.spot_enabled ? 1 : 0
+  count = local.spot_autoscaling_enabled ? 1 : 0
 
   name_prefix               = format("%s%sspot%s", module.labels.id, var.delimiter, var.delimiter)
   vpc_zone_identifier       = var.subnet_ids
@@ -225,6 +271,7 @@ resource "aws_autoscaling_group" "spot" {
   }
 
   depends_on = [
-    aws_launch_configuration.spot
+    aws_launch_configuration.spot,
+    module.iam-role
   ]
 }

@@ -3,6 +3,8 @@ locals {
   fargate_enabled = var.enabled && var.fargate_td_enabled ? true : false
 }
 
+#Module      : label
+#Description : Terraform module to create consistent naming for multiple names.
 module "labels" {
   source      = "git::https://github.com/clouddrove/terraform-labels.git?ref=tags/0.12.0"
   name        = var.name
@@ -14,6 +16,8 @@ module "labels" {
   label_order = var.label_order
 }
 
+#Module      : IAM ROLE
+#Description : IAM Role for for ECS Task Definition.
 module "iam-role-td" {
   source = "git::https://github.com/clouddrove/terraform-aws-iam-role.git?ref=tags/0.12.3"
 
@@ -40,6 +44,8 @@ data "aws_iam_policy_document" "assume_role_td" {
   }
 }
 
+#Module      : ECS TASK DEFINITION
+#Description : ECS task definition to deploy on EC2.
 resource "aws_ecs_task_definition" "ec2" {
   count                    = local.ec2_enabled ? 1 : 0
   family                   = module.labels.id
@@ -55,14 +61,18 @@ resource "aws_ecs_task_definition" "ec2" {
   tags                     = module.labels.tags
 }
 
+#Module      : CLOUD WATCH LOG GROUP
+#Description : Cloud watch log group for container logs.
 resource "aws_cloudwatch_log_group" "ec2-container" {
   count             = local.ec2_enabled ? 1 : 0
-  name              = format("%s-ec2-container-logs", module.labels.id)
+  name              = "ec2-container-logs"
   retention_in_days = var.retention_in_days
   kms_key_id        = var.kms_key_arn
   tags              = module.labels.tags
 }
 
+#Module      : ECS TASK DEFINITION
+#Description : ECS task definition to deploy on Fargate.
 resource "aws_ecs_task_definition" "fargate" {
   count                    = local.fargate_enabled ? 1 : 0
   family                   = module.labels.id
@@ -76,9 +86,11 @@ resource "aws_ecs_task_definition" "fargate" {
   tags                     = module.labels.tags
 }
 
+#Module      : CLOUD WATCH LOG GROUP
+#Description : Cloud watch log group for container logs.
 resource "aws_cloudwatch_log_group" "fargate-container" {
   count             = local.fargate_enabled ? 1 : 0
-  name              = format("%s-fargate-container-logs", module.labels.id)
+  name              = "fargate-container-logs"
   retention_in_days = var.retention_in_days
   kms_key_id        = var.kms_key_arn
   tags              = module.labels.tags

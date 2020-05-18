@@ -336,6 +336,36 @@ variable "additional_security_group_ids" {
   description = "Additional list of security groups that will be attached to the autoscaling group."
 }
 
+variable "retention_in_days" {
+  type        = number
+  default     = 30
+  description = "The retention of cloud watch logs."
+}
+
+variable "kms_key_arn" {
+  type        = string
+  default     = ""
+  description = "AWS Key Management Service (AWS KMS) customer master key (CMK) to use when creating the encrypted volume. encrypted must be set to true when this is set."
+}
+
+variable "cloudwatch_prefix" {
+  type        = string
+  default     = ""
+  description = "The prefix of cloudwatch logs."
+}
+
+variable "network_mode" {
+  type        = string
+  default     = ""
+  description = "The Docker networking mode to use for the containers in the task. The valid values are none, bridge, awsvpc, and host."
+}
+
+variable "region" {
+  type        = string
+  default     = ""
+  description = "The AWS region name."
+}
+
 ## Spot
 
 variable "spot_enabled" {

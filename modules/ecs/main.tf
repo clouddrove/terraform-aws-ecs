@@ -16,6 +16,8 @@ module "labels" {
   label_order = var.label_order
 }
 
+#Module      : ECS CLUSTER
+#Description : ECS Cluster for maintaining docker containers on EC2 launch type.
 resource "aws_ecs_cluster" "ec2" {
   count = local.ec2_enabled ? 1 : 0
   name  = module.labels.id
@@ -27,6 +29,8 @@ resource "aws_ecs_cluster" "ec2" {
   }
 }
 
+#Module      : ECS CLUSTER
+#Description : ECS Cluster for maintaining docker containers on Fargate launch type.
 resource "aws_ecs_cluster" "fargate" {
   count              = local.fargate_enabled ? 1 : 0
   capacity_providers = var.fargate_cluster_cp

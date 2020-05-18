@@ -47,6 +47,11 @@ module "auto-scaling" {
   memory_reservation_low_threshold_percent  = var.memory_reservation_low_threshold_percent
   additional_security_group_ids             = var.additional_security_group_ids
   lb_security_group                         = var.lb_security_group
+  cloudwatch_prefix                         = var.cloudwatch_prefix
+  retention_in_days                         = var.retention_in_days
+  kms_key_arn                               = var.kms_key_arn
+  region                                    = var.region
+  network_mode                              = var.network_mode
   cluster_name                              = module.ecs.ec2_name
 }
 

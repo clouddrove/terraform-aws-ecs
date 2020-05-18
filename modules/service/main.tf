@@ -3,6 +3,8 @@ locals {
   fargate_enabled = var.enabled && var.fargate_service_enabled ? true : false
 }
 
+#Module      : label
+#Description : Terraform module to create consistent naming for multiple names.
 module "labels" {
   source      = "git::https://github.com/clouddrove/terraform-labels.git?ref=tags/0.12.0"
   name        = var.name
@@ -14,6 +16,8 @@ module "labels" {
   label_order = var.label_order
 }
 
+#Module      : IAM ROLE
+#Description : IAM Role for for ECS Service.
 module "iam-role-ec2" {
   source = "git::https://github.com/clouddrove/terraform-aws-iam-role.git?ref=tags/0.12.3"
 
@@ -40,6 +44,8 @@ data "aws_iam_policy_document" "assume_role_ec2" {
   }
 }
 
+#Module      : LOAD BALANCER
+#Description : Application load balancer for front end of EC2 containers.
 module "lb" {
   source                     = "git::https://github.com/clouddrove/terraform-aws-alb.git?ref=tags/0.12.5"
   name                       = format("%s-alb", var.name)
@@ -65,6 +71,8 @@ module "lb" {
   listener_ssl_policy        = ""
 }
 
+#Module      : ECS SERVICE
+#Description : ECS Service for automating the task deployment on EC2.
 resource "aws_ecs_service" "ec2" {
   count                              = local.ec2_enabled ? 1 : 0
   name                               = module.labels.id
@@ -108,6 +116,8 @@ resource "aws_ecs_service" "ec2" {
   ]
 }
 
+#Module      : ECS SERVICE
+#Description : ECS Service for automating the task deployment on Fargate.
 resource "aws_ecs_service" "fargate" {
   count                              = local.fargate_enabled ? 1 : 0
   name                               = module.labels.id
