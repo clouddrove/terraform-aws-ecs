@@ -65,22 +65,22 @@ module "sg_lb" {
 }
 
 module "kms_key" {
-    source      = "git::https://github.com/clouddrove/terraform-aws-kms.git?ref=tags/0.12.5"
+  source      = "git::https://github.com/clouddrove/terraform-aws-kms.git?ref=tags/0.12.5"
     
-    name        = "kms"
-    application = "clouddrove"
-    environment = "test"
-    label_order = ["environment", "application", "name"]
-    enabled     = true
+  name        = "kms"
+  application = "clouddrove"
+  environment = "test"
+  label_order = ["environment", "application", "name"]
+  enabled     = true
     
-    description              = "KMS key for eks"
-    alias                    = "alias/ecs"
-    key_usage                = "ENCRYPT_DECRYPT"
-    customer_master_key_spec = "SYMMETRIC_DEFAULT"
-    deletion_window_in_days  = 7
-    is_enabled               = true
-    enable_key_rotation      = false
-    policy                   = data.aws_iam_policy_document.default.json
+  description              = "KMS key for eks"
+  alias                    = "alias/ecs"
+  key_usage                = "ENCRYPT_DECRYPT"
+  customer_master_key_spec = "SYMMETRIC_DEFAULT"
+  deletion_window_in_days  = 7
+  is_enabled               = true
+  enable_key_rotation      = false
+  policy                   = data.aws_iam_policy_document.default.json
 }
 
 data "aws_iam_policy_document" "default" {
