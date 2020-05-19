@@ -50,8 +50,6 @@ module "auto-scaling" {
   cloudwatch_prefix                         = var.cloudwatch_prefix
   retention_in_days                         = var.retention_in_days
   kms_key_arn                               = var.kms_key_arn
-  region                                    = var.region
-  network_mode                              = var.network_mode
   fargate_cluster_enabled                   = var.fargate_cluster_enabled
   cluster_name                              = module.ecs.ec2_name
 }

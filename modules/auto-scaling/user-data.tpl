@@ -81,3 +81,7 @@ end script
 EOF
 
 start ecs
+
+instance_role_arn=$(curl http://169.254.169.254/latest/meta-data/iam/info | jq -r '. | .InstanceProfileArn' | awk -F/ '{print $NF}')
+
+aws ecs put-account-setting --name awsvpcTrunking --value enabled --principal-arn $instance_role_arn --region $region

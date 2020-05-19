@@ -362,18 +362,6 @@ variable "cloudwatch_prefix" {
   description = "The prefix of cloudwatch logs."
 }
 
-variable "network_mode" {
-  type        = string
-  default     = ""
-  description = "The Docker networking mode to use for the containers in the task. The valid values are none, bridge, awsvpc, and host."
-}
-
-variable "region" {
-  type        = string
-  default     = ""
-  description = "The AWS region name."
-}
-
 ## Spot
 
 variable "spot_enabled" {

@@ -119,7 +119,6 @@ module "ecs" {
   key_name                     = module.keypair.name
   image_id                     = "ami-001085c9389955bb6"
   instance_type                = "m5.large"
-  region                       = "eu-west-1"
   min_size                     = 1
   max_size                     = 3
   volume_size                  = 8

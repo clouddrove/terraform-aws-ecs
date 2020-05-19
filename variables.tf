@@ -206,12 +206,6 @@ variable "kms_key_arn" {
   description = "AWS Key Management Service (AWS KMS) customer master key (CMK) to use when creating the encrypted volume. encrypted must be set to true when this is set."
 }
 
-variable "region" {
-  type        = string
-  default     = ""
-  description = "The AWS region name."
-}
-
 ## Spot
 
 variable "spot_enabled" {

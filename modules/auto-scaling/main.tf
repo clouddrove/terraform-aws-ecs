@@ -57,6 +57,7 @@ data "aws_iam_policy_document" "iam_policy_ec2" {
       "ecs:StartTelemetrySession",
       "ecs:UpdateContainerInstancesState",
       "ecs:Submit*",
+      "ecs:PutAccountSetting",
       "ecr:GetAuthorizationToken",
       "ecr:BatchCheckLayerAvailability",
       "ecr:GetDownloadUrlForLayer",
@@ -76,20 +77,6 @@ resource "aws_iam_instance_profile" "default" {
   count = var.enabled && var.fargate_cluster_enabled == false ? 1 : 0
   name  = format("%s-instance-profile", module.labels.id)
   role  = module.iam-role.name
-}
-
-#Module      : NULL RESOURCE
-#Description : Executing null resource for applying VPC trunking to IAM container instance role.
-resource "null_resource" "default" {
-  count = var.enabled && var.network_mode == "awsvpc" ? 1 : 0
-  
-  provisioner "local-exec" {
-    command = "aws ecs put-account-setting --name awsvpcTrunking --value enabled --principal-arn ${module.iam-role.arn} --region ${var.region}"
-  }
-
-  depends_on = [
-    aws_autoscaling_group.default
-  ]
 }
 
 #Module      : SECURITY GROUP
@@ -228,7 +215,8 @@ resource "aws_autoscaling_group" "default" {
 
   depends_on = [
     aws_launch_configuration.default,
-    module.iam-role
+    module.iam-role,
+    aws_iam_instance_profile.default
   ]
 }
 
@@ -272,6 +260,7 @@ resource "aws_autoscaling_group" "spot" {
 
   depends_on = [
     aws_launch_configuration.spot,
-    module.iam-role
+    module.iam-role,
+    aws_iam_instance_profile.default
   ]
 }
