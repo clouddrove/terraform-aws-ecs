@@ -16,6 +16,8 @@
 
 - [ ] In `example.tf` files the `volume_size = 8` because when auto scaling group launch an instance then it creates an additional volume of size 22 as this size is acquired by docker and ECS agent to launch container onto the EC2 instance.
 
+- [ ] Never mention `base = var.base` in `modules/service/main.tf` on fargate ecs service resource of `capacity_provider_strategy` first column because base is mentioned only one time in any one `capacity_provider_strategy` block. Reference to this - [Link](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/cluster-capacity-providers.html)
+
 ## Reference Links
 
 [AWS Documentation](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/Welcome.html)
