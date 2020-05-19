@@ -336,7 +336,7 @@ variable "fargate_cluster_cp" {
   description = "The name of the capacity provider."
 }
 
-## Service Variables
+## Service 
 
 variable "ec2_service_enabled" {
   type        = bool
@@ -476,7 +476,7 @@ variable "ec2_awsvpc_enabled" {
   description = "AWSVPC network mode is enabled or not."
 }
 
-## Task Definition Variables
+## Task Definition 
 
 variable "task_role_arn" {
   type        = string

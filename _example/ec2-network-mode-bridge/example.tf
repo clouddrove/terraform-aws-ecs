@@ -74,7 +74,7 @@ module "kms_key" {
   label_order = ["environment", "application", "name"]
   enabled     = true
     
-  description              = "KMS key for eks"
+  description              = "KMS key for ecs"
   alias                    = "alias/ecs"
   key_usage                = "ENCRYPT_DECRYPT"
   customer_master_key_spec = "SYMMETRIC_DEFAULT"

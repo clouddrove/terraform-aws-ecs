@@ -1,3 +1,5 @@
+## Task Definition
+
 output "ec2_arn" {
   description = "Full ARN of the Task Definition (including both family and revision)."
   value       = join("", aws_ecs_task_definition.ec2.*.arn)

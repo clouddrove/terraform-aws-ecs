@@ -1,3 +1,5 @@
+## ECS Cluster
+
 output "ec2_id" {
   description = "The Amazon Resource Name (ARN) that identifies the cluster"
   value       = join("", aws_ecs_cluster.ec2.*.id)

@@ -1,3 +1,5 @@
+## EC2
+
 output "launch_configuration_id" {
   description = "The ID of the launch configuration"
   value       = module.auto-scaling.launch_configuration_id
@@ -76,6 +78,8 @@ output "auto_scaling_tags" {
   value       = module.auto-scaling.tags
 }
 
+## ECS Cluster
+
 output "ecs_tags" {
   description = "The tags of the autoscaling group"
   value       = module.ecs.tags
@@ -110,6 +114,8 @@ output "ec2_service_id" {
   description = "The Amazon Resource Name (ARN) that identifies the service"
   value       = module.service.ec2_id
 }
+
+## Service
 
 output "ec2_service_name" {
   description = "The name of the service"
@@ -155,6 +161,8 @@ output "service_tags" {
   description = "The tags of the service"
   value       = module.service.tags
 }
+
+## Task Definition
 
 output "ec2_td_arn" {
   description = "Full ARN of the Task Definition (including both family and revision)."

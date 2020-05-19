@@ -1,3 +1,5 @@
+## Service
+
 output "ec2_id" {
   description = "The Amazon Resource Name (ARN) that identifies the service"
   value       = join("", aws_ecs_service.ec2.*.id)
