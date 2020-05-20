@@ -18,6 +18,8 @@
 
 9. Never mention `base = var.base` in `modules/service/main.tf` on fargate ecs service resource of `capacity_provider_strategy` first column because base is mentioned only one time in any one `capacity_provider_strategy` block. Reference to this - [Link](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/cluster-capacity-providers.html)
 
+10. If you want to change the `CPU` and `Memory` of task and container definition, please make sure that the size for task should be greater than container definition otherwise it will give error.
+
 ## Reference Links
 
 [AWS Documentation](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/Welcome.html)

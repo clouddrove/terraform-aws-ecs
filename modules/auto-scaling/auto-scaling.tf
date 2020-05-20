@@ -15,7 +15,6 @@ resource "aws_autoscaling_policy" "scale_up" {
   policy_type            = var.scale_up_policy_type
   cooldown               = var.scale_up_cooldown_seconds
   autoscaling_group_name = join("", aws_autoscaling_group.default.*.name)
-
 }
 
 #Module      : AUTOSCALING POLICY UP
@@ -28,7 +27,6 @@ resource "aws_autoscaling_policy" "scale_up_spot" {
   policy_type            = var.scale_up_policy_type
   cooldown               = var.scale_up_cooldown_seconds
   autoscaling_group_name = join("", aws_autoscaling_group.spot.*.name)
-
 }
 
 #Module      : AUTOSCALING POLICY DOWN
