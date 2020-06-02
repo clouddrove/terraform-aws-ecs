@@ -80,11 +80,6 @@ output "auto_scaling_tags" {
 
 ## ECS Cluster
 
-output "ecs_tags" {
-  description = "The tags of the autoscaling group"
-  value       = module.ecs.tags
-}
-
 output "ec2_cluster_id" {
   description = "The Amazon Resource Name (ARN) that identifies the cluster"
   value       = module.ecs.ec2_id
@@ -115,6 +110,11 @@ output "fargate_cluster_arn" {
   value       = module.ecs.fargate_arn
 }
 
+output "ecs_tags" {
+  description = "The tags of the autoscaling group"
+  value       = module.ecs.tags
+}
+
 ## Service
 
 output "ec2_service_id" {
@@ -128,7 +128,7 @@ output "ec2_service_name" {
 }
 
 output "ec2_service_cluster" {
-  description = " The Amazon Resource Name (ARN) of cluster which the service runs on"
+  description = "The Amazon Resource Name (ARN) of cluster which the service runs on"
   value       = module.service.ec2_cluster
 }
 
@@ -153,7 +153,7 @@ output "fargate_service_name" {
 }
 
 output "fargate_service_cluster" {
-  description = " The Amazon Resource Name (ARN) of cluster which the service runs on"
+  description = "The Amazon Resource Name (ARN) of cluster which the service runs on"
   value       = module.service.fargate_cluster
 }
 
