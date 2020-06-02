@@ -493,13 +493,13 @@ variable "network_mode" {
 variable "ipc_mode" {
   type        = string
   default     = ""
-  description = "The IPC resource namespace to be used for the containers in the task The valid values are host, task, and none."
+  description = "The IPC resource namespace to be used for the containers in the task The valid values are host, task, and none. (It does not support for fargate launch type)."
 }
 
 variable "pid_mode" {
   type        = string
   default     = ""
-  description = "The process namespace to use for the containers in the task. The valid values are host and task."
+  description = "The process namespace to use for the containers in the task. The valid values are host and task. (It does not support for fargate launch type)."
 }
 
 variable "cpu" {

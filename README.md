@@ -10,17 +10,15 @@
 
 5. The `awslogs-group` in JSON files should match the cloud watch log group name which is getting created in `modules/task-definition/main.tf` file otherwise the task will not run on the container instance.
 
-6. Never include `ipc_mode` and `pic_mode` in `modules/task-definition/main.tf` fargate ecs service resource because fargate does not support it.
+6. In `_example/fargate/example.tf` the variable `assign_public_ip = true` is set because fargate requires this variable as true to assign tasks.
 
-7. In `_example/fargate/example.tf` the variable `assign_public_ip = true` is set because fargate requires this variable as true to assign tasks.
+7. In `example.tf` files the `volume_size = 8` because when auto scaling group launch an instance then it creates an additional volume of size 22 as this size is acquired by docker and ECS agent to launch container onto the EC2 instance.
 
-8. In `example.tf` files the `volume_size = 8` because when auto scaling group launch an instance then it creates an additional volume of size 22 as this size is acquired by docker and ECS agent to launch container onto the EC2 instance.
+8. Never mention `base = var.base` in `modules/service/main.tf` on fargate ecs service resource of `capacity_provider_strategy` first column because base is mentioned only one time in any one `capacity_provider_strategy` block. Reference to this - [Link](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/cluster-capacity-providers.html)
 
-9. Never mention `base = var.base` in `modules/service/main.tf` on fargate ecs service resource of `capacity_provider_strategy` first column because base is mentioned only one time in any one `capacity_provider_strategy` block. Reference to this - [Link](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/cluster-capacity-providers.html)
+9. If you want to change the `CPU` and `Memory` of task and container definition, please make sure that the size for task should be greater than container definition otherwise it will give error.
 
-10. If you want to change the `CPU` and `Memory` of task and container definition, please make sure that the size for task should be greater than container definition otherwise it will give error.
-
-11. Never mention `launch type` and `capacity provider strategy block` simultaneously because you can either choose one of them in service resource of fargate.
+10. Never mention `launch type` and `capacity provider strategy block` simultaneously because you can either choose one of them in service resource of fargate.
 
 ## Reference Links
 
