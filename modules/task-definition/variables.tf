@@ -80,6 +80,18 @@ variable "network_mode" {
   description = "The Docker networking mode to use for the containers in the task. The valid values are none, bridge, awsvpc, and host."
 }
 
+variable "file_name" {
+  type        = string
+  default     = ""
+  description = "File name for container definitions."
+}
+
+variable "container_log_group_name" {
+  type        = string
+  default     = ""
+  description = "Log group name for the container."
+}
+
 variable "ipc_mode" {
   type        = string
   default     = ""

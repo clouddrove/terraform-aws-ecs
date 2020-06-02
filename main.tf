@@ -115,24 +115,26 @@ module "service" {
 }
 
 module "task-definition" {
-  source             = "./modules/task-definition"
-  name               = var.name
-  application        = var.application
-  environment        = var.environment
-  managedby          = var.managedby
-  delimiter          = var.delimiter
-  attributes         = var.attributes
-  label_order        = var.label_order
-  tags               = var.tags
-  enabled            = var.enabled
-  ec2_td_enabled     = var.ec2_td_enabled
-  fargate_td_enabled = var.fargate_td_enabled
-  task_role_arn      = var.task_role_arn
-  network_mode       = var.network_mode
-  ipc_mode           = var.ipc_mode
-  pid_mode           = var.pid_mode
-  cpu                = var.cpu
-  memory             = var.memory
-  kms_key_arn        = var.kms_key_arn
-  retention_in_days  = var.retention_in_days
+  source                   = "./modules/task-definition"
+  name                     = var.name
+  application              = var.application
+  environment              = var.environment
+  managedby                = var.managedby
+  delimiter                = var.delimiter
+  attributes               = var.attributes
+  label_order              = var.label_order
+  tags                     = var.tags
+  enabled                  = var.enabled
+  ec2_td_enabled           = var.ec2_td_enabled
+  fargate_td_enabled       = var.fargate_td_enabled
+  task_role_arn            = var.task_role_arn
+  file_name                = var.file_name
+  container_log_group_name = var.container_log_group_name
+  ipc_mode                 = var.ipc_mode
+  pid_mode                 = var.pid_mode
+  cpu                      = var.cpu
+  memory                   = var.memory
+  network_mode             = var.network_mode
+  kms_key_arn              = var.kms_key_arn
+  retention_in_days        = var.retention_in_days
 }

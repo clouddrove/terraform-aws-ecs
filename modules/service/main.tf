@@ -18,7 +18,7 @@ module "labels" {
 
 #Module      : IAM ROLE
 #Description : IAM Role for for ECS Service.
-module "iam-role-ec2" {
+module "iam-role-ecs" {
   source = "git::https://github.com/clouddrove/terraform-aws-iam-role.git?ref=tags/0.12.3"
 
   name               = format("%s-lb", var.name)
@@ -26,13 +26,13 @@ module "iam-role-ec2" {
   environment        = var.environment
   label_order        = var.label_order
   enabled            = var.enabled && var.network_mode == "bridge" ? true : false
-  assume_role_policy = data.aws_iam_policy_document.assume_role_ec2.json
+  assume_role_policy = data.aws_iam_policy_document.assume_role_ecs.json
 
   policy_enabled = true
   policy_arn     = "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceRole"
 }
 
-data "aws_iam_policy_document" "assume_role_ec2" {
+data "aws_iam_policy_document" "assume_role_ecs" {
   statement {
     effect  = "Allow"
     actions = ["sts:AssumeRole"]
@@ -83,7 +83,7 @@ resource "aws_ecs_service" "ec2" {
   enable_ecs_managed_tags            = var.enable_ecs_managed_tags
   health_check_grace_period_seconds  = var.health_check_grace_period_seconds
   launch_type                        = "EC2"
-  iam_role                           = var.network_mode == "bridge" ? module.iam-role-ec2.arn : ""
+  iam_role                           = var.network_mode == "bridge" ? module.iam-role-ecs.arn : ""
   propagate_tags                     = var.propagate_tags
   scheduling_strategy                = var.scheduling_strategy
   task_definition                    = var.ec2_task_definition
@@ -111,7 +111,7 @@ resource "aws_ecs_service" "ec2" {
   }
 
   depends_on = [
-    module.iam-role-ec2,
+    module.iam-role-ecs,
     module.lb
   ]
 }

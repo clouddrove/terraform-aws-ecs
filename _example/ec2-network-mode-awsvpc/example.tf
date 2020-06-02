@@ -175,10 +175,12 @@ module "ecs" {
   target_type         = "ip"
 
   ## Task Definition
-  ec2_td_enabled  = true
-  network_mode    = "awsvpc"
-  ipc_mode        = "task"
-  pid_mode        = "task"
-  cpu             = 512
-  memory          = 1024
+  ec2_td_enabled           = true
+  network_mode             = "awsvpc"
+  ipc_mode                 = "task"
+  pid_mode                 = "task"
+  cpu                      = 512
+  memory                   = 1024
+  file_name                = "./td-ec2-awsvpc.json"
+  container_log_group_name = "ec2-container-logs"
 }

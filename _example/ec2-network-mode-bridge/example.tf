@@ -174,10 +174,12 @@ module "ecs" {
   target_type         = "instance"
 
   ## Task Definition
-  ec2_td_enabled  = true
-  network_mode    = "bridge"
-  ipc_mode        = "task"
-  pid_mode        = "task"
-  cpu             = 512
-  memory          = 1024
+  ec2_td_enabled           = true
+  network_mode             = "bridge"
+  ipc_mode                 = "task"
+  pid_mode                 = "task"
+  cpu                      = 512
+  memory                   = 1024
+  file_name                = "./td-ec2-bridge.json"
+  container_log_group_name = "ec2-container-logs"
 }

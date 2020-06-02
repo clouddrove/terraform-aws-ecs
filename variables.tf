@@ -525,3 +525,15 @@ variable "fargate_td_enabled" {
   default     = false
   description = "Whether fargate task definition is enabled."
 }
+
+variable "file_name" {
+  type        = string
+  default     = ""
+  description = "File name for container definitions."
+}
+
+variable "container_log_group_name" {
+  type        = string
+  default     = ""
+  description = "Log group name for the container."
+}

@@ -49,7 +49,7 @@ data "aws_iam_policy_document" "assume_role_td" {
 resource "aws_ecs_task_definition" "ec2" {
   count                    = local.ec2_enabled ? 1 : 0
   family                   = module.labels.id
-  container_definitions    = var.network_mode == "bridge" ? file("${path.module}/templates/td-ec2.json") : file("${path.module}/templates/td-ec2-awsvpc.json")
+  container_definitions    = file(var.file_name)
   task_role_arn            = var.task_role_arn
   execution_role_arn       = module.iam-role-td.arn
   network_mode             = var.network_mode
@@ -65,7 +65,7 @@ resource "aws_ecs_task_definition" "ec2" {
 #Description : Cloud watch log group for container logs.
 resource "aws_cloudwatch_log_group" "ec2-container" {
   count             = local.ec2_enabled ? 1 : 0
-  name              = "ec2-container-logs"
+  name              = var.container_log_group_name
   retention_in_days = var.retention_in_days
   kms_key_id        = var.kms_key_arn
   tags              = module.labels.tags
@@ -76,7 +76,7 @@ resource "aws_cloudwatch_log_group" "ec2-container" {
 resource "aws_ecs_task_definition" "fargate" {
   count                    = local.fargate_enabled ? 1 : 0
   family                   = module.labels.id
-  container_definitions    = file("${path.module}/templates/td-fargate.json")
+  container_definitions    = file(var.file_name)
   task_role_arn            = var.task_role_arn
   execution_role_arn       = module.iam-role-td.arn
   network_mode             = "awsvpc"
@@ -90,7 +90,7 @@ resource "aws_ecs_task_definition" "fargate" {
 #Description : Cloud watch log group for container logs.
 resource "aws_cloudwatch_log_group" "fargate-container" {
   count             = local.fargate_enabled ? 1 : 0
-  name              = "fargate-container-logs"
+  name              = var.container_log_group_name
   retention_in_days = var.retention_in_days
   kms_key_id        = var.kms_key_arn
   tags              = module.labels.tags

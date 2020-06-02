@@ -84,7 +84,9 @@ module "ecs" {
   fargate_capacity_provider_spot   = "FARGATE_SPOT"
 
   ## Task Definition
-  fargate_td_enabled = true
-  cpu                = 512
-  memory             = 1024
+  fargate_td_enabled       = true
+  cpu                      = 512
+  memory                   = 1024
+  file_name                = "./td-fargate.json"
+  container_log_group_name = "fargate-container-logs"
 }
