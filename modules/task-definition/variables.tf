@@ -76,7 +76,7 @@ variable "task_role_arn" {
 
 variable "network_mode" {
   type        = string
-  default     = ""
+  default     = "bridge"
   description = "The Docker networking mode to use for the containers in the task. The valid values are none, bridge, awsvpc, and host."
 }
 
@@ -88,20 +88,20 @@ variable "file_name" {
 
 variable "container_log_group_name" {
   type        = string
-  default     = ""
+  default     = "log-group"
   description = "Log group name for the container."
 }
 
 variable "ipc_mode" {
   type        = string
-  default     = ""
-  description = "The IPC resource namespace to be used for the containers in the task The valid values are host, task, and none."
+  default     = "task"
+  description = "The IPC resource namespace to be used for the containers in the task The valid values are host, task, and none. (It does not support for fargate launch type)."
 }
 
 variable "pid_mode" {
   type        = string
-  default     = ""
-  description = "The process namespace to use for the containers in the task. The valid values are host and task."
+  default     = "task"
+  description = "The process namespace to use for the containers in the task. The valid values are host and task. (It does not support for fargate launch type)."
 }
 
 variable "cpu" {

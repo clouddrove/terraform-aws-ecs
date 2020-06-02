@@ -215,8 +215,8 @@ variable "spot_enabled" {
 }
 
 variable "spot_price" {
-  type        = string
-  default     = ""
+  type        = number
+  default     = 1
   description = "The maximum hourly price you're willing to pay for the Spot Instances."
 }
 
@@ -336,7 +336,7 @@ variable "fargate_cluster_cp" {
   description = "The name of the capacity provider."
 }
 
-## Service 
+## Service
 
 variable "ec2_service_enabled" {
   type        = bool
@@ -382,13 +382,13 @@ variable "health_check_grace_period_seconds" {
 
 variable "propagate_tags" {
   type        = string
-  default     = ""
+  default     = "SERVICE"
   description = " Specifies whether to propagate the tags from the task definition or the service to the tasks. The valid values are SERVICE and TASK_DEFINITION."
 }
 
 variable "scheduling_strategy" {
   type        = string
-  default     = ""
+  default     = "REPLICA"
   description = "The scheduling strategy to use for the service. The valid values are REPLICA and DAEMON."
 }
 
@@ -476,7 +476,7 @@ variable "ec2_awsvpc_enabled" {
   description = "AWSVPC network mode is enabled or not."
 }
 
-## Task Definition 
+## Task Definition
 
 variable "task_role_arn" {
   type        = string
@@ -486,20 +486,20 @@ variable "task_role_arn" {
 
 variable "network_mode" {
   type        = string
-  default     = ""
+  default     = "bridge"
   description = "The Docker networking mode to use for the containers in the task. The valid values are none, bridge, awsvpc, and host."
 }
 
 variable "ipc_mode" {
   type        = string
-  default     = ""
-  description = "The IPC resource namespace to be used for the containers in the task The valid values are host, task, and none."
+  default     = "task"
+  description = "The IPC resource namespace to be used for the containers in the task The valid values are host, task, and none. (It does not support for fargate launch type)."
 }
 
 variable "pid_mode" {
   type        = string
-  default     = ""
-  description = "The process namespace to use for the containers in the task. The valid values are host and task."
+  default     = "task"
+  description = "The process namespace to use for the containers in the task. The valid values are host and task. (It does not support for fargate launch type)."
 }
 
 variable "cpu" {
@@ -534,6 +534,6 @@ variable "file_name" {
 
 variable "container_log_group_name" {
   type        = string
-  default     = ""
+  default     = "log-group"
   description = "Log group name for the container."
 }

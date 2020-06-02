@@ -7,7 +7,7 @@ output "ec2_id" {
 
 output "ec2_name" {
   description = "The name of the service"
-  value       = join("", aws_ecs_service.ec2.*.name)  
+  value       = join("", aws_ecs_service.ec2.*.name)
 }
 
 output "ec2_cluster" {
@@ -32,7 +32,7 @@ output "fargate_id" {
 
 output "fargate_name" {
   description = "The name of the service"
-  value       = join("", aws_ecs_service.fargate.*.name)  
+  value       = join("", aws_ecs_service.fargate.*.name)
 }
 
 output "fargate_cluster" {

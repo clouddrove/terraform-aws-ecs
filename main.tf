@@ -55,20 +55,20 @@ module "auto-scaling" {
 }
 
 module "ecs" {
-  source                            = "./modules/ecs"
-  name                              = var.name
-  application                       = var.application
-  environment                       = var.environment
-  managedby                         = var.managedby
-  delimiter                         = var.delimiter
-  attributes                        = var.attributes
-  label_order                       = var.label_order
-  tags                              = var.tags
-  enabled                           = var.enabled
-  ec2_cluster_enabled               = var.ec2_cluster_enabled
-  fargate_cluster_enabled           = var.fargate_cluster_enabled
-  ecs_settings_enabled              = var.ecs_settings_enabled
-  fargate_cluster_cp                = var.fargate_cluster_cp
+  source                  = "./modules/ecs"
+  name                    = var.name
+  application             = var.application
+  environment             = var.environment
+  managedby               = var.managedby
+  delimiter               = var.delimiter
+  attributes              = var.attributes
+  label_order             = var.label_order
+  tags                    = var.tags
+  enabled                 = var.enabled
+  ec2_cluster_enabled     = var.ec2_cluster_enabled
+  fargate_cluster_enabled = var.fargate_cluster_enabled
+  ecs_settings_enabled    = var.ecs_settings_enabled
+  fargate_cluster_cp      = var.fargate_cluster_cp
 }
 
 module "service" {
@@ -82,7 +82,7 @@ module "service" {
   label_order                        = var.label_order
   tags                               = var.tags
   enabled                            = var.enabled
-  ec2_service_enabled                = var.ec2_service_enabled 
+  ec2_service_enabled                = var.ec2_service_enabled
   ec2_cluster_name                   = module.ecs.ec2_id
   deployment_maximum_percent         = var.deployment_maximum_percent
   deployment_minimum_healthy_percent = var.deployment_minimum_healthy_percent

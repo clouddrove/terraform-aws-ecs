@@ -48,7 +48,7 @@ variable "delimiter" {
   description = "Delimiter to be used between `organization`, `environment`, `name` and `attributes`."
 }
 
-## Service 
+## Service
 
 variable "enabled" {
   type        = bool
@@ -112,13 +112,13 @@ variable "health_check_grace_period_seconds" {
 
 variable "propagate_tags" {
   type        = string
-  default     = ""
+  default     = "SERVICE"
   description = " Specifies whether to propagate the tags from the task definition or the service to the tasks. The valid values are SERVICE and TASK_DEFINITION."
 }
 
 variable "scheduling_strategy" {
   type        = string
-  default     = ""
+  default     = "REPLICA"
   description = "The scheduling strategy to use for the service. The valid values are REPLICA and DAEMON."
 }
 

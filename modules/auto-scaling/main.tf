@@ -46,7 +46,7 @@ data "aws_iam_policy_document" "assume_role_ec2" {
 
 data "aws_iam_policy_document" "iam_policy_ec2" {
   statement {
-    effect  = "Allow"
+    effect = "Allow"
     actions = [
       "ec2:DescribeTags",
       "ecs:CreateCluster",

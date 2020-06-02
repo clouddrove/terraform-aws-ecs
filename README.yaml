@@ -38,7 +38,7 @@ usage : |-
     ```hcl
     module "ecs" {
       source = "git::https://github.com/clouddrove/terraform-aws-ecs.git?ref=tags/0.12.0"
-      
+
       ## Tags
       name        = "ecs-awsvpc"
       application = "clouddrove"
@@ -52,7 +52,7 @@ usage : |-
       additional_security_group_ids = [module.sg_ssh.security_group_ids]
 
       ## EC2
-      autoscaling_policies_enabled = true  
+      autoscaling_policies_enabled = true
       key_name                     = module.keypair.name
       image_id                     = "ami-001085c9389955bb6"
       instance_type                = "m5.large"
@@ -62,9 +62,9 @@ usage : |-
       lb_security_group            = module.sg_lb.security_group_ids
       service_lb_security_group    = [module.sg_lb.security_group_ids]
       cloudwatch_prefix            = "ecs-logs"
-  
+
       ## ECS Cluster
-      ec2_cluster_enabled  = true  
+      ec2_cluster_enabled  = true
       ecs_settings_enabled = "enabled"
 
       ## Schedule
@@ -128,7 +128,7 @@ usage : |-
     ```hcl
     module "ecs" {
       source = "git::https://github.com/clouddrove/terraform-aws-ecs.git?ref=tags/0.12.0"
-      
+
       ## Tags
       name        = "ecs-bridge"
       application = "clouddrove"
@@ -142,7 +142,7 @@ usage : |-
       additional_security_group_ids = [module.sg_ssh.security_group_ids]
 
       ## EC2
-      autoscaling_policies_enabled = true  
+      autoscaling_policies_enabled = true
       key_name                     = module.keypair.name
       image_id                     = "ami-001085c9389955bb6"
       instance_type                = "t3.medium"
@@ -152,9 +152,9 @@ usage : |-
       lb_security_group            = module.sg_lb.security_group_ids
       service_lb_security_group    = [module.sg_lb.security_group_ids]
       cloudwatch_prefix            = "ecs-logs"
-  
+
       ## ECS Cluster
-      ec2_cluster_enabled  = true  
+      ec2_cluster_enabled  = true
       ecs_settings_enabled = "enabled"
 
       ## Schedule
@@ -217,7 +217,7 @@ usage : |-
     ```hcl
     module "ecs" {
       source = "git::https://github.com/clouddrove/terraform-aws-ecs.git?ref=tags/0.12.0"
-      
+
       ## Tags
       name        = "ecs-fargate"
       application = "clouddrove"
@@ -234,7 +234,7 @@ usage : |-
       service_lb_security_group = [module.sg_lb.security_group_ids]
 
       ## Fargate Cluster
-      fargate_cluster_enabled = true  
+      fargate_cluster_enabled = true
       ecs_settings_enabled    = "enabled"
       fargate_cluster_cp      = ["FARGATE", "FARGATE_SPOT"]
 

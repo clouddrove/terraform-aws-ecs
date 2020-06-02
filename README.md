@@ -7,7 +7,7 @@
     Terraform AWS ECS
 </h1>
 
-<p align="center" style="font-size: 1.2rem;"> 
+<p align="center" style="font-size: 1.2rem;">
     Terraform module to create ECS on AWS.
      </p>
 
@@ -38,7 +38,7 @@
 <hr>
 
 
-We eat, drink, sleep and most importantly love **DevOps**. We are working towards strategies for standardizing architecture while ensuring security for the infrastructure. We are strong believer of the philosophy <b>Bigger problems are always solved by breaking them into smaller manageable problems</b>. Resonating with microservices architecture, it is considered best-practice to run database, cluster, storage in smaller <b>connected yet manageable pieces</b> within the infrastructure. 
+We eat, drink, sleep and most importantly love **DevOps**. We are working towards strategies for standardizing architecture while ensuring security for the infrastructure. We are strong believer of the philosophy <b>Bigger problems are always solved by breaking them into smaller manageable problems</b>. Resonating with microservices architecture, it is considered best-practice to run database, cluster, storage in smaller <b>connected yet manageable pieces</b> within the infrastructure.
 
 This module is basically combination of [Terraform open source](https://www.terraform.io/) and includes automatation tests and examples. It also helps to create and improve your infrastructure with minimalistic code instead of maintaining the whole infrastructure code yourself.
 
@@ -49,7 +49,7 @@ We have [*fifty plus terraform modules*][terraform_modules]. A few of them are c
 
 ## Prerequisites
 
-This module has a few dependencies: 
+This module has a few dependencies:
 
 - [Terraform 0.12](https://learn.hashicorp.com/terraform/getting-started/install.html)
 - [Go](https://golang.org/doc/install)
@@ -58,8 +58,12 @@ This module has a few dependencies:
 
 
 
+## Points to remember
 
-
+- Make sure all resources enabled in `Amazon ECS ARN and resource ID settings` at ECS > Account Settings in particular region before deploying module.
+- For type `awsvpc network mode` example you have to use instance type like a1, c5 etc. [Reference](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/container-instance-eni.html#eni-trunking-supported-instance-types)
+- The `awslogs-group` in JSON task files should match with variable container_log_group_name.
+- If you want to change the CPU and Memory of task and container definition, please make sure that the size for task should be greater than container definition otherwise it will give error.
 
 
 ## Examples
@@ -73,7 +77,7 @@ Here is an example of how you can use this module in your inventory structure:
   ```hcl
   module "ecs" {
     source = "git::https://github.com/clouddrove/terraform-aws-ecs.git?ref=tags/0.12.0"
-    
+
     ## Tags
     name        = "ecs-awsvpc"
     application = "clouddrove"
@@ -87,7 +91,7 @@ Here is an example of how you can use this module in your inventory structure:
     additional_security_group_ids = [module.sg_ssh.security_group_ids]
 
     ## EC2
-    autoscaling_policies_enabled = true  
+    autoscaling_policies_enabled = true
     key_name                     = module.keypair.name
     image_id                     = "ami-001085c9389955bb6"
     instance_type                = "m5.large"
@@ -99,7 +103,7 @@ Here is an example of how you can use this module in your inventory structure:
     cloudwatch_prefix            = "ecs-logs"
 
     ## ECS Cluster
-    ec2_cluster_enabled  = true  
+    ec2_cluster_enabled  = true
     ecs_settings_enabled = "enabled"
 
     ## Schedule
@@ -163,7 +167,7 @@ Here is an example of how you can use this module in your inventory structure:
   ```hcl
   module "ecs" {
     source = "git::https://github.com/clouddrove/terraform-aws-ecs.git?ref=tags/0.12.0"
-    
+
     ## Tags
     name        = "ecs-bridge"
     application = "clouddrove"
@@ -177,7 +181,7 @@ Here is an example of how you can use this module in your inventory structure:
     additional_security_group_ids = [module.sg_ssh.security_group_ids]
 
     ## EC2
-    autoscaling_policies_enabled = true  
+    autoscaling_policies_enabled = true
     key_name                     = module.keypair.name
     image_id                     = "ami-001085c9389955bb6"
     instance_type                = "t3.medium"
@@ -189,7 +193,7 @@ Here is an example of how you can use this module in your inventory structure:
     cloudwatch_prefix            = "ecs-logs"
 
     ## ECS Cluster
-    ec2_cluster_enabled  = true  
+    ec2_cluster_enabled  = true
     ecs_settings_enabled = "enabled"
 
     ## Schedule
@@ -252,7 +256,7 @@ Here is an example of how you can use this module in your inventory structure:
   ```hcl
   module "ecs" {
     source = "git::https://github.com/clouddrove/terraform-aws-ecs.git?ref=tags/0.12.0"
-    
+
     ## Tags
     name        = "ecs-fargate"
     application = "clouddrove"
@@ -269,7 +273,7 @@ Here is an example of how you can use this module in your inventory structure:
     service_lb_security_group = [module.sg_lb.security_group_ids]
 
     ## Fargate Cluster
-    fargate_cluster_enabled = true  
+    fargate_cluster_enabled = true
     ecs_settings_enabled    = "enabled"
     fargate_cluster_cp      = ["FARGATE", "FARGATE_SPOT"]
 
@@ -344,7 +348,7 @@ Here is an example of how you can use this module in your inventory structure:
 | health\_check\_type | Controls how health checking is done. Valid values are `EC2` or `ELB`. | string | `"EC2"` | no |
 | image\_id | The EC2 image ID to launch. | string | `""` | no |
 | instance\_type | Instance type to launch. | string | `"t2.medium"` | no |
-| ipc\_mode | The IPC resource namespace to be used for the containers in the task The valid values are host, task, and none. | string | `""` | no |
+| ipc\_mode | The IPC resource namespace to be used for the containers in the task The valid values are host, task, and none. \(It does not support for fargate launch type\). | string | `""` | no |
 | key\_name | The SSH key name that should be used for the instance. | string | `""` | no |
 | kms\_key\_arn | AWS Key Management Service \(AWS KMS\) customer master key \(CMK\) to use when creating the encrypted volume. encrypted must be set to true when this is set. | string | `""` | no |
 | label\_order | Label order, e.g. `name`,`application`. | list | `<list>` | no |
@@ -361,7 +365,7 @@ Here is an example of how you can use this module in your inventory structure:
 | min\_size\_scaledown | The minimum size for the Auto Scaling group. Default 0. Set to -1 if you don't want to change the minimum size at the scheduled time. | number | `"0"` | no |
 | name | Name  \(e.g. `app` or `cluster`\). | string | `""` | no |
 | network\_mode | The Docker networking mode to use for the containers in the task. The valid values are none, bridge, awsvpc, and host. | string | `""` | no |
-| pid\_mode | The process namespace to use for the containers in the task. The valid values are host and task. | string | `""` | no |
+| pid\_mode | The process namespace to use for the containers in the task. The valid values are host and task. \(It does not support for fargate launch type\). | string | `""` | no |
 | platform\_version | The platform version on which to run your service. | string | `"LATEST"` | no |
 | propagate\_tags | Specifies whether to propagate the tags from the task definition or the service to the tasks. The valid values are SERVICE and TASK\_DEFINITION. | string | `""` | no |
 | retention\_in\_days | The retention of cloud watch logs. | number | `"30"` | no |
@@ -444,7 +448,7 @@ Here is an example of how you can use this module in your inventory structure:
 
 
 ## Testing
-In this module testing is performed with [terratest](https://github.com/gruntwork-io/terratest) and it creates a small piece of infrastructure, matches the output like ARN, ID and Tags name etc and destroy infrastructure in your AWS account. This testing is written in GO, so you need a [GO environment](https://golang.org/doc/install) in your system. 
+In this module testing is performed with [terratest](https://github.com/gruntwork-io/terratest) and it creates a small piece of infrastructure, matches the output like ARN, ID and Tags name etc and destroy infrastructure in your AWS account. This testing is written in GO, so you need a [GO environment](https://golang.org/doc/install) in your system.
 
 You need to run the following command in the testing folder:
 ```hcl
@@ -453,7 +457,7 @@ You need to run the following command in the testing folder:
 
 
 
-## Feedback 
+## Feedback
 If you come accross a bug or have any feedback, please log it in our [issue tracker](https://github.com/clouddrove/terraform-aws-ecs/issues), or feel free to drop us an email at [hello@clouddrove.com](mailto:hello@clouddrove.com).
 
 If you have found it worth your time, go ahead and give us a ★ on [our GitHub](https://github.com/clouddrove/terraform-aws-ecs)!

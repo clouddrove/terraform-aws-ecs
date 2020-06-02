@@ -87,7 +87,7 @@ resource "aws_ecs_service" "ec2" {
   propagate_tags                     = var.propagate_tags
   scheduling_strategy                = var.scheduling_strategy
   task_definition                    = var.ec2_task_definition
-  
+
   tags = module.labels.tags
 
   deployment_controller {
@@ -131,7 +131,7 @@ resource "aws_ecs_service" "fargate" {
   propagate_tags                     = var.propagate_tags
   scheduling_strategy                = var.scheduling_strategy
   task_definition                    = var.fargate_task_definition
-  
+
   tags = module.labels.tags
 
   deployment_controller {

@@ -27,7 +27,7 @@ module "subnets" {
   availability_zones  = ["eu-west-1a", "eu-west-1b"]
   vpc_id              = module.vpc.vpc_id
   cidr_block          = module.vpc.vpc_cidr_block
-  type                = "public-private"      
+  type                = "public-private"
   igw_id              = module.vpc.igw_id
 }
 
@@ -52,7 +52,7 @@ module "ecs" {
   application = "clouddrove"
   environment = "test"
   label_order = ["environment", "application", "name"]
-  enabled     = false      # set to true after VPC, Subnets and Security Groups gets created
+  enabled     = false # set to true after VPC, Subnets and Security Groups gets created
 
   ## Network
   vpc_id     = module.vpc.vpc_id
@@ -63,7 +63,7 @@ module "ecs" {
   service_lb_security_group = [module.sg_lb.security_group_ids]
 
   ## Fargate Cluster
-  fargate_cluster_enabled = true  
+  fargate_cluster_enabled = true
   ecs_settings_enabled    = "enabled"
   fargate_cluster_cp      = ["FARGATE", "FARGATE_SPOT"]
 

@@ -35,7 +35,7 @@ module "subnets" {
   availability_zones  = ["eu-west-1a", "eu-west-1b"]
   vpc_id              = module.vpc.vpc_id
   cidr_block          = module.vpc.vpc_cidr_block
-  type                = "public-private"      
+  type                = "public-private"
   igw_id              = module.vpc.igw_id
 }
 
@@ -66,14 +66,14 @@ module "sg_lb" {
 }
 
 module "kms_key" {
-  source      = "git::https://github.com/clouddrove/terraform-aws-kms.git?ref=tags/0.12.5"
-    
+  source = "git::https://github.com/clouddrove/terraform-aws-kms.git?ref=tags/0.12.5"
+
   name        = "kms"
   application = "clouddrove"
   environment = "test"
   label_order = ["environment", "application", "name"]
   enabled     = true
-    
+
   description              = "KMS key for ecs"
   alias                    = "alias/ecs"
   key_usage                = "ENCRYPT_DECRYPT"
@@ -86,7 +86,7 @@ module "kms_key" {
 
 data "aws_iam_policy_document" "default" {
   version = "2012-10-17"
-  
+
   statement {
     sid    = "Enable IAM User Permissions"
     effect = "Allow"
@@ -107,7 +107,7 @@ module "ecs" {
   application = "clouddrove"
   environment = "test"
   label_order = ["environment", "application", "name"]
-  enabled     = false      # set to true after VPC, Subnets, Security Groups, KMS Key and Key Pair gets created
+  enabled     = false # set to true after VPC, Subnets, Security Groups, KMS Key and Key Pair gets created
 
   ## Network
   vpc_id                        = module.vpc.vpc_id
@@ -115,7 +115,7 @@ module "ecs" {
   additional_security_group_ids = [module.sg_ssh.security_group_ids]
 
   ## EC2
-  autoscaling_policies_enabled = true  
+  autoscaling_policies_enabled = true
   key_name                     = module.keypair.name
   image_id                     = "ami-001085c9389955bb6"
   instance_type                = "m5.large"
@@ -125,9 +125,9 @@ module "ecs" {
   lb_security_group            = module.sg_lb.security_group_ids
   service_lb_security_group    = [module.sg_lb.security_group_ids]
   cloudwatch_prefix            = "ecs-logs"
-  
+
   ## ECS Cluster
-  ec2_cluster_enabled  = true  
+  ec2_cluster_enabled  = true
   ecs_settings_enabled = "enabled"
 
   ## Schedule

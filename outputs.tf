@@ -139,7 +139,7 @@ output "ec2_service_iam_role" {
 
 output "ec2_service_desired_count" {
   description = "The number of instances of the task definition"
-  value       = module.service.ec2_desired_count  
+  value       = module.service.ec2_desired_count
 }
 
 output "fargate_service_id" {
@@ -149,7 +149,7 @@ output "fargate_service_id" {
 
 output "fargate_service_name" {
   description = "The name of the service"
-  value       = module.service.fargate_name  
+  value       = module.service.fargate_name
 }
 
 output "fargate_service_cluster" {
@@ -159,7 +159,7 @@ output "fargate_service_cluster" {
 
 output "fargate_service_desired_count" {
   description = "The number of instances of the task definition"
-  value       = module.service.fargate_desired_count  
+  value       = module.service.fargate_desired_count
 }
 
 output "service_tags" {
