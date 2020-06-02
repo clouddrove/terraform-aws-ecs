@@ -58,7 +58,7 @@ module "ecs" {
   vpc_id     = module.vpc.vpc_id
   subnet_ids = module.subnets.private_subnet_id
 
-  ## Ec2
+  ## EC2
   lb_security_group         = module.sg_lb.security_group_ids
   service_lb_security_group = [module.sg_lb.security_group_ids]
 

@@ -105,17 +105,22 @@ output "fargate_cluster_id" {
   value       = module.ecs.fargate_id
 }
 
+output "fargate_cluster_name" {
+  description = "The name of the ECS cluster"
+  value       = module.ecs.fargate_name
+}
+
 output "fargate_cluster_arn" {
   description = "The Amazon Resource Name (ARN) that identifies the cluster"
   value       = module.ecs.fargate_arn
 }
 
+## Service
+
 output "ec2_service_id" {
   description = "The Amazon Resource Name (ARN) that identifies the service"
   value       = module.service.ec2_id
 }
-
-## Service
 
 output "ec2_service_name" {
   description = "The name of the service"

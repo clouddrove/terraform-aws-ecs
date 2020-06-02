@@ -6,7 +6,7 @@ output "ec2_id" {
 }
 
 output "ec2_name" {
-  description = "The Amazon Resource Name (ARN) that identifies the cluster"
+  description = "The name of the ECS cluster"
   value       = join("", aws_ecs_cluster.ec2.*.name)
 }
 
@@ -18,6 +18,11 @@ output "ec2_arn" {
 output "fargate_id" {
   description = "The Amazon Resource Name (ARN) that identifies the cluster"
   value       = join("", aws_ecs_cluster.fargate.*.id)
+}
+
+output "fargate_name" {
+  description = "The name of the ECS cluster"
+  value       = join("", aws_ecs_cluster.fargate.*.name)
 }
 
 output "fargate_arn" {

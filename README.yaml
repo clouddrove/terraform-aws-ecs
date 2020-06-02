@@ -1,0 +1,258 @@
+---
+#
+# This is the canonical configuration for the `README.md`
+# Run `make readme` to rebuild the `README.md`
+#
+
+
+# Name of this project
+name : Terraform AWS ECS
+
+# License of this project
+license: "MIT"
+
+# Canonical GitHub repo
+github_repo: clouddrove/terraform-aws-ecs
+
+# Badges to display
+badges:
+  - name: "Terraform"
+    image: "https://img.shields.io/badge/Terraform-v0.12-green"
+    url: "https://www.terraform.io"
+  - name: "Licence"
+    image: "https://img.shields.io/badge/License-MIT-blue.svg"
+    url: "LICENSE.md"
+
+#  description of this project
+description: |-
+  Terraform module to create ECS on AWS.
+
+# extra content
+include:
+  - "terraform.md"
+
+# How to use this project
+usage : |-
+  ### Network Mode AWSVPC Example
+  Here is an example of how you can use this module in your inventory structure:
+    ```hcl
+    module "ecs" {
+      source = "git::https://github.com/clouddrove/terraform-aws-ecs.git?ref=tags/0.12.0"
+      
+      ## Tags
+      name        = "ecs-awsvpc"
+      application = "clouddrove"
+      environment = "test"
+      label_order = ["environment", "application", "name"]
+      enabled     = false      # set to true after VPC, Subnets, Security Groups, KMS Key and Key Pair gets created
+
+      ## Network
+      vpc_id                        = module.vpc.vpc_id
+      subnet_ids                    = module.subnets.private_subnet_id
+      additional_security_group_ids = [module.sg_ssh.security_group_ids]
+
+      ## EC2
+      autoscaling_policies_enabled = true  
+      key_name                     = module.keypair.name
+      image_id                     = "ami-001085c9389955bb6"
+      instance_type                = "m5.large"
+      min_size                     = 1
+      max_size                     = 3
+      volume_size                  = 8
+      lb_security_group            = module.sg_lb.security_group_ids
+      service_lb_security_group    = [module.sg_lb.security_group_ids]
+      cloudwatch_prefix            = "ecs-logs"
+  
+      ## ECS Cluster
+      ec2_cluster_enabled  = true  
+      ecs_settings_enabled = "enabled"
+
+      ## Schedule
+      scheduler_down = "0 19 * * MON-FRI"
+      scheduler_up   = "0 6 * * MON-FRI"
+
+      schedule_enabled   = true
+      min_size_scaledown = 0
+      max_size_scaledown = 1
+      scale_up_desired   = 2
+      scale_down_desired = 1
+
+      spot_schedule_enabled   = true
+      spot_min_size_scaledown = 0
+      spot_max_size_scaledown = 1
+      spot_scale_up_desired   = 2
+      spot_scale_down_desired = 1
+
+      ## Spot
+      spot_enabled  = true
+      spot_min_size = 1
+      spot_max_size = 3
+
+      spot_price         = "0.10"
+      spot_instance_type = "m5.xlarge"
+
+      ## Health Checks
+      memory_reservation_high_threshold_percent = 75
+      memory_reservation_low_threshold_percent  = 50
+      health_check_type                         = "EC2"
+
+      ## EBS Encryption
+      ebs_encryption = true
+      kms_key_arn    = module.kms_key.key_arn
+
+      ## Service
+      ec2_service_enabled = true
+      ec2_awsvpc_enabled  = true
+      desired_count       = 10
+      propagate_tags      = "TASK_DEFINITION"
+      lb_subnet           = module.subnets.public_subnet_id
+      scheduling_strategy = "REPLICA"
+      container_name      = "nginx"
+      container_port      = 80
+      target_type         = "ip"
+
+      ## Task Definition
+      ec2_td_enabled  = true
+      network_mode    = "awsvpc"
+      ipc_mode        = "task"
+      pid_mode        = "task"
+      cpu             = 512
+      memory          = 1024
+    }
+    ```
+
+  ### Network Mode BRIDGE Example
+  Here is an example of how you can use this module in your inventory structure:
+    ```hcl
+    module "ecs" {
+      source = "git::https://github.com/clouddrove/terraform-aws-ecs.git?ref=tags/0.12.0"
+      
+      ## Tags
+      name        = "ecs-bridge"
+      application = "clouddrove"
+      environment = "test"
+      label_order = ["environment", "application", "name"]
+      enabled     = false      # set to true after VPC, Subnets, Security Groups, KMS Key and Key Pair gets created
+
+      ## Network
+      vpc_id                        = module.vpc.vpc_id
+      subnet_ids                    = module.subnets.private_subnet_id
+      additional_security_group_ids = [module.sg_ssh.security_group_ids]
+
+      ## EC2
+      autoscaling_policies_enabled = true  
+      key_name                     = module.keypair.name
+      image_id                     = "ami-001085c9389955bb6"
+      instance_type                = "t3.medium"
+      min_size                     = 1
+      max_size                     = 3
+      volume_size                  = 8
+      lb_security_group            = module.sg_lb.security_group_ids
+      service_lb_security_group    = [module.sg_lb.security_group_ids]
+      cloudwatch_prefix            = "ecs-logs"
+  
+      ## ECS Cluster
+      ec2_cluster_enabled  = true  
+      ecs_settings_enabled = "enabled"
+
+      ## Schedule
+      scheduler_down = "0 19 * * MON-FRI"
+      scheduler_up   = "0 6 * * MON-FRI"
+
+      schedule_enabled   = true
+      min_size_scaledown = 0
+      max_size_scaledown = 1
+      scale_up_desired   = 2
+      scale_down_desired = 1
+
+      spot_schedule_enabled   = true
+      spot_min_size_scaledown = 0
+      spot_max_size_scaledown = 1
+      spot_scale_up_desired   = 2
+      spot_scale_down_desired = 1
+
+      ## Spot
+      spot_enabled  = true
+      spot_min_size = 1
+      spot_max_size = 3
+
+      spot_price         = "0.10"
+      spot_instance_type = "m5.xlarge"
+
+      ## Health Checks
+      memory_reservation_high_threshold_percent = 75
+      memory_reservation_low_threshold_percent  = 50
+      health_check_type                         = "EC2"
+
+      ## EBS Encryption
+      ebs_encryption = true
+      kms_key_arn    = module.kms_key.key_arn
+
+      ## Service
+      ec2_service_enabled = true
+      desired_count       = 6
+      propagate_tags      = "TASK_DEFINITION"
+      lb_subnet           = module.subnets.public_subnet_id
+      scheduling_strategy = "REPLICA"
+      container_name      = "nginx"
+      container_port      = 80
+      target_type         = "instance"
+
+      ## Task Definition
+      ec2_td_enabled  = true
+      network_mode    = "bridge"
+      ipc_mode        = "task"
+      pid_mode        = "task"
+      cpu             = 512
+      memory          = 1024
+    }
+    ```
+
+  ### Fargate Example
+  Here is an example of how you can use this module in your inventory structure:
+    ```hcl
+    module "ecs" {
+      source = "git::https://github.com/clouddrove/terraform-aws-ecs.git?ref=tags/0.12.0"
+      
+      ## Tags
+      name        = "ecs-fargate"
+      application = "clouddrove"
+      environment = "test"
+      label_order = ["environment", "application", "name"]
+      enabled     = false      # set to true after VPC, Subnets, Security Groups, KMS Key and Key Pair gets created
+
+      ## Network
+      vpc_id     = module.vpc.vpc_id
+      subnet_ids = module.subnets.private_subnet_id
+
+      ## EC2
+      lb_security_group         = module.sg_lb.security_group_ids
+      service_lb_security_group = [module.sg_lb.security_group_ids]
+
+      ## Fargate Cluster
+      fargate_cluster_enabled = true  
+      ecs_settings_enabled    = "enabled"
+      fargate_cluster_cp      = ["FARGATE", "FARGATE_SPOT"]
+
+      ## Service
+      fargate_service_enabled          = true
+      desired_count                    = 4
+      assign_public_ip                 = true
+      propagate_tags                   = "TASK_DEFINITION"
+      lb_subnet                        = module.subnets.public_subnet_id
+      scheduling_strategy              = "REPLICA"
+      container_name                   = "nginx"
+      container_port                   = 80
+      target_type                      = "ip"
+      weight_simple                    = 1
+      weight_spot                      = 2
+      base                             = 1
+      fargate_capacity_provider_simple = "FARGATE"
+      fargate_capacity_provider_spot   = "FARGATE_SPOT"
+
+      ## Task Definition
+      fargate_td_enabled = true
+      cpu                = 512
+      memory             = 1024
+    }
+    ```

@@ -114,7 +114,7 @@ module "ecs" {
   subnet_ids                    = module.subnets.private_subnet_id
   additional_security_group_ids = [module.sg_ssh.security_group_ids]
 
-  ## Ec2
+  ## EC2
   autoscaling_policies_enabled = true  
   key_name                     = module.keypair.name
   image_id                     = "ami-001085c9389955bb6"

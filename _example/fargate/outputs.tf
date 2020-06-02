@@ -1,6 +1,6 @@
-output "ecs_cluster_id" {
-  description = "The id of the ecs cluster"
-  value       = module.ecs.fargate_cluster_id
+output "ecs_cluster_name" {
+  description = "The name of the ecs cluster"
+  value       = module.ecs.fargate_cluster_name
 }
 
 output "ecs_cluster_arn" {
