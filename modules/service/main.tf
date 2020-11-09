@@ -6,7 +6,7 @@ locals {
 #Module      : label
 #Description : Terraform module to create consistent naming for multiple names.
 module "labels" {
-  source      = "git::https://github.com/clouddrove/terraform-labels.git?ref=tags/0.12.0"
+  source      = "git::https://github.com/clouddrove/terraform-labels.git?ref=tags/0.13.0"
   name        = var.name
   application = var.application
   environment = var.environment
@@ -19,8 +19,8 @@ module "labels" {
 #Module      : IAM ROLE
 #Description : IAM Role for for ECS Service.
 module "iam-role-ecs" {
-  source = "git::https://github.com/clouddrove/terraform-aws-iam-role.git?ref=tags/0.12.3"
-
+  source             = "clouddrove/iam-role/aws"
+  version            = "0.13.0"
   name               = format("%s-lb", var.name)
   application        = var.application
   environment        = var.environment
@@ -47,7 +47,8 @@ data "aws_iam_policy_document" "assume_role_ecs" {
 #Module      : LOAD BALANCER
 #Description : Application load balancer for front end of EC2 containers.
 module "lb" {
-  source                     = "git::https://github.com/clouddrove/terraform-aws-alb.git?ref=tags/0.12.5"
+  source                     = "clouddrove/alb/aws"
+  version                    = "0.13.0"
   name                       = format("%s-alb", var.name)
   application                = var.application
   environment                = var.environment
@@ -60,7 +61,6 @@ module "lb" {
   enable                     = var.enabled
   target_type                = var.target_type
   vpc_id                     = var.vpc_id
-  target_group_protocol      = "HTTP"
   target_group_port          = 80
   http_enabled               = false
   https_enabled              = true
@@ -69,6 +69,25 @@ module "lb" {
   listener_type              = "forward"
   listener_protocol          = "HTTP"
   listener_ssl_policy        = ""
+  target_groups = [
+    {
+      backend_protocol     = "HTTP"
+      backend_port         = 80
+      target_type          = "instance"
+      deregistration_delay = 300
+      health_check = {
+        enabled             = true
+        interval            = 30
+        path                = "/"
+        port                = "traffic-port"
+        healthy_threshold   = 3
+        unhealthy_threshold = 3
+        timeout             = 10
+        protocol            = "HTTP"
+        matcher             = "200-399"
+      }
+    }
+  ]
 }
 
 #Module      : ECS SERVICE

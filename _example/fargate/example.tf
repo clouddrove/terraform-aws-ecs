@@ -3,8 +3,8 @@ provider "aws" {
 }
 
 module "vpc" {
-  source = "git::https://github.com/clouddrove/terraform-aws-vpc.git?ref=tags/0.12.5"
-
+  source      = "clouddrove/vpc/aws"
+  version     = "0.13.0"
   name        = "vpc"
   application = "clouddrove"
   environment = "test"
@@ -15,8 +15,8 @@ module "vpc" {
 }
 
 module "subnets" {
-  source = "git::https://github.com/clouddrove/terraform-aws-subnet.git?ref=tags/0.12.6"
-
+  source      = "clouddrove/subnet/aws"
+  version     = "0.13.0"
   name        = "subnets"
   application = "clouddrove"
   environment = "test"
@@ -29,11 +29,12 @@ module "subnets" {
   cidr_block          = module.vpc.vpc_cidr_block
   type                = "public-private"
   igw_id              = module.vpc.igw_id
+  ipv6_cidr_block     = module.vpc.ipv6_cidr_block
 }
 
 module "sg_lb" {
-  source = "git::https://github.com/clouddrove/terraform-aws-security-group.git?ref=tags/0.12.4"
-
+  source      = "clouddrove/security-group/aws"
+  version     = "0.13.0"
   name        = "sg-lb"
   application = "clouddrove"
   environment = "test"
@@ -48,11 +49,11 @@ module "ecs" {
   source = "../../"
 
   ## Tags
-  name        = "ecs-fargate"
+  name        = "fargate"
   application = "clouddrove"
   environment = "test"
   label_order = ["environment", "application", "name"]
-  enabled     = false # set to true after VPC, Subnets and Security Groups gets created
+  enabled     = true # set to true after VPC, Subnets and Security Groups gets created
 
   ## Network
   vpc_id     = module.vpc.vpc_id

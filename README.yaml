@@ -17,7 +17,7 @@ github_repo: clouddrove/terraform-aws-ecs
 # Badges to display
 badges:
   - name: "Terraform"
-    image: "https://img.shields.io/badge/Terraform-v0.12-green"
+    image: "https://img.shields.io/badge/Terraform-v0.13-green"
     url: "https://www.terraform.io"
   - name: "Licence"
     image: "https://img.shields.io/badge/License-MIT-blue.svg"
@@ -37,8 +37,8 @@ usage : |-
   Here is an example of how you can use this module in your inventory structure:
     ```hcl
     module "ecs" {
-      source = "git::https://github.com/clouddrove/terraform-aws-ecs.git?ref=tags/0.12.0"
-
+      source = "clouddrove/ecs/aws"
+      version= "0.13.0"
       ## Tags
       name        = "ecs-awsvpc"
       application = "clouddrove"
@@ -127,8 +127,8 @@ usage : |-
   Here is an example of how you can use this module in your inventory structure:
     ```hcl
     module "ecs" {
-      source = "git::https://github.com/clouddrove/terraform-aws-ecs.git?ref=tags/0.12.0"
-
+      source = "clouddrove/ecs/aws"
+      version= "0.13.0"
       ## Tags
       name        = "ecs-bridge"
       application = "clouddrove"
@@ -216,8 +216,8 @@ usage : |-
   Here is an example of how you can use this module in your inventory structure:
     ```hcl
     module "ecs" {
-      source = "git::https://github.com/clouddrove/terraform-aws-ecs.git?ref=tags/0.12.0"
-
+      source = "clouddrove/ecs/aws"
+      version= "0.13.0"
       ## Tags
       name        = "ecs-fargate"
       application = "clouddrove"

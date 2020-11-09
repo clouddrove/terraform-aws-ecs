@@ -471,3 +471,8 @@ variable "spot_schedule_enabled" {
   default     = false
   description = "AutoScaling Schedule resource for spot"
 }
+variable "desired_capacity" {
+  type        = number
+  default     = 1
+  description = "desired capacity"
+}

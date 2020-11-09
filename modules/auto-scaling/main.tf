@@ -4,7 +4,7 @@
 #Module      : label
 #Description : Terraform module to create consistent naming for multiple names.
 module "labels" {
-  source = "git::https://github.com/clouddrove/terraform-labels.git?ref=tags/0.12.0"
+  source = "git::https://github.com/clouddrove/terraform-labels.git?ref=tags/0.13.0"
 
   name        = var.name
   application = var.application
@@ -19,8 +19,8 @@ module "labels" {
 #Module      : IAM ROLE
 #Description : IAM Role for EC2 Instance.
 module "iam-role" {
-  source = "git::https://github.com/clouddrove/terraform-aws-iam-role.git?ref=tags/0.12.3"
-
+  source             = "clouddrove/iam-role/aws"
+  version            = "0.13.0"
   name               = format("%s-instance-role", var.name)
   application        = var.application
   environment        = var.environment
@@ -198,6 +198,7 @@ resource "aws_autoscaling_group" "default" {
   wait_for_capacity_timeout = var.wait_for_capacity_timeout
   protect_from_scale_in     = var.protect_from_scale_in
   service_linked_role_arn   = var.service_linked_role_arn
+  desired_capacity          = var.desired_capacity
   launch_configuration      = join("", aws_launch_configuration.default.*.name)
 
   tags = flatten([
@@ -243,6 +244,7 @@ resource "aws_autoscaling_group" "spot" {
   wait_for_capacity_timeout = var.wait_for_capacity_timeout
   protect_from_scale_in     = var.protect_from_scale_in
   service_linked_role_arn   = var.service_linked_role_arn
+  desired_capacity          = var.desired_capacity
   launch_configuration      = join("", aws_launch_configuration.spot.*.name)
 
   tags = flatten([
