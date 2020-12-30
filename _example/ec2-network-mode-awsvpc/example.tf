@@ -3,32 +3,33 @@ provider "aws" {
 }
 
 module "keypair" {
-  source = "git::https://github.com/clouddrove/terraform-aws-keypair.git?ref=tags/0.12.2"
+  source = "git::https://github.com/clouddrove/terraform-aws-keypair.git?ref=0.14"
 
   key_path        = "~/.ssh/id_rsa.pub"
   key_name        = "main-key"
   enable_key_pair = true
+
 }
 
 module "vpc" {
-  source = "git::https://github.com/clouddrove/terraform-aws-vpc.git?ref=tags/0.12.5"
+  source = "git::https://github.com/clouddrove/terraform-aws-vpc.git?ref=0.14"
 
   name        = "vpc"
-  application = "clouddrove"
+  repository  = "https://github.com/clouddrove/terraform-aws-vpc"
   environment = "test"
-  label_order = ["environment", "application", "name"]
+  label_order = ["name", "environment"]
   vpc_enabled = true
 
   cidr_block = "10.10.0.0/16"
 }
 
 module "subnets" {
-  source = "git::https://github.com/clouddrove/terraform-aws-subnet.git?ref=tags/0.12.6"
+  source = "git::https://github.com/clouddrove/terraform-aws-subnet.git?ref=0.14"
 
   name        = "subnets"
-  application = "clouddrove"
+  repository  = "https://github.com/clouddrove/terraform-aws-subnet"
   environment = "test"
-  label_order = ["environment", "application", "name"]
+  label_order = ["name", "environment"]
   enabled     = true
 
   nat_gateway_enabled = true
@@ -40,12 +41,12 @@ module "subnets" {
 }
 
 module "sg_ssh" {
-  source = "git::https://github.com/clouddrove/terraform-aws-security-group.git?ref=tags/0.12.4"
+  source = "git::https://github.com/clouddrove/terraform-aws-security-group.git?ref=0.14"
 
   name        = "sg-ssh"
-  application = "clouddrove"
+  repository  = "https://github.com/clouddrove/terraform-aws-security-group"
   environment = "test"
-  label_order = ["environment", "application", "name"]
+  label_order = ["name", "environment"]
 
   vpc_id        = module.vpc.vpc_id
   allowed_ip    = ["49.36.129.122/32", module.vpc.vpc_cidr_block]
@@ -53,12 +54,12 @@ module "sg_ssh" {
 }
 
 module "sg_lb" {
-  source = "git::https://github.com/clouddrove/terraform-aws-security-group.git?ref=tags/0.12.4"
+  source = "git::https://github.com/clouddrove/terraform-aws-security-group.git?ref=0.14"
 
   name        = "sg-lb"
-  application = "clouddrove"
+  repository  = "https://github.com/clouddrove/terraform-aws-security-group"
   environment = "test"
-  label_order = ["environment", "application", "name"]
+  label_order = ["name", "environment"]
 
   vpc_id        = module.vpc.vpc_id
   allowed_ip    = ["0.0.0.0/0"]
@@ -66,12 +67,12 @@ module "sg_lb" {
 }
 
 module "kms_key" {
-  source = "git::https://github.com/clouddrove/terraform-aws-kms.git?ref=tags/0.12.5"
+  source = "git::https://github.com/clouddrove/terraform-aws-kms.git?ref=0.14"
 
   name        = "kms"
-  application = "clouddrove"
+  repository  = "https://github.com/clouddrove/terraform-aws-kms"
   environment = "test"
-  label_order = ["environment", "application", "name"]
+  label_order = ["name", "environment"]
   enabled     = true
 
   description              = "KMS key for ecs"
@@ -104,9 +105,9 @@ module "ecs" {
 
   ## Tags
   name        = "ecs-awsvpc"
-  application = "clouddrove"
+  repository  = "https://github.com/clouddrove/terraform-aws-ecs"
   environment = "test"
-  label_order = ["environment", "application", "name"]
+  label_order = ["name", "environment"]
   enabled     = false # set to true after VPC, Subnets, Security Groups, KMS Key and Key Pair gets created
 
   ## Network

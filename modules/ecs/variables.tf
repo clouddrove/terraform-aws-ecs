@@ -6,10 +6,16 @@ variable "name" {
   description = "Name  (e.g. `app` or `cluster`)."
 }
 
-variable "application" {
+variable "repository" {
   type        = string
   default     = ""
-  description = "Application (e.g. `cd` or `clouddrove`)."
+  description = "Terraform current module repo"
+
+  validation {
+    # regex(...) fails if it cannot find a match
+    condition     = can(regex("^https://", var.repository))
+    error_message = "The module-repo value must be a valid Git repo link."
+  }
 }
 
 variable "environment" {
@@ -38,8 +44,8 @@ variable "tags" {
 
 variable "managedby" {
   type        = string
-  default     = "anmol@clouddrove.com"
-  description = "ManagedBy, eg 'CloudDrove' or 'AnmolNagpal'."
+  default     = "hello@clouddrove.com"
+  description = "ManagedBy, eg 'CloudDrove'."
 }
 
 variable "delimiter" {
@@ -71,11 +77,13 @@ variable "fargate_cluster_enabled" {
 variable "fargate_cluster_cp" {
   type        = list(string)
   default     = []
+  sensitive   = true
   description = "The name of the capacity provider."
 }
 
 variable "ecs_settings_enabled" {
   type        = string
   default     = ""
+  sensitive   = true
   description = "Whether ecs setting is enabled or not."
 }

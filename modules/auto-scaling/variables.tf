@@ -6,10 +6,16 @@ variable "name" {
   description = "Name  (e.g. `app` or `cluster`)."
 }
 
-variable "application" {
+variable "repository" {
   type        = string
   default     = ""
-  description = "Application (e.g. `cd` or `clouddrove`)."
+  description = "Terraform current module repo"
+
+  validation {
+    # regex(...) fails if it cannot find a match
+    condition     = can(regex("^https://", var.repository))
+    error_message = "The module-repo value must be a valid Git repo link."
+  }
 }
 
 variable "environment" {
@@ -38,8 +44,8 @@ variable "tags" {
 
 variable "managedby" {
   type        = string
-  default     = "anmol@clouddrove.com"
-  description = "ManagedBy, eg 'CloudDrove' or 'AnmolNagpal'."
+  default     = "hello@clouddrove.com"
+  description = "ManagedBy, eg 'CloudDrove'."
 }
 
 variable "delimiter" {
@@ -59,12 +65,14 @@ variable "enabled" {
 variable "image_id" {
   type        = string
   default     = ""
+  sensitive   = true
   description = "The EC2 image ID to launch."
 }
 
 variable "instance_type" {
   type        = string
   default     = "t2.medium"
+  sensitive   = true
   description = "Instance type to launch."
 }
 
@@ -119,6 +127,7 @@ variable "min_size" {
 variable "subnet_ids" {
   type        = list(string)
   default     = []
+  sensitive   = true
   description = "A list of subnet IDs to launch resources in."
 }
 
@@ -149,12 +158,14 @@ variable "force_delete" {
 variable "load_balancers" {
   type        = list(string)
   default     = []
+  sensitive   = true
   description = "A list of elastic load balancer names to add to the autoscaling group names. Only valid for classic load balancers. For ALBs, use `target_group_arns` instead."
 }
 
 variable "target_group_arns" {
   type        = list(string)
   default     = []
+  sensitive   = true
   description = "A list of aws_alb_target_group ARNs, for use with Application Load Balancing."
 }
 
@@ -167,6 +178,7 @@ variable "termination_policies" {
 variable "suspended_processes" {
   type        = list(string)
   default     = []
+  sensitive   = true
   description = "A list of processes to suspend for the AutoScaling Group. The allowed values are `Launch`, `Terminate`, `HealthCheck`, `ReplaceUnhealthy`, `AZRebalance`, `AlarmNotification`, `ScheduledActions`, `AddToLoadBalancer`. Note that if you suspend either the `Launch` or `Terminate` process types, it can prevent your autoscaling group from functioning properly."
 }
 
@@ -203,6 +215,7 @@ variable "protect_from_scale_in" {
 variable "service_linked_role_arn" {
   type        = string
   default     = ""
+  sensitive   = true
   description = "The ARN of the service-linked role that the ASG will use to call other AWS services."
 }
 
@@ -329,18 +342,21 @@ variable "ebs_encryption" {
 variable "lb_security_group" {
   type        = string
   default     = ""
+  sensitive   = true
   description = "The LB security groups."
 }
 
 variable "vpc_id" {
   type        = string
   default     = ""
+  sensitive   = true
   description = "VPC ID for the EKS cluster."
 }
 
 variable "additional_security_group_ids" {
   type        = list(string)
   default     = []
+  sensitive   = true
   description = "Additional list of security groups that will be attached to the autoscaling group."
 }
 
@@ -353,6 +369,7 @@ variable "retention_in_days" {
 variable "kms_key_arn" {
   type        = string
   default     = ""
+  sensitive   = true
   description = "AWS Key Management Service (AWS KMS) customer master key (CMK) to use when creating the encrypted volume. encrypted must be set to true when this is set."
 }
 
