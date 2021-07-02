@@ -1,7 +1,7 @@
 module "auto-scaling" {
   source                                    = "./modules/auto-scaling"
   name                                      = var.name
- environment                               = var.environment
+  environment                               = var.environment
   managedby                                 = var.managedby
   delimiter                                 = var.delimiter
   label_order                               = var.label_order

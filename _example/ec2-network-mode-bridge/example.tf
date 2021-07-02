@@ -27,8 +27,8 @@ module "vpc" {
 }
 
 module "subnets" {
-  source  = "clouddrove/subnet/aws"
-  version = "0.15.0"
+  source      = "clouddrove/subnet/aws"
+  version     = "0.15.0"
   name        = "subnets"
   environment = "test"
   label_order = ["environment", "name"]
@@ -40,7 +40,7 @@ module "subnets" {
   cidr_block          = module.vpc.vpc_cidr_block
   type                = "public-private"
   igw_id              = module.vpc.igw_id
-  ipv6_cidr_block    = module.vpc.ipv6_cidr_block
+  ipv6_cidr_block     = module.vpc.ipv6_cidr_block
 
 }
 
