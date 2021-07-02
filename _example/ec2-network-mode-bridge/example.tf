@@ -3,32 +3,35 @@ provider "aws" {
 }
 
 module "keypair" {
-  source = "git::https://github.com/clouddrove/terraform-aws-keypair.git?ref=tags/0.12.2"
+  source  = "clouddrove/keypair/aws"
+  version = "0.15.0"
 
-  key_path        = "~/.ssh/id_rsa.pub"
-  key_name        = "main-key"
+  name        = "key"
+  environment = "test"
+  label_order = ["name", "environment"]
+
   enable_key_pair = true
+  public_key      = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDfjNc4A++/+8A60ZN+mTEj6M4Zmbiw7ypGjcK8utgOyoJ58uWIMt76VW46M6FIGVymwnqBm5PUgThzTPhwVpIc4kTw2Ko1CF4l8fhHNHr698NNTkpol5QvFiBZIgbTGF9RBJyYpGN1XupY4UCrwLBFb5Sigu42lCfb2/wpuAPk5LpoUhdvrDYyzxMdFy0AhIs+3my9D5jNs2rHywoYzcGfrEwi8tLHRqaV+nOI4URk7GenzAQWbUeKwosgSyVv4XnAFrtHMx2oUN5iqAMwFeZH67gw9BkATiF0ZhExCHGILcLZTNJP2N0= anmol@clouddrove-Lenov"
 }
 
 module "vpc" {
-  source = "git::https://github.com/clouddrove/terraform-aws-vpc.git?ref=tags/0.12.5"
+  source  = "clouddrove/vpc/aws"
+  version = "0.15.0"
 
   name        = "vpc"
-  application = "clouddrove"
   environment = "test"
-  label_order = ["environment", "application", "name"]
+  label_order = ["environment", "name"]
   vpc_enabled = true
 
   cidr_block = "10.10.0.0/16"
 }
 
 module "subnets" {
-  source = "git::https://github.com/clouddrove/terraform-aws-subnet.git?ref=tags/0.12.6"
-
+  source  = "clouddrove/subnet/aws"
+  version = "0.15.0"
   name        = "subnets"
-  application = "clouddrove"
   environment = "test"
-  label_order = ["environment", "application", "name"]
+  label_order = ["environment", "name"]
   enabled     = true
 
   nat_gateway_enabled = true
@@ -37,15 +40,17 @@ module "subnets" {
   cidr_block          = module.vpc.vpc_cidr_block
   type                = "public-private"
   igw_id              = module.vpc.igw_id
+  ipv6_cidr_block    = module.vpc.ipv6_cidr_block
+
 }
 
 module "sg_ssh" {
-  source = "git::https://github.com/clouddrove/terraform-aws-security-group.git?ref=tags/0.12.4"
+  source  = "clouddrove/security-group/aws"
+  version = "0.15.0"
 
   name        = "sg-ssh"
-  application = "clouddrove"
   environment = "test"
-  label_order = ["environment", "application", "name"]
+  label_order = ["environment", "name"]
 
   vpc_id        = module.vpc.vpc_id
   allowed_ip    = ["49.36.129.122/32", module.vpc.vpc_cidr_block]
@@ -53,12 +58,12 @@ module "sg_ssh" {
 }
 
 module "sg_lb" {
-  source = "git::https://github.com/clouddrove/terraform-aws-security-group.git?ref=tags/0.12.4"
+  source  = "clouddrove/security-group/aws"
+  version = "0.15.0"
 
   name        = "sg-lb"
-  application = "clouddrove"
   environment = "test"
-  label_order = ["environment", "application", "name"]
+  label_order = ["environment", "name"]
 
   vpc_id        = module.vpc.vpc_id
   allowed_ip    = ["0.0.0.0/0"]
@@ -66,22 +71,19 @@ module "sg_lb" {
 }
 
 module "kms_key" {
-  source = "git::https://github.com/clouddrove/terraform-aws-kms.git?ref=tags/0.12.5"
+  source  = "clouddrove/kms/aws"
+  version = "0.15.0"
 
   name        = "kms"
-  application = "clouddrove"
   environment = "test"
-  label_order = ["environment", "application", "name"]
-  enabled     = true
+  label_order = ["name", "environment"]
 
-  description              = "KMS key for ecs"
-  alias                    = "alias/ecs"
-  key_usage                = "ENCRYPT_DECRYPT"
-  customer_master_key_spec = "SYMMETRIC_DEFAULT"
-  deletion_window_in_days  = 7
-  is_enabled               = true
-  enable_key_rotation      = false
-  policy                   = data.aws_iam_policy_document.default.json
+  enabled                 = true
+  description             = "KMS key for cloudtrail"
+  deletion_window_in_days = 15
+  alias                   = "alias/cloudtrail_Name"
+  policy                  = data.aws_iam_policy_document.default.json
+
 }
 
 data "aws_iam_policy_document" "default" {
@@ -104,9 +106,8 @@ module "ecs" {
 
   ## Tags
   name        = "ecs-bridge"
-  application = "clouddrove"
   environment = "test"
-  label_order = ["environment", "application", "name"]
+  label_order = ["environment", "name"]
   enabled     = false # set to true after VPC, Subnets, Security Groups, KMS Key and Key Pair gets created
 
   ## Network

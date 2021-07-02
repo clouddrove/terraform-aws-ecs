@@ -1,8 +1,7 @@
 module "auto-scaling" {
   source                                    = "./modules/auto-scaling"
   name                                      = var.name
-  application                               = var.application
-  environment                               = var.environment
+ environment                               = var.environment
   managedby                                 = var.managedby
   delimiter                                 = var.delimiter
   label_order                               = var.label_order
@@ -57,7 +56,6 @@ module "auto-scaling" {
 module "ecs" {
   source                  = "./modules/ecs"
   name                    = var.name
-  application             = var.application
   environment             = var.environment
   managedby               = var.managedby
   delimiter               = var.delimiter
@@ -74,7 +72,6 @@ module "ecs" {
 module "service" {
   source                             = "./modules/service"
   name                               = var.name
-  application                        = var.application
   environment                        = var.environment
   managedby                          = var.managedby
   delimiter                          = var.delimiter
@@ -117,7 +114,6 @@ module "service" {
 module "task-definition" {
   source                   = "./modules/task-definition"
   name                     = var.name
-  application              = var.application
   environment              = var.environment
   managedby                = var.managedby
   delimiter                = var.delimiter

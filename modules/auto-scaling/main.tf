@@ -4,12 +4,11 @@
 #Module      : label
 #Description : Terraform module to create consistent naming for multiple names.
 module "labels" {
-  source = "git::https://github.com/clouddrove/terraform-labels.git?ref=tags/0.12.0"
+  source  = "clouddrove/labels/aws"
+  version = "0.15.0"
 
   name        = var.name
-  application = var.application
   environment = var.environment
-  tags        = var.tags
   enabled     = var.enabled
   managedby   = var.managedby
   attributes  = compact(concat(var.attributes, ["autoscaling"]))
@@ -19,10 +18,10 @@ module "labels" {
 #Module      : IAM ROLE
 #Description : IAM Role for EC2 Instance.
 module "iam-role" {
-  source = "git::https://github.com/clouddrove/terraform-aws-iam-role.git?ref=tags/0.12.3"
+  source  = "clouddrove/iam-role/aws"
+  version = "0.15.0"
 
   name               = format("%s-instance-role", var.name)
-  application        = var.application
   environment        = var.environment
   label_order        = var.label_order
   enabled            = var.enabled && var.fargate_cluster_enabled == false ? true : false

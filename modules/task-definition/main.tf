@@ -6,9 +6,10 @@ locals {
 #Module      : label
 #Description : Terraform module to create consistent naming for multiple names.
 module "labels" {
-  source      = "git::https://github.com/clouddrove/terraform-labels.git?ref=tags/0.12.0"
+  source  = "clouddrove/labels/aws"
+  version = "0.15.0"
+
   name        = var.name
-  application = var.application
   environment = var.environment
   managedby   = var.managedby
   delimiter   = var.delimiter
@@ -19,10 +20,10 @@ module "labels" {
 #Module      : IAM ROLE
 #Description : IAM Role for for ECS Task Definition.
 module "iam-role-td" {
-  source = "git::https://github.com/clouddrove/terraform-aws-iam-role.git?ref=tags/0.12.3"
+  source  = "clouddrove/iam-role/aws"
+  version = "0.15.0"
 
   name               = format("%s-td", var.name)
-  application        = var.application
   environment        = var.environment
   label_order        = var.label_order
   enabled            = var.enabled
