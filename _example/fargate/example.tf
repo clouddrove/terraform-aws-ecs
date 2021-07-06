@@ -3,24 +3,24 @@ provider "aws" {
 }
 
 module "vpc" {
-  source = "git::https://github.com/clouddrove/terraform-aws-vpc.git?ref=tags/0.12.5"
+  source  = "clouddrove/vpc/aws"
+  version = "0.15.0"
 
   name        = "vpc"
-  application = "clouddrove"
   environment = "test"
-  label_order = ["environment", "application", "name"]
+  label_order = ["environment", "name"]
   vpc_enabled = true
 
   cidr_block = "10.10.0.0/16"
 }
 
 module "subnets" {
-  source = "git::https://github.com/clouddrove/terraform-aws-subnet.git?ref=tags/0.12.6"
+  source  = "clouddrove/subnet/aws"
+  version = "0.15.0"
 
   name        = "subnets"
-  application = "clouddrove"
   environment = "test"
-  label_order = ["environment", "application", "name"]
+  label_order = ["environment", "name"]
   enabled     = true
 
   nat_gateway_enabled = true
@@ -32,12 +32,12 @@ module "subnets" {
 }
 
 module "sg_lb" {
-  source = "git::https://github.com/clouddrove/terraform-aws-security-group.git?ref=tags/0.12.4"
+  source  = "clouddrove/security-group/aws"
+  version = "0.15.0"
 
   name        = "sg-lb"
-  application = "clouddrove"
   environment = "test"
-  label_order = ["environment", "application", "name"]
+  label_order = ["environment", "name"]
 
   vpc_id        = module.vpc.vpc_id
   allowed_ip    = ["0.0.0.0/0"]
