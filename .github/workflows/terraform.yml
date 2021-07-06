@@ -125,6 +125,7 @@ jobs:
       - fmt
       - ec2-network-mode-awsvpc
       - ec2-network-mode-bridge
+      - fargate
     runs-on: ubuntu-latest
     steps:
       - name: 'Checkout'
