@@ -29,6 +29,8 @@ module "subnets" {
   cidr_block          = module.vpc.vpc_cidr_block
   type                = "public-private"
   igw_id              = module.vpc.igw_id
+  ipv6_cidr_block     = module.vpc.ipv6_cidr_block
+
 }
 
 module "sg_lb" {
