@@ -258,7 +258,7 @@ Here is an example of how you can use this module in your inventory structure:
     source = "git::https://github.com/clouddrove/terraform-aws-ecs.git?ref=tags/0.12.0"
 
     ## Tags
-    name        = "ecs-fargate"
+    name        = "ecs-fargate.go"
     application = "clouddrove"
     environment = "test"
     label_order = ["environment", "application", "name"]
@@ -297,7 +297,7 @@ Here is an example of how you can use this module in your inventory structure:
     fargate_td_enabled       = true
     cpu                      = 512
     memory                   = 1024
-    file_name                = "./td-fargate.json"
+    file_name                = "./td-fargate.go.json"
     container_log_group_name = "ec2-container-logs"
   }
   ```

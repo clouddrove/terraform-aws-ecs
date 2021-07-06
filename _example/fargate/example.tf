@@ -49,9 +49,8 @@ module "ecs" {
 
   ## Tags
   name        = "ecs-fargate"
-  application = "clouddrove"
   environment = "test"
-  label_order = ["environment", "application", "name"]
+  label_order = ["environment", "name"]
   enabled     = false # set to true after VPC, Subnets and Security Groups gets created
 
   ## Network
