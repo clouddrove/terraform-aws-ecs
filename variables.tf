@@ -6,6 +6,7 @@ variable "name" {
   description = "Name  (e.g. `app` or `cluster`)."
 }
 
+
 variable "repository" {
   type        = string
   default     = ""
@@ -28,6 +29,12 @@ variable "label_order" {
   type        = list(any)
   default     = []
   description = "Label order, e.g. `name`,`application`."
+}
+
+variable "repository" {
+  type        = string
+  default     = "https://github.com/clouddrove/terraform-aws-ecs"
+  description = "Terraform current module repo"
 }
 
 variable "attributes" {

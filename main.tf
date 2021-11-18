@@ -72,9 +72,8 @@ module "ecs" {
 }
 
 module "service" {
-  source = "./modules/service"
-  name   = var.name
-  //repository                         = var.repository
+  source                             = "./modules/service"
+  name                               = var.name
   environment                        = var.environment
   managedby                          = var.managedby
   delimiter                          = var.delimiter
@@ -117,7 +116,6 @@ module "service" {
 module "task-definition" {
   source = "./modules/task-definition"
   name   = var.name
-  // repository               = var.repository
   environment              = var.environment
   managedby                = var.managedby
   delimiter                = var.delimiter

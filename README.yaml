@@ -17,7 +17,7 @@ github_repo: clouddrove/terraform-aws-ecs
 # Badges to display
 badges:
   - name: "Terraform"
-    image: "https://img.shields.io/badge/Terraform-v0.14-green"
+    image: "https://img.shields.io/badge/Terraform-v0.15-green"
     url: "https://www.terraform.io"
   - name: "Licence"
     image: "https://img.shields.io/badge/License-MIT-blue.svg"
@@ -45,6 +45,7 @@ usage : |-
       repository  = "https://github.com/clouddrove/terraform-aws-ecs"
       environment = "test"
       label_order = ["name", "environment"]
+
       enabled     = false      # set to true after VPC, Subnets, Security Groups, KMS Key and Key Pair gets created
 
       ## Network
@@ -134,9 +135,11 @@ usage : |-
 
       ## Tags
       name        = "ecs-bridge"
+
       repository  = "https://github.com/clouddrove/terraform-aws-ecs"
       environment = "test"
       label_order = ["name", "environment"]
+
       enabled     = false      # set to true after VPC, Subnets, Security Groups, KMS Key and Key Pair gets created
 
       ## Network
@@ -228,6 +231,7 @@ usage : |-
       repository  = "https://github.com/clouddrove/terraform-aws-ecs"
       environment = "test"
       label_order = ["name", "environment"]
+
       enabled     = false      # set to true after VPC, Subnets, Security Groups, KMS Key and Key Pair gets created
 
       ## Network
