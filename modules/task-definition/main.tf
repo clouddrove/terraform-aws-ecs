@@ -8,7 +8,8 @@ locals {
 module "labels" {
   source  = "clouddrove/labels/aws"
   version = "0.15.0"
-  name        = var.name
+  name    = var.name
+  //application = var.application
   environment = var.environment
   managedby   = var.managedby
   delimiter   = var.delimiter

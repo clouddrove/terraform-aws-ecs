@@ -114,8 +114,8 @@ module "service" {
 }
 
 module "task-definition" {
-  source = "./modules/task-definition"
-  name   = var.name
+  source                   = "./modules/task-definition"
+  name                     = var.name
   environment              = var.environment
   managedby                = var.managedby
   delimiter                = var.delimiter
