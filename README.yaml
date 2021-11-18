@@ -37,7 +37,8 @@ usage : |-
   Here is an example of how you can use this module in your inventory structure:
     ```hcl
     module "ecs" {
-      source = "git::https://github.com/clouddrove/terraform-aws-ecs.git?ref=tags/0.12.0"
+      source  = "clouddrove/ecs/aws"
+      version = "0.15.1"
 
       ## Tags
       name        = "ecs-awsvpc"
@@ -127,7 +128,9 @@ usage : |-
   Here is an example of how you can use this module in your inventory structure:
     ```hcl
     module "ecs" {
-      source = "git::https://github.com/clouddrove/terraform-aws-ecs.git?ref=tags/0.12.0"
+      source  = "clouddrove/ecs/aws"
+      version = "0.15.1"
+
 
       ## Tags
       name        = "ecs-bridge"
@@ -216,7 +219,9 @@ usage : |-
   Here is an example of how you can use this module in your inventory structure:
     ```hcl
     module "ecs" {
-      source = "git::https://github.com/clouddrove/terraform-aws-ecs.git?ref=tags/0.12.0"
+      source  = "clouddrove/ecs/aws"
+      version = "0.15.1"
+
 
       ## Tags
       name        = "ecs-fargate"
