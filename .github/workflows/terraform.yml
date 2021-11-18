@@ -39,7 +39,7 @@ jobs:
         uses: 'clouddrove/github-actions@v9.0.1'
         with:
           actions_subcommand: 'init'
-          tf_actions_working_dir: ._example/ec2-network-mode-awsvpc
+          tf_actions_working_dir: ./_example/ec2-network-mode-awsvpc
 
       - name: 'Terraform validate'
         uses: 'clouddrove/github-actions@v9.0.1'
