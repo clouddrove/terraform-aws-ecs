@@ -13,11 +13,11 @@ jobs:
         uses: actions/checkout@v2.3.4
 
       - name: 'Terraform Format'
-        uses: 'clouddrove/github-actions@v8.0'
+        uses: 'clouddrove/github-actions@v9.0.1''
         with:
           actions_subcommand: 'fmt'
       - name: 'Terraform Format'
-        uses: 'clouddrove/github-actions@v8.0'
+        uses: 'clouddrove/github-actions@v9.0.1''
         with:
           actions_subcommand: 'fmt'
 
@@ -36,19 +36,19 @@ jobs:
           aws-region: us-east-2
 
       - name: 'Terraform init for ec2-network-mode-awsvpc'
-        uses: 'clouddrove/github-actions@v8.0'
+        uses: 'clouddrove/github-actions@v9.0.1''
         with:
           actions_subcommand: 'init'
           tf_actions_working_dir: ./_example/ec2-network-mode-awsvpc
 
       - name: 'Terraform validate for ec2-network-mode-awsvpc'
-        uses: 'clouddrove/github-actions@v8.0'
+        uses: 'clouddrove/github-actions@v9.0.1''
         with:
           actions_subcommand: 'validate'
           tf_actions_working_dir: ./_example/ec2-network-mode-awsvpc
 
       - name: 'Terraform plan for ec2-network-mode-awsvpc'
-        uses: 'clouddrove/github-actions@v8.0'
+        uses: 'clouddrove/github-actions@v9.0.1''
         with:
           actions_subcommand: 'plan'
           tf_actions_working_dir: ./_example/ec2-network-mode-awsvpc
@@ -68,19 +68,19 @@ jobs:
           aws-region: us-east-2
 
       - name: 'Terraform init for ec2-network-mode-bridge'
-        uses: 'clouddrove/github-actions@v8.0'
+        uses: 'clouddrove/github-actions@v9.0.1''
         with:
           actions_subcommand: 'init'
           tf_actions_working_dir: ./_example/ec2-network-mode-bridge
 
       - name: 'Terraform validate for ec2-network-mode-bridge'
-        uses: 'clouddrove/github-actions@v8.0'
+        uses: 'clouddrove/github-actions@v9.0.1''
         with:
           actions_subcommand: 'validate'
           tf_actions_working_dir: ./_example/ec2-network-mode-bridge
 
       - name: 'Terraform plan for ec2-network-mode-bridge'
-        uses: 'clouddrove/github-actions@v8.0'
+        uses: 'clouddrove/github-actions@v9.0.1''
         with:
           actions_subcommand: 'plan'
           tf_actions_working_dir: ./_example/ec2-network-mode-bridge
@@ -101,19 +101,19 @@ jobs:
           aws-region: us-east-2
 
       - name: 'Terraform init for fargate'
-        uses: 'clouddrove/github-actions@v8.0'
+        uses: 'clouddrove/github-actions@v9.0.1''
         with:
           actions_subcommand: 'init'
           tf_actions_working_dir: ./_example/fargate
 
       - name: 'Terraform validate for fargate'
-        uses: 'clouddrove/github-actions@v8.0'
+        uses: 'clouddrove/github-actions@v9.0.1''
         with:
           actions_subcommand: 'validate'
           tf_actions_working_dir: ./_example/fargate
 
       - name: 'Terraform plan for fargate'
-        uses: 'clouddrove/github-actions@v8.0'
+        uses: 'clouddrove/github-actions@v9.0.1''
         with:
           actions_subcommand: 'plan'
           tf_actions_working_dir: ./_example/fargate

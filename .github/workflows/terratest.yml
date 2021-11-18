@@ -23,7 +23,7 @@ jobs:
 
       - name: 'Terratest for ec2-network-mode-awsvpc'
         if: ${{ github.event.label.name == 'terratest' }}
-        uses: 'clouddrove/github-actions@v8.0'
+        uses: 'clouddrove/github-actions@v9.0.1''
         with:
           actions_subcommand: 'terratest'
           tf_actions_working_dir: '_test/ec2-network-mode-awsvpc'
@@ -32,7 +32,7 @@ jobs:
 
       - name: 'Terratest for ec2-network-mode-bridge'
         if: ${{ github.event.label.name == 'terratest' }}
-        uses: 'clouddrove/github-actions@v8.0'
+        uses: 'clouddrove/github-actions@v9.0.1''
         with:
           actions_subcommand: 'terratest'
           tf_actions_working_dir: '_test/ec2-network-mode-bridge'
@@ -42,7 +42,7 @@ jobs:
 
       - name: 'Terratest for fargate'
         if: ${{ github.event.label.name == 'terratest' }}
-        uses: 'clouddrove/github-actions@v8.0'
+        uses: 'clouddrove/github-actions@v9.0.1''
         with:
           actions_subcommand: 'terratest'
           tf_actions_working_dir: '_test/fargate'
