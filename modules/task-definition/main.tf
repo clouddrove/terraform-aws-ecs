@@ -8,8 +8,8 @@ locals {
 module "labels" {
   source  = "clouddrove/labels/aws"
   version = "0.15.0"
-
-  name        = var.name
+  name    = var.name
+  //application = var.application
   environment = var.environment
   managedby   = var.managedby
   delimiter   = var.delimiter
@@ -20,9 +20,8 @@ module "labels" {
 #Module      : IAM ROLE
 #Description : IAM Role for for ECS Task Definition.
 module "iam-role-td" {
-  source  = "clouddrove/iam-role/aws"
-  version = "0.15.0"
-
+  source             = "clouddrove/iam-role/aws"
+  version            = "0.15.0"
   name               = format("%s-td", var.name)
   environment        = var.environment
   label_order        = var.label_order

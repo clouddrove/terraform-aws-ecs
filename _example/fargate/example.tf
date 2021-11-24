@@ -7,8 +7,9 @@ module "vpc" {
   version = "0.15.0"
 
   name        = "vpc"
+  repository  = "https://github.com/clouddrove/terraform-aws-vpc"
   environment = "test"
-  label_order = ["environment", "name"]
+  label_order = ["name", "environment"]
   vpc_enabled = true
 
   cidr_block = "10.10.0.0/16"
@@ -19,8 +20,9 @@ module "subnets" {
   version = "0.15.0"
 
   name        = "subnets"
+  repository  = "https://github.com/clouddrove/terraform-aws-subnet"
   environment = "test"
-  label_order = ["environment", "name"]
+  label_order = ["name", "environment"]
   enabled     = true
 
   nat_gateway_enabled = true
@@ -30,16 +32,16 @@ module "subnets" {
   type                = "public-private"
   igw_id              = module.vpc.igw_id
   ipv6_cidr_block     = module.vpc.ipv6_cidr_block
-
 }
 
 module "sg_lb" {
   source  = "clouddrove/security-group/aws"
   version = "0.15.0"
 
-  name        = "sg-lb"
+  name        = "sglb"
+  repository  = "https://github.com/clouddrove/terraform-aws-security-group"
   environment = "test"
-  label_order = ["environment", "name"]
+  label_order = ["name", "environment"]
 
   vpc_id        = module.vpc.vpc_id
   allowed_ip    = ["0.0.0.0/0"]
@@ -51,9 +53,10 @@ module "ecs" {
 
   ## Tags
   name        = "ecs-fargate"
+  repository  = "https://github.com/clouddrove/terraform-aws-ecs"
   environment = "test"
-  label_order = ["environment", "name"]
-  enabled     = false # set to true after VPC, Subnets and Security Groups gets created
+  label_order = ["name", "environment"]
+  enabled     = true # set to true after VPC, Subnets and Security Groups gets created
 
   ## Network
   vpc_id     = module.vpc.vpc_id

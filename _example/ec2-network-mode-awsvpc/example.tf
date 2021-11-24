@@ -6,12 +6,11 @@ module "keypair" {
   source  = "clouddrove/keypair/aws"
   version = "0.15.0"
 
-  name        = "key"
-  environment = "test"
-  label_order = ["name", "environment"]
-
+  key_path        = "~/.ssh/id_rsa.pub"
+  public_key      = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDfjNc4A+atuEBaElnpQqFkBFgGc+kCslpXh/aKETl1Wh95tOy9IWHomegVxKB44OvB5s6I6HFwRa8MCpcAUnW3vD7hBwOv+PgJ0ZFUGYrl71doDHsWtfgoRhrKlhk2jjS7gOZrrYK2vg0859knhrmRQEm6snqFdZ6bLc6R/r0htgtgUx9mESZHfupL/lylOjBiEboQxpo1lp2MKEmksv5q+8A60ZN+mTEj6M4Zmbiw7ypGjcK8utgOyoJ58uWIMt76VW46M6FIGVymwnqBm5PUgThzTPhwVpIc4kTw2Ko1CF4l8fhHNHr698NNTkpol5QvFiBZIgbTGF9RBJyYpGN1XupY4UCrwLBFb5Sigu42lCfb2/wpuAPk5LpoUhdvrDYyzxMdFy0AhIs+3my9D5jNs2rHywoYzcGfrEwi8tLHRqaV+nOI4URk7GenzAQWbUeKwosgSyVv4XnAFrtHMx2oUN5iqAMwFeZH67gw9BkATiF0ZhExCHGILcLZTNJP2N0= anmol@clouddrove-Lenov"
+  key_name        = "main-key"
   enable_key_pair = true
-  public_key      = "ssh-rsa +atuEBaElnpQqFkBFgGc+kCslpXh///wpuAPk5LpoUhdvrDYyzxMdFy0AhIs+3my9D5jNs2rHywoYzcGfrEwi8tLHRqaV+nOI4URk7GenzAQWbUeKwosgSyVv4XnAFrtHMx2oUN5iqAMwFeZH67gw9BkATiF0ZhExCHGILcLZTNJP2N0= anmol@clouddrove-Lenov"
+
 }
 
 module "vpc" {
@@ -19,8 +18,9 @@ module "vpc" {
   version = "0.15.0"
 
   name        = "vpc"
+  repository  = "https://github.com/clouddrove/terraform-aws-vpc"
   environment = "test"
-  label_order = ["environment", "name"]
+  label_order = ["name", "environment"]
   vpc_enabled = true
 
   cidr_block = "10.10.0.0/16"
@@ -31,8 +31,9 @@ module "subnets" {
   version = "0.15.0"
 
   name        = "subnets"
+  repository  = "https://github.com/clouddrove/terraform-aws-subnet"
   environment = "test"
-  label_order = ["environment", "name"]
+  label_order = ["name", "environment"]
   enabled     = true
 
   nat_gateway_enabled = true
@@ -48,9 +49,10 @@ module "sg_ssh" {
   source  = "clouddrove/security-group/aws"
   version = "0.15.0"
 
-  name        = "sg-ssh"
+  name        = "sgssh"
+  repository  = "https://github.com/clouddrove/terraform-aws-security-group"
   environment = "test"
-  label_order = ["environment", "name"]
+  label_order = ["name", "environment"]
 
   vpc_id        = module.vpc.vpc_id
   allowed_ip    = ["49.36.129.122/32", module.vpc.vpc_cidr_block]
@@ -61,9 +63,10 @@ module "sg_lb" {
   source  = "clouddrove/security-group/aws"
   version = "0.15.0"
 
-  name        = "sg-lb"
+  name        = "sglb"
+  repository  = "https://github.com/clouddrove/terraform-aws-security-group"
   environment = "test"
-  label_order = ["environment", "name"]
+  label_order = ["name", "environment"]
 
   vpc_id        = module.vpc.vpc_id
   allowed_ip    = ["0.0.0.0/0"]
@@ -75,8 +78,9 @@ module "kms_key" {
   version = "0.15.0"
 
   name        = "kms"
+  repository  = "https://github.com/clouddrove/terraform-aws-kms"
   environment = "test"
-  label_order = ["environment", "name"]
+  label_order = ["name", "environment"]
   enabled     = true
 
   description              = "KMS key for ecs"
@@ -109,9 +113,10 @@ module "ecs" {
 
   ## Tags
   name        = "ecs-awsvpc"
+  repository  = "https://github.com/clouddrove/terraform-aws-ecs"
   environment = "test"
-  label_order = ["environment", "name"]
-  enabled     = false # set to true after VPC, Subnets, Security Groups, KMS Key and Key Pair gets created
+  label_order = ["name", "environment"]
+  enabled     = true # set to true after VPC, Subnets, Security Groups, KMS Key and Key Pair gets created
 
   ## Network
   vpc_id                        = module.vpc.vpc_id

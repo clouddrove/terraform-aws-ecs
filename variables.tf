@@ -6,6 +6,18 @@ variable "name" {
   description = "Name  (e.g. `app` or `cluster`)."
 }
 
+variable "repository" {
+  type        = string
+  default     = ""
+  description = "Terraform current module repo"
+
+  validation {
+    # regex(...) fails if it cannot find a match
+    condition     = can(regex("^https://", var.repository))
+    error_message = "The module-repo value must be a valid Git repo link."
+  }
+}
+
 variable "environment" {
   type        = string
   default     = ""
@@ -16,12 +28,6 @@ variable "label_order" {
   type        = list(any)
   default     = []
   description = "Label order, e.g. `name`,`application`."
-}
-
-variable "repository" {
-  type        = string
-  default     = "https://github.com/clouddrove/terraform-aws-ecs"
-  description = "Terraform current module repo"
 }
 
 variable "attributes" {
@@ -38,8 +44,8 @@ variable "tags" {
 
 variable "managedby" {
   type        = string
-  default     = "anmol@clouddrove.com"
-  description = "ManagedBy, eg 'CloudDrove' or 'AnmolNagpal'."
+  default     = "hello@clouddrove.com"
+  description = "ManagedBy, eg 'CloudDrove'."
 }
 
 variable "delimiter" {
@@ -59,6 +65,7 @@ variable "enabled" {
 variable "image_id" {
   type        = string
   default     = ""
+  sensitive   = true
   description = "The EC2 image ID to launch."
 }
 
@@ -71,12 +78,14 @@ variable "instance_type" {
 variable "key_name" {
   type        = string
   default     = ""
+  sensitive   = true
   description = "The SSH key name that should be used for the instance."
 }
 
 variable "security_group_ids" {
   type        = list(string)
   default     = []
+  sensitive   = true
   description = "A list of associated security group IDs."
 }
 
@@ -101,24 +110,28 @@ variable "min_size" {
 variable "subnet_ids" {
   type        = list(string)
   default     = []
+  sensitive   = true
   description = "A list of subnet IDs to launch resources in."
 }
 
 variable "health_check_type" {
   type        = string
   default     = "EC2"
+  sensitive   = true
   description = "Controls how health checking is done. Valid values are `EC2` or `ELB`."
 }
 
 variable "load_balancers" {
   type        = list(string)
   default     = []
+  sensitive   = true
   description = "A list of elastic load balancer names to add to the autoscaling group names. Only valid for classic load balancers. For ALBs, use `target_group_arns` instead."
 }
 
 variable "target_group_arns" {
   type        = list(string)
   default     = []
+  sensitive   = true
   description = "A list of aws_alb_target_group ARNs, for use with Application Load Balancing."
 }
 
@@ -174,10 +187,12 @@ variable "vpc_id" {
   type        = string
   default     = ""
   description = "VPC ID for the EKS cluster."
+  sensitive   = true
 }
 
 variable "additional_security_group_ids" {
   type        = list(string)
+  sensitive   = true
   default     = []
   description = "Additional list of security groups that will be attached to the autoscaling group."
 }
@@ -197,12 +212,14 @@ variable "cloudwatch_prefix" {
 variable "lb_security_group" {
   type        = string
   default     = ""
+  sensitive   = true
   description = "The LB security groups."
 }
 
 variable "kms_key_arn" {
   type        = string
   default     = ""
+  sensitive   = true
   description = "AWS Key Management Service (AWS KMS) customer master key (CMK) to use when creating the encrypted volume. encrypted must be set to true when this is set."
 }
 
@@ -455,12 +472,14 @@ variable "weight_spot" {
 variable "service_lb_security_group" {
   type        = list(string)
   default     = []
+  sensitive   = true
   description = "The service LB security groups."
 }
 
 variable "lb_subnet" {
   type        = list(string)
   default     = []
+  sensitive   = true
   description = "The subnet associated with the load balancer."
 }
 
@@ -481,6 +500,7 @@ variable "ec2_awsvpc_enabled" {
 variable "task_role_arn" {
   type        = string
   default     = ""
+  sensitive   = true
   description = "The ARN of IAM role that allows your Amazon ECS container task to make calls to other AWS services."
 }
 

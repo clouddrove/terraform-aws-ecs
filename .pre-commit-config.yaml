@@ -1,14 +1,18 @@
 repos:
 
-  - repo: https://github.com/gruntwork-io/pre-commit
-    rev: v0.1.12 # Get the latest from: https://github.com/gruntwork-io/pre-commit/releases
+  - repo: git://github.com/antonbabenko/pre-commit-terraform
+    rev: v1.45.0
+
+
+
     hooks:
       - id: terraform-fmt
       - id: shellcheck
       - id: tflint
 
-  - repo: git://github.com/pre-commit/pre-commit-hooks
-    rev: v4.0.1 # Use the ref you want to point at
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v3.4.0
     hooks:
       - id: end-of-file-fixer
       - id: trailing-whitespace

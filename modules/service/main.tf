@@ -48,9 +48,8 @@ data "aws_iam_policy_document" "assume_role_ecs" {
 #Module      : LOAD BALANCER
 #Description : Application load balancer for front end of EC2 containers.
 module "lb" {
-  source  = "clouddrove/alb/aws"
-  version = "0.15.0"
 
+  source                     = "git::https://github.com/clouddrove/terraform-aws-alb.git?ref=tags/0.12.5"
   name                       = format("%s-alb", var.name)
   environment                = var.environment
   label_order                = var.label_order
@@ -62,6 +61,7 @@ module "lb" {
   enable                     = var.enabled
   target_type                = var.target_type
   vpc_id                     = var.vpc_id
+  target_group_protocol      = "HTTP"
   target_group_port          = 80
   http_enabled               = false
   https_enabled              = true
@@ -69,6 +69,7 @@ module "lb" {
   target_id                  = []
   listener_type              = "forward"
   listener_protocol          = "HTTP"
+  listener_ssl_policy        = ""
 }
 
 #Module      : ECS SERVICE

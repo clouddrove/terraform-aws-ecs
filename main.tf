@@ -1,6 +1,7 @@
 module "auto-scaling" {
   source                                    = "./modules/auto-scaling"
   name                                      = var.name
+  repository                                = var.repository
   environment                               = var.environment
   managedby                                 = var.managedby
   delimiter                                 = var.delimiter
@@ -56,6 +57,7 @@ module "auto-scaling" {
 module "ecs" {
   source                  = "./modules/ecs"
   name                    = var.name
+  repository              = var.repository
   environment             = var.environment
   managedby               = var.managedby
   delimiter               = var.delimiter

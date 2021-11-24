@@ -6,10 +6,10 @@ locals {
 #Module      : label
 #Description : Terraform module to create consistent naming for multiple names.
 module "labels" {
-  source  = "clouddrove/labels/aws"
-  version = "0.15.0"
-
+  source      = "clouddrove/labels/aws"
+  version     = "0.15.0"
   name        = var.name
+  repository  = var.repository
   environment = var.environment
   managedby   = var.managedby
   delimiter   = var.delimiter

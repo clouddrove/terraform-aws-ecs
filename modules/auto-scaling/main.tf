@@ -8,6 +8,7 @@ module "labels" {
   version = "0.15.0"
 
   name        = var.name
+  repository  = var.repository
   environment = var.environment
   enabled     = var.enabled
   managedby   = var.managedby
@@ -22,6 +23,7 @@ module "iam-role" {
   version = "0.15.0"
 
   name               = format("%s-instance-role", var.name)
+  repository         = var.repository
   environment        = var.environment
   label_order        = var.label_order
   enabled            = var.enabled && var.fargate_cluster_enabled == false ? true : false
