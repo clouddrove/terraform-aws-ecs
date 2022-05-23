@@ -5,7 +5,7 @@ provider "aws" {
 module "keypair" {
   //source = "git::https://github.com/clouddrove/terraform-aws-keypair.git?ref=0.14"
   source          = "clouddrove/keypair/aws"
-  version         = "0.15.0"
+  version         = "1.0.1"
   key_path        = "~/.ssh/id_rsa.pub"
   public_key      = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDfjNc4A+atuEBaElnpQqFkBFgGc+kCslpXh/aKETl1Wh95tOy9IWHomegVxKB44OvB5s6I6HFwRa8MCpcAUnW3vD7hBwOv+PgJ0ZFUGYrl71doDHsWtfgoRhrKlhk2jjS7gOZrrYK2vg0859knhrmRQEm6snqFdZ6bLc6R/r0htgtgUx9mESZHfupL/lylOjBiEboQxpo1lp2MKEmksv5q+8A60ZN+mTEj6M4Zmbiw7ypGjcK8utgOyoJ58uWIMt76VW46M6FIGVymwnqBm5PUgThzTPhwVpIc4kTw2Ko1CF4l8fhHNHr698NNTkpol5QvFiBZIgbTGF9RBJyYpGN1XupY4UCrwLBFb5Sigu42lCfb2/wpuAPk5LpoUhdvrDYyzxMdFy0AhIs+3my9D5jNs2rHywoYzcGfrEwi8tLHRqaV+nOI4URk7GenzAQWbUeKwosgSyVv4XnAFrtHMx2oUN5iqAMwFeZH67gw9BkATiF0ZhExCHGILcLZTNJP2N0= anmol@clouddrove-Lenov"
   key_name        = "main-key"
@@ -14,7 +14,7 @@ module "keypair" {
 
 module "vpc" {
   source  = "clouddrove/vpc/aws"
-  version = "0.15.0"
+  version = "0.15.1"
   //source = "git::https://github.com/clouddrove/terraform-aws-vpc.git?ref=0.14"
 
   name        = "vpc"
@@ -28,7 +28,7 @@ module "vpc" {
 
 module "subnets" {
   source  = "clouddrove/subnet/aws"
-  version = "0.15.0"
+  version = "0.15.3"
 
   name        = "subnets"
   repository  = "https://github.com/clouddrove/terraform-aws-subnet"
@@ -47,7 +47,7 @@ module "subnets" {
 
 module "sg_ssh" {
   source  = "clouddrove/security-group/aws"
-  version = "0.15.0"
+  version = "1.0.1"
 
   name        = "sgssh"
   repository  = "https://github.com/clouddrove/terraform-aws-security-group"
@@ -61,7 +61,7 @@ module "sg_ssh" {
 
 module "sg_lb" {
   source  = "clouddrove/security-group/aws"
-  version = "0.15.0"
+  version = "1.0.1"
 
   name        = "sglb"
   repository  = "https://github.com/clouddrove/terraform-aws-security-group"
@@ -75,7 +75,7 @@ module "sg_lb" {
 
 module "kms_key" {
   source  = "clouddrove/kms/aws"
-  version = "0.15.0"
+  version = "1.0.1"
 
   name        = "kms"
   repository  = "https://github.com/clouddrove/terraform-aws-kms"
