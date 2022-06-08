@@ -23,8 +23,8 @@ badges:
     image: "https://img.shields.io/badge/License-APACHE-blue.svg"
     url: "LICENSE.md"
   - name: "static-checks"
-    image: "https://github.com/clouddrove/terraform-aws-kms/actions/workflows/terraform.yml/badge.svg"
-    url: "https://github.com/clouddrove/terraform-aws-kms/actions/workflows/terraform.yml"
+    image: "https://github.com/clouddrove/terraform-aws-ecs/actions/workflows/terraform.yml/badge.svg"
+    url: "https://github.com/clouddrove/terraform-aws-ecs/actions/workflows/terraform.yml"
 
 #  description of this project
 description: |-
@@ -41,7 +41,7 @@ usage : |-
     ```hcl
     module "ecs" {
       source  = "clouddrove/ecs/aws"
-      version = "0.15.1"
+      version = "1.0.1"
 
       ## Tags
       name        = "ecs-awsvpc"
@@ -133,7 +133,7 @@ usage : |-
     ```hcl
     module "ecs" {
       source  = "clouddrove/ecs/aws"
-      version = "0.15.1"
+      version = "1.0.1"
 
 
       ## Tags
@@ -226,7 +226,7 @@ usage : |-
     ```hcl
     module "ecs" {
       source  = "clouddrove/ecs/aws"
-      version = "0.15.1"
+      version = "1.0.1"
 
 
       ## Tags
