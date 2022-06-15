@@ -14,10 +14,13 @@
 <p align="center">
 
 <a href="https://www.terraform.io">
-  <img src="https://img.shields.io/badge/Terraform-v0.15-green" alt="Terraform">
+  <img src="https://img.shields.io/badge/Terraform-v1.1.7-green" alt="Terraform">
 </a>
 <a href="LICENSE.md">
-  <img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="Licence">
+  <img src="https://img.shields.io/badge/License-APACHE-blue.svg" alt="Licence">
+</a>
+<a href="https://github.com/clouddrove/terraform-aws-ecs/actions/workflows/terraform.yml">
+  <img src="https://github.com/clouddrove/terraform-aws-ecs/actions/workflows/terraform.yml/badge.svg" alt="static-checks">
 </a>
 
 
@@ -51,7 +54,7 @@ We have [*fifty plus terraform modules*][terraform_modules]. A few of them are c
 
 This module has a few dependencies: 
 
-- [Terraform 0.13](https://learn.hashicorp.com/terraform/getting-started/install.html)
+- [Terraform 1.x.x](https://learn.hashicorp.com/terraform/getting-started/install.html)
 - [Go](https://golang.org/doc/install)
 - [github.com/stretchr/testify/assert](https://github.com/stretchr/testify)
 - [github.com/gruntwork-io/terratest/modules/terraform](https://github.com/gruntwork-io/terratest)
@@ -73,11 +76,14 @@ Here is an example of how you can use this module in your inventory structure:
   ```hcl
   module "ecs" {
     source  = "clouddrove/ecs/aws"
-    version = "0.15.0"
+    version = "1.0.1"
+
     ## Tags
     name        = "ecs-awsvpc"
+    repository  = "https://github.com/clouddrove/terraform-aws-ecs"
     environment = "test"
-    label_order = ["environment", "name"]
+    label_order = ["name", "environment"]
+
     enabled     = false      # set to true after VPC, Subnets, Security Groups, KMS Key and Key Pair gets created
 
     ## Network
@@ -161,12 +167,17 @@ Here is an example of how you can use this module in your inventory structure:
 Here is an example of how you can use this module in your inventory structure:
   ```hcl
   module "ecs" {
-    source = "git::https://github.com/clouddrove/terraform-aws-ecs.git?ref=tags/0.12.0"
+    source  = "clouddrove/ecs/aws"
+    version = "1.0.1"
+
 
     ## Tags
     name        = "ecs-bridge"
+
+    repository  = "https://github.com/clouddrove/terraform-aws-ecs"
     environment = "test"
-    label_order = ["environment", "name"]
+    label_order = ["name", "environment"]
+
     enabled     = false      # set to true after VPC, Subnets, Security Groups, KMS Key and Key Pair gets created
 
     ## Network
@@ -249,12 +260,16 @@ Here is an example of how you can use this module in your inventory structure:
 Here is an example of how you can use this module in your inventory structure:
   ```hcl
   module "ecs" {
-    source = "git::https://github.com/clouddrove/terraform-aws-ecs.git?ref=tags/0.12.0"
+    source  = "clouddrove/ecs/aws"
+    version = "1.0.1"
+
 
     ## Tags
     name        = "ecs-fargate"
+    repository  = "https://github.com/clouddrove/terraform-aws-ecs"
     environment = "test"
-    label_order = ["environment", "name"]
+    label_order = ["name", "environment"]
+
     enabled     = false      # set to true after VPC, Subnets, Security Groups, KMS Key and Key Pair gets created
 
     ## Network
@@ -347,7 +362,7 @@ Here is an example of how you can use this module in your inventory structure:
 | lb\_security\_group | The LB security groups. | `string` | `""` | no |
 | lb\_subnet | The subnet associated with the load balancer. | `list(string)` | `[]` | no |
 | load\_balancers | A list of elastic load balancer names to add to the autoscaling group names. Only valid for classic load balancers. For ALBs, use `target_group_arns` instead. | `list(string)` | `[]` | no |
-| managedby | ManagedBy, eg 'CloudDrove' or 'AnmolNagpal'. | `string` | `"anmol@clouddrove.com"` | no |
+| managedby | ManagedBy, eg 'CloudDrove'. | `string` | `"hello@clouddrove.com"` | no |
 | max\_size | The maximum size of the autoscale group. | `number` | `3` | no |
 | max\_size\_scaledown | The maximum size for the Auto Scaling group. Default 0. Set to -1 if you don't want to change the minimum size at the scheduled time. | `number` | `1` | no |
 | memory | The amount (in MiB) of memory used by the task. If the requires\_compatibilities is FARGATE this field is required. | `number` | `1024` | no |
@@ -360,7 +375,7 @@ Here is an example of how you can use this module in your inventory structure:
 | pid\_mode | The process namespace to use for the containers in the task. The valid values are host and task. (It does not support for fargate launch type). | `string` | `"task"` | no |
 | platform\_version | The platform version on which to run your service. | `string` | `"LATEST"` | no |
 | propagate\_tags | Specifies whether to propagate the tags from the task definition or the service to the tasks. The valid values are SERVICE and TASK\_DEFINITION. | `string` | `"SERVICE"` | no |
-| repository | Terraform current module repo | `string` | `"https://github.com/clouddrove/terraform-aws-ecs"` | no |
+| repository | Terraform current module repo | `string` | `""` | no |
 | retention\_in\_days | The retention of cloud watch logs. | `number` | `30` | no |
 | scale\_down\_desired | The number of Amazon EC2 instances that should be running in the group. | `number` | `0` | no |
 | scale\_up\_desired | The number of Amazon EC2 instances that should be running in the group. | `number` | `0` | no |
