@@ -21,7 +21,7 @@ module "labels" {
 #Description : IAM Role for for ECS Task Definition.
 module "iam-role-td" {
   source             = "clouddrove/iam-role/aws"
-  version            = "0.15.0"
+  version            = "1.3.0"
   name               = format("%s-td", var.name)
   environment        = var.environment
   label_order        = var.label_order
