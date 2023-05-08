@@ -49,7 +49,7 @@ data "aws_iam_policy_document" "assume_role_ecs" {
 #Description : Application load balancer for front end of EC2 containers.
 module "lb" {
 
-  source                     = "git::https://github.com/clouddrove/terraform-aws-alb.git?ref=tags/0.12.5"
+  source                     = "git::https://github.com/clouddrove/terraform-aws-alb.git?ref=tags/1.3.0"
   name                       = format("%s-alb", var.name)
   environment                = var.environment
   label_order                = var.label_order
