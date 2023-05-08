@@ -21,7 +21,7 @@ module "labels" {
 #Description : IAM Role for for ECS Service.
 module "iam-role-ecs" {
   source  = "clouddrove/iam-role/aws"
-  version = "0.15.0"
+  version = "1.3.0"
 
   name               = format("%s-lb", var.name)
   environment        = var.environment
