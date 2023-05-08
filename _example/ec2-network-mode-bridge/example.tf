@@ -14,7 +14,7 @@ module "keypair" {
 
 module "vpc" {
   source  = "clouddrove/vpc/aws"
-  version = "0.15.1"
+  version = "1.3.0"
   //source = "git::https://github.com/clouddrove/terraform-aws-vpc.git?ref=0.14"
 
   name        = "vpc"
