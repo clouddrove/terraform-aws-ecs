@@ -62,7 +62,6 @@ module "lb" {
   enable                     = var.enabled
   target_type                = var.target_type
   vpc_id                     = var.vpc_id
-  target_group_protocol      = "HTTP"
   target_group_port          = 80
   http_enabled               = false
   https_enabled              = true
@@ -70,7 +69,6 @@ module "lb" {
   target_id                  = []
   listener_type              = "forward"
   listener_protocol          = "HTTP"
-  listener_ssl_policy        = ""
 }
 
 #Module      : ECS SERVICE
