@@ -4,7 +4,7 @@ provider "aws" {
 
 module "vpc" {
   source  = "clouddrove/vpc/aws"
-  version = "0.15.0"
+  version = "1.3.0"
 
   name        = "vpc"
   repository  = "https://github.com/clouddrove/terraform-aws-vpc"
@@ -17,7 +17,7 @@ module "vpc" {
 
 module "subnets" {
   source  = "clouddrove/subnet/aws"
-  version = "0.15.0"
+  version = "1.3.0"
 
   name        = "subnets"
   repository  = "https://github.com/clouddrove/terraform-aws-subnet"
@@ -36,7 +36,7 @@ module "subnets" {
 
 module "sg_lb" {
   source  = "clouddrove/security-group/aws"
-  version = "0.15.0"
+  version = "1.3.0"
 
   name        = "sglb"
   repository  = "https://github.com/clouddrove/terraform-aws-security-group"

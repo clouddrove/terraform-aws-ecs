@@ -5,7 +5,7 @@
 #Description : Terraform module to create consistent naming for multiple names.
 module "labels" {
   source  = "clouddrove/labels/aws"
-  version = "0.15.0"
+  version = "1.3.0"
 
   name        = var.name
   repository  = var.repository
@@ -20,7 +20,7 @@ module "labels" {
 #Description : IAM Role for EC2 Instance.
 module "iam-role" {
   source  = "clouddrove/iam-role/aws"
-  version = "0.15.0"
+  version = "1.3.0"
 
   name               = format("%s-instance-role", var.name)
   repository         = var.repository

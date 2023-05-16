@@ -7,7 +7,7 @@ locals {
 #Description : Terraform module to create consistent naming for multiple names.
 module "labels" {
   source  = "clouddrove/labels/aws"
-  version = "0.15.0"
+  version = "1.3.0"
 
   name        = var.name
   environment = var.environment
@@ -21,7 +21,7 @@ module "labels" {
 #Description : IAM Role for for ECS Service.
 module "iam-role-ecs" {
   source  = "clouddrove/iam-role/aws"
-  version = "0.15.0"
+  version = "1.3.0"
 
   name               = format("%s-lb", var.name)
   environment        = var.environment
@@ -48,8 +48,9 @@ data "aws_iam_policy_document" "assume_role_ecs" {
 #Module      : LOAD BALANCER
 #Description : Application load balancer for front end of EC2 containers.
 module "lb" {
+  source  = "clouddrove/alb/aws"
+  version = "1.3.0"
 
-  source                     = "git::https://github.com/clouddrove/terraform-aws-alb.git?ref=tags/0.12.5"
   name                       = format("%s-alb", var.name)
   environment                = var.environment
   label_order                = var.label_order
