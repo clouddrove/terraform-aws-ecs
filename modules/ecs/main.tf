@@ -34,12 +34,16 @@ resource "aws_ecs_cluster" "ec2" {
 #Description : ECS Cluster for maintaining docker containers on Fargate launch type.
 resource "aws_ecs_cluster" "fargate" {
   count              = local.fargate_enabled ? 1 : 0
-  capacity_providers = var.fargate_cluster_cp
+#  capacity_providers = var.fargate_cluster_cp
   name               = module.labels.id
   tags               = module.labels.tags
 
-  setting {
-    name  = "containerInsights"
-    value = var.ecs_settings_enabled
-  }
+}
+
+resource "aws_ecs_cluster_capacity_providers" "example" {
+  count        = local.fargate_enabled ? 1 : 0
+  cluster_name = join("", aws_ecs_cluster.fargate.*.name)
+
+  capacity_providers = var.fargate_cluster_cp
+
 }

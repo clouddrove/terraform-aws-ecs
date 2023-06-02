@@ -201,14 +201,11 @@ resource "aws_autoscaling_group" "default" {
   service_linked_role_arn   = var.service_linked_role_arn
   launch_configuration      = join("", aws_launch_configuration.default.*.name)
 
-  tags = flatten([
-    for key in keys(module.labels.tags) :
-    {
-      key                 = key
-      value               = module.labels.tags[key]
-      propagate_at_launch = true
-    }
-  ])
+  tag {
+    key                 = "name"
+    value               = module.labels.id
+    propagate_at_launch = true
+  }
 
   lifecycle {
     create_before_destroy = true
@@ -246,14 +243,20 @@ resource "aws_autoscaling_group" "spot" {
   service_linked_role_arn   = var.service_linked_role_arn
   launch_configuration      = join("", aws_launch_configuration.spot.*.name)
 
-  tags = flatten([
-    for key in keys(module.labels.tags) :
-    {
-      key                 = key
-      value               = module.labels.tags[key]
-      propagate_at_launch = true
-    }
-  ])
+#  tags = flatten([
+#    for key in keys(module.labels.tags) :
+#    {
+#      key                 = key
+#      value               = module.labels.tags[key]
+#      propagate_at_launch = true
+#    }
+#  ])
+
+  tag {
+    key                 = "name"
+    value               = module.labels.id
+    propagate_at_launch = true
+  }
 
   lifecycle {
     create_before_destroy = true
