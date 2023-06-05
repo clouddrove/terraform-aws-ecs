@@ -5,8 +5,9 @@ locals {
   autoscaling_enabled_spot_schedule = var.enabled && var.autoscaling_policies_enabled && var.spot_enabled && var.spot_schedule_enabled ? true : false
 }
 
-#Module      : AUTOSCALING POLICY UP
-#Description : Provides an AutoScaling Scaling Policy resource.
+##-----------------------------------------------------------------------------
+## aws_autoscaling_policy. Provides an AutoScaling Scaling Policy resource.
+##-----------------------------------------------------------------------------
 resource "aws_autoscaling_policy" "scale_up" {
   count                  = local.autoscaling_enabled ? 1 : 0
   name                   = format("%s%sscale%sup", module.labels.id, var.delimiter, var.delimiter)
@@ -17,8 +18,9 @@ resource "aws_autoscaling_policy" "scale_up" {
   autoscaling_group_name = join("", aws_autoscaling_group.default.*.name)
 }
 
-#Module      : AUTOSCALING POLICY UP
-#Description : Provides an AutoScaling Scaling Policy resource.
+##-----------------------------------------------------------------------------
+## aws_autoscaling_policy. Provides an AutoScaling Scaling Policy resource.
+##-----------------------------------------------------------------------------
 resource "aws_autoscaling_policy" "scale_up_spot" {
   count                  = local.spot_autoscaling_enabled ? 1 : 0
   name                   = format("%s%sscale%sup-spot", module.labels.id, var.delimiter, var.delimiter)
@@ -41,8 +43,9 @@ resource "aws_autoscaling_policy" "scale_down" {
   autoscaling_group_name = join("", aws_autoscaling_group.default.*.name)
 }
 
-#Module      : AUTOSCALING POLICY DOWN
-#Description : Provides an AutoScaling Scaling Policy resource.
+##-----------------------------------------------------------------------------
+## aws_autoscaling_policy. Provides an AutoScaling Scaling Policy resource.
+##-----------------------------------------------------------------------------
 resource "aws_autoscaling_policy" "scale_down_spot" {
   count                  = local.spot_autoscaling_enabled ? 1 : 0
   name                   = format("%s%sscale%sdown-spot", module.labels.id, var.delimiter, var.delimiter)
@@ -53,8 +56,9 @@ resource "aws_autoscaling_policy" "scale_down_spot" {
   autoscaling_group_name = join("", aws_autoscaling_group.spot.*.name)
 }
 
-#Module      : CLOUDWATCH METRIC ALARM MEMORY HIGH
-#Description : Provides a CloudWatch Metric Alarm resource.
+##-----------------------------------------------------------------------------
+## creates Cloudwatch Alarm on AWS for monitoring AWS services.
+##-----------------------------------------------------------------------------
 resource "aws_cloudwatch_metric_alarm" "memory_high" {
   count      = local.autoscaling_enabled ? 1 : 0
   alarm_name = format("%s%smemory%sreservation%shigh", module.labels.id, var.delimiter, var.delimiter, var.delimiter)
@@ -76,8 +80,9 @@ resource "aws_cloudwatch_metric_alarm" "memory_high" {
   alarm_actions     = [join("", aws_autoscaling_policy.scale_up.*.arn)]
 }
 
-#Module      : CLOUDWATCH METRIC ALARM MEMORY HIGH
-#Description : Provides a CloudWatch Metric Alarm resource.
+##-----------------------------------------------------------------------------
+## creates Cloudwatch Alarm on AWS for monitoring AWS services.
+##-----------------------------------------------------------------------------
 resource "aws_cloudwatch_metric_alarm" "memory_high_spot" {
   count      = local.spot_autoscaling_enabled ? 1 : 0
   alarm_name = format("%s%smemory%sreservation%shigh-spot", module.labels.id, var.delimiter, var.delimiter, var.delimiter)
@@ -99,8 +104,9 @@ resource "aws_cloudwatch_metric_alarm" "memory_high_spot" {
   alarm_actions     = [join("", aws_autoscaling_policy.scale_up_spot.*.arn)]
 }
 
-#Module      : CLOUDWATCH METRIC ALARM MEMORY LOW
-#Description : Provides a CloudWatch Metric Alarm resource.
+##-----------------------------------------------------------------------------
+## creates Cloudwatch Alarm on AWS for monitoring AWS services.
+##-----------------------------------------------------------------------------
 resource "aws_cloudwatch_metric_alarm" "memory_low" {
   count               = local.autoscaling_enabled ? 1 : 0
   alarm_name          = format("%s%smemory%sreservation%slow", module.labels.id, var.delimiter, var.delimiter, var.delimiter)
@@ -121,8 +127,9 @@ resource "aws_cloudwatch_metric_alarm" "memory_low" {
   alarm_actions     = [join("", aws_autoscaling_policy.scale_down.*.arn)]
 }
 
-#Module      : CLOUDWATCH METRIC ALARM MEMORY LOW
-#Description : Provides a CloudWatch Metric Alarm resource.
+##-----------------------------------------------------------------------------
+## creates Cloudwatch Alarm on AWS for monitoring AWS services.
+##-----------------------------------------------------------------------------
 resource "aws_cloudwatch_metric_alarm" "memory_low_spot" {
   count               = local.spot_autoscaling_enabled ? 1 : 0
   alarm_name          = format("%s%smemory%sreservation%slow-spot", module.labels.id, var.delimiter, var.delimiter, var.delimiter)
@@ -143,8 +150,9 @@ resource "aws_cloudwatch_metric_alarm" "memory_low_spot" {
   alarm_actions     = [join("", aws_autoscaling_policy.scale_down_spot.*.arn)]
 }
 
-#Module      : AWS AUTOSCALING SCHEDULE
-#Description : Provides an AutoScaling Schedule resource.
+##-----------------------------------------------------------------------------
+## aws_autoscaling_schedule. Provides an AutoScaling Schedule resource.
+##-----------------------------------------------------------------------------
 resource "aws_autoscaling_schedule" "scale_down" {
   count                  = local.autoscaling_enabled_schedule ? 1 : 0
   autoscaling_group_name = aws_autoscaling_group.default[0].name
@@ -155,8 +163,9 @@ resource "aws_autoscaling_schedule" "scale_down" {
   recurrence             = var.scheduler_down
 }
 
-#Module      : AWS AUTOSCALING SCHEDULE
-#Description : Provides an AutoScaling Schedule resource.
+##-----------------------------------------------------------------------------
+## aws_autoscaling_schedule. Provides an AutoScaling Schedule resource.
+##-----------------------------------------------------------------------------
 resource "aws_autoscaling_schedule" "scale_up" {
   count                  = local.autoscaling_enabled_schedule ? 1 : 0
   autoscaling_group_name = aws_autoscaling_group.default[0].name
@@ -167,8 +176,9 @@ resource "aws_autoscaling_schedule" "scale_up" {
   recurrence             = var.scheduler_up
 }
 
-#Module      : AWS AUTOSCALING SCHEDULE
-#Description : Provides an AutoScaling Schedule resource.
+##-----------------------------------------------------------------------------
+## aws_autoscaling_schedule. Provides an AutoScaling Schedule resource.
+##-----------------------------------------------------------------------------
 resource "aws_autoscaling_schedule" "spot_scaledown" {
   count                  = local.autoscaling_enabled_spot_schedule ? 1 : 0
   autoscaling_group_name = aws_autoscaling_group.spot[0].name
@@ -179,8 +189,9 @@ resource "aws_autoscaling_schedule" "spot_scaledown" {
   recurrence             = var.scheduler_down
 }
 
-#Module      : AWS AUTOSCALING SCHEDULE
-#Description : Provides an AutoScaling Schedule resource.
+##-----------------------------------------------------------------------------
+## aws_autoscaling_schedule. Provides an AutoScaling Schedule resource.
+##-----------------------------------------------------------------------------
 resource "aws_autoscaling_schedule" "spot_scaleup" {
   count                  = local.autoscaling_enabled_spot_schedule ? 1 : 0
   autoscaling_group_name = aws_autoscaling_group.spot[0].name

@@ -3,8 +3,9 @@ locals {
   fargate_enabled = var.enabled && var.fargate_service_enabled ? true : false
 }
 
-#Module      : label
-#Description : Terraform module to create consistent naming for multiple names.
+##-----------------------------------------------------------------------------
+## Labels module callled that will be used for naming and tags.
+##-----------------------------------------------------------------------------
 module "labels" {
   source  = "clouddrove/labels/aws"
   version = "1.3.0"
@@ -17,8 +18,9 @@ module "labels" {
   label_order = var.label_order
 }
 
-#Module      : IAM ROLE
-#Description : IAM Role for for ECS Service.
+##-----------------------------------------------------
+## When your trusted identities assume IAM roles, they are granted only the permissions scoped by those IAM roles.
+##-----------------------------------------------------
 module "iam-role-ecs" {
   source  = "clouddrove/iam-role/aws"
   version = "1.3.0"
@@ -45,8 +47,9 @@ data "aws_iam_policy_document" "assume_role_ecs" {
   }
 }
 
-#Module      : LOAD BALANCER
-#Description : Application load balancer for front end of EC2 containers.
+##-----------------------------------------------------
+## Application Load Balancer (ALB) is a fully managed layer 7 load balancing service that load balances incoming traffic across multiple targets, such as Amazon EC2 instances.
+##-----------------------------------------------------
 module "lb" {
   source  = "clouddrove/alb/aws"
   version = "1.3.0"
@@ -71,8 +74,9 @@ module "lb" {
   listener_protocol          = "HTTP"
 }
 
-#Module      : ECS SERVICE
-#Description : ECS Service for automating the task deployment on EC2.
+##-----------------------------------------------------
+## aws_ecs_service. An Amazon ECS service allows you to run and maintain a specified number of instances of a task definition simultaneously in an Amazon ECS cluster.
+##-----------------------------------------------------
 resource "aws_ecs_service" "ec2" {
   count                              = local.ec2_enabled ? 1 : 0
   name                               = module.labels.id
@@ -116,8 +120,9 @@ resource "aws_ecs_service" "ec2" {
   ]
 }
 
-#Module      : ECS SERVICE
-#Description : ECS Service for automating the task deployment on Fargate.
+##-----------------------------------------------------
+## aws_ecs_service. An Amazon ECS service allows you to run and maintain a specified number of instances of a task definition simultaneously in an Amazon ECS cluster.
+##-----------------------------------------------------
 resource "aws_ecs_service" "fargate" {
   count                              = local.fargate_enabled ? 1 : 0
   name                               = module.labels.id

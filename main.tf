@@ -1,3 +1,6 @@
+##-----------------------------------------------------------------------------
+## auto-scaling module call.
+##-----------------------------------------------------------------------------
 module "auto-scaling" {
   source                                    = "./modules/auto-scaling"
   name                                      = var.name
@@ -54,6 +57,9 @@ module "auto-scaling" {
   cluster_name                              = module.ecs.ec2_name
 }
 
+##-----------------------------------------------------------------------------
+## ecs module call.
+##-----------------------------------------------------------------------------
 module "ecs" {
   source                  = "./modules/ecs"
   name                    = var.name
@@ -71,6 +77,9 @@ module "ecs" {
   fargate_cluster_cp      = var.fargate_cluster_cp
 }
 
+##-----------------------------------------------------------------------------
+## service module call.
+##-----------------------------------------------------------------------------
 module "service" {
   source                             = "./modules/service"
   name                               = var.name
@@ -113,6 +122,9 @@ module "service" {
   network_mode                       = var.network_mode
 }
 
+##-----------------------------------------------------------------------------
+## task-definition module call.
+##-----------------------------------------------------------------------------
 module "task-definition" {
   source                   = "./modules/task-definition"
   name                     = var.name

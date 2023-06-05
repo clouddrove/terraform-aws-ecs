@@ -3,8 +3,9 @@ locals {
   fargate_enabled = var.enabled && var.fargate_cluster_enabled ? true : false
 }
 
-#Module      : label
-#Description : Terraform module to create consistent naming for multiple names.
+##-----------------------------------------------------------------------------
+## Labels module callled that will be used for naming and tags.
+##-----------------------------------------------------------------------------
 module "labels" {
   source      = "clouddrove/labels/aws"
   version     = "1.3.0"
@@ -17,8 +18,9 @@ module "labels" {
   label_order = var.label_order
 }
 
-#Module      : ECS CLUSTER
-#Description : ECS Cluster for maintaining docker containers on EC2 launch type.
+##-----------------------------------------------------------------------------
+## An Amazon ECS cluster groups together tasks, and services, and allows for shared capacity and common configurations.
+##-----------------------------------------------------------------------------
 resource "aws_ecs_cluster" "ec2" {
   count = local.ec2_enabled ? 1 : 0
   name  = module.labels.id
@@ -30,8 +32,9 @@ resource "aws_ecs_cluster" "ec2" {
   }
 }
 
-#Module      : ECS CLUSTER
-#Description : ECS Cluster for maintaining docker containers on Fargate launch type.
+##-----------------------------------------------------------------------------
+## An Amazon ECS cluster groups together tasks, and services, and allows for shared capacity and common configurations.
+##-----------------------------------------------------------------------------
 resource "aws_ecs_cluster" "fargate" {
   count = local.fargate_enabled ? 1 : 0
   name  = module.labels.id
