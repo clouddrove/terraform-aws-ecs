@@ -3,8 +3,9 @@ locals {
   fargate_enabled = var.enabled && var.fargate_td_enabled ? true : false
 }
 
-#Module      : label
-#Description : Terraform module to create consistent naming for multiple names.
+##-----------------------------------------------------------------------------
+## Labels module callled that will be used for naming and tags.
+##-----------------------------------------------------------------------------
 module "labels" {
   source  = "clouddrove/labels/aws"
   version = "1.3.0"
@@ -17,8 +18,9 @@ module "labels" {
   label_order = var.label_order
 }
 
-#Module      : IAM ROLE
-#Description : IAM Role for for ECS Task Definition.
+##-----------------------------------------------------
+## When your trusted identities assume IAM roles, they are granted only the permissions scoped by those IAM roles.
+##-----------------------------------------------------
 module "iam-role-td" {
   source             = "clouddrove/iam-role/aws"
   version            = "1.3.0"
@@ -44,8 +46,9 @@ data "aws_iam_policy_document" "assume_role_td" {
   }
 }
 
-#Module      : ECS TASK DEFINITION
-#Description : ECS task definition to deploy on EC2.
+##-----------------------------------------------------
+## aws_ecs_task_definition. Manages a revision of an ECS task definition to be used in aws_ecs_service .
+##-----------------------------------------------------
 resource "aws_ecs_task_definition" "ec2" {
   count                    = local.ec2_enabled ? 1 : 0
   family                   = module.labels.id
@@ -61,8 +64,9 @@ resource "aws_ecs_task_definition" "ec2" {
   tags                     = module.labels.tags
 }
 
-#Module      : CLOUD WATCH LOG GROUP
-#Description : Cloud watch log group for container logs.
+##-----------------------------------------------------
+## Each separate source of logs in CloudWatch Logs makes up a separate log stream. A log group is a group of log streams that share the same retention, monitoring, and access control settings.
+##-----------------------------------------------------
 resource "aws_cloudwatch_log_group" "ec2-container" {
   count             = local.ec2_enabled ? 1 : 0
   name              = var.container_log_group_name
@@ -71,8 +75,9 @@ resource "aws_cloudwatch_log_group" "ec2-container" {
   tags              = module.labels.tags
 }
 
-#Module      : ECS TASK DEFINITION
-#Description : ECS task definition to deploy on Fargate.
+##-----------------------------------------------------
+## aws_ecs_task_definition. Manages a revision of an ECS task definition to be used in aws_ecs_service .
+##-----------------------------------------------------
 resource "aws_ecs_task_definition" "fargate" {
   count                    = local.fargate_enabled ? 1 : 0
   family                   = module.labels.id
@@ -86,8 +91,9 @@ resource "aws_ecs_task_definition" "fargate" {
   tags                     = module.labels.tags
 }
 
-#Module      : CLOUD WATCH LOG GROUP
-#Description : Cloud watch log group for container logs.
+##-----------------------------------------------------
+## Each separate source of logs in CloudWatch Logs makes up a separate log stream. A log group is a group of log streams that share the same retention, monitoring, and access control settings.
+##-----------------------------------------------------
 resource "aws_cloudwatch_log_group" "fargate-container" {
   count             = local.fargate_enabled ? 1 : 0
   name              = var.container_log_group_name

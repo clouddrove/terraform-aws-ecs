@@ -1,8 +1,6 @@
-## Managed By : CloudDrove
-## Copyright @ CloudDrove. All Right Reserved.
-
-#Module      : label
-#Description : Terraform module to create consistent naming for multiple names.
+##-----------------------------------------------------------------------------
+## Labels module callled that will be used for naming and tags.
+##-----------------------------------------------------------------------------
 module "labels" {
   source  = "clouddrove/labels/aws"
   version = "1.3.0"
@@ -16,8 +14,9 @@ module "labels" {
   label_order = var.label_order
 }
 
-#Module      : IAM ROLE
-#Description : IAM Role for EC2 Instance.
+##-----------------------------------------------------
+## When your trusted identities assume IAM roles, they are granted only the permissions scoped by those IAM roles.
+##-----------------------------------------------------
 module "iam-role" {
   source  = "clouddrove/iam-role/aws"
   version = "1.3.0"
@@ -72,16 +71,18 @@ data "aws_iam_policy_document" "iam_policy_ec2" {
   }
 }
 
-#Module      : IAM INSTANCE PROFILE
-#Description : IAM instance profile for ECS Instance.
+##-----------------------------------------------------
+## instance profile is a container for an IAM role that you can use to pass role information to an Amazon EC2 instance when the instance starts
+##-----------------------------------------------------
 resource "aws_iam_instance_profile" "default" {
   count = var.enabled && var.fargate_cluster_enabled == false ? 1 : 0
   name  = format("%s-instance-profile", module.labels.id)
   role  = module.iam-role.name
 }
 
-#Module      : SECURITY GROUP
-#Description : Provides a security group resource.
+##-----------------------------------------------------
+## aws_security_group. Provides a security group resource.
+##-----------------------------------------------------
 resource "aws_security_group" "default" {
   count       = var.enabled ? 1 : 0
   name        = module.labels.id
@@ -90,9 +91,10 @@ resource "aws_security_group" "default" {
   tags        = module.labels.tags
 }
 
-#Module      : SECURITY GROUP RULE EGRESS
-#Description : Provides a security group rule resource. Represents a single egress group rule,
-#              which can be added to external Security Groups.
+##-----------------------------------------------------
+## Provides a security group rule resource. Represents a single egress group rule,
+## which can be added to external Security Groups.
+##-----------------------------------------------------
 resource "aws_security_group_rule" "egress" {
   count             = var.enabled ? 1 : 0
   description       = "Allow all egress traffic"
@@ -104,9 +106,10 @@ resource "aws_security_group_rule" "egress" {
   type              = "egress"
 }
 
-#Module      : SECURITY GROUP RULE INGRESS
-#Description : Provides a security group rule resource. Represents a single egress group rule,
-#              which can be added to external Security Groups.
+##-----------------------------------------------------
+## Provides a security group rule resource. Represents a single egress group rule,
+## which can be added to external Security Groups.
+##-----------------------------------------------------
 resource "aws_security_group_rule" "ingress_alb" {
   count                    = var.enabled ? 1 : 0
   description              = "Allow instances to receive traffic from ALB"
@@ -128,9 +131,9 @@ data "template_file" "ec2" {
   }
 }
 
-#Module      : LAUNCH CONFIGURATION
-#Description : Provides an EC2 launch template resource. Can be used to create instances or
-#              auto scaling groups.
+##-----------------------------------------------------
+##  Provides a resource to create a new launch configuration, used for autoscaling groups.
+##-----------------------------------------------------
 resource "aws_launch_configuration" "default" {
   count = local.autoscaling_enabled ? 1 : 0
 
@@ -153,6 +156,9 @@ resource "aws_launch_configuration" "default" {
   }
 }
 
+##-----------------------------------------------------
+##  Provides a resource to create a new launch configuration, used for autoscaling groups.
+##-----------------------------------------------------
 resource "aws_launch_configuration" "spot" {
   count = local.spot_autoscaling_enabled ? 1 : 0
 
@@ -176,8 +182,10 @@ resource "aws_launch_configuration" "spot" {
   }
 }
 
-#Module      : AUTOSCALING GROUP
-#Description : Provides an AutoScaling Group resource.
+##-----------------------------------------------------
+##  aws_autoscaling_group. Provides an Auto Scaling Group resource.
+## Note: You must specify either launch_configuration , launch_template , or mixed_instances_policy.
+##-----------------------------------------------------
 resource "aws_autoscaling_group" "default" {
   count = local.autoscaling_enabled ? 1 : 0
 
@@ -201,14 +209,11 @@ resource "aws_autoscaling_group" "default" {
   service_linked_role_arn   = var.service_linked_role_arn
   launch_configuration      = join("", aws_launch_configuration.default.*.name)
 
-  tags = flatten([
-    for key in keys(module.labels.tags) :
-    {
-      key                 = key
-      value               = module.labels.tags[key]
-      propagate_at_launch = true
-    }
-  ])
+  tag {
+    key                 = "name"
+    value               = module.labels.id
+    propagate_at_launch = true
+  }
 
   lifecycle {
     create_before_destroy = true
@@ -221,8 +226,10 @@ resource "aws_autoscaling_group" "default" {
   ]
 }
 
-#Module      : AUTOSCALING GROUP
-#Description : Provides an AutoScaling Group resource.
+##-----------------------------------------------------
+##  aws_autoscaling_group. Provides an Auto Scaling Group resource.
+## Note: You must specify either launch_configuration , launch_template , or mixed_instances_policy.
+##-----------------------------------------------------
 resource "aws_autoscaling_group" "spot" {
   count = local.spot_autoscaling_enabled ? 1 : 0
 
@@ -246,14 +253,11 @@ resource "aws_autoscaling_group" "spot" {
   service_linked_role_arn   = var.service_linked_role_arn
   launch_configuration      = join("", aws_launch_configuration.spot.*.name)
 
-  tags = flatten([
-    for key in keys(module.labels.tags) :
-    {
-      key                 = key
-      value               = module.labels.tags[key]
-      propagate_at_launch = true
-    }
-  ])
+  tag {
+    key                 = "name"
+    value               = module.labels.id
+    propagate_at_launch = true
+  }
 
   lifecycle {
     create_before_destroy = true

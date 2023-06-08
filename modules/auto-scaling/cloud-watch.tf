@@ -1,5 +1,6 @@
-#Module      : CLOUD WATCH LOG GROUP
-#Description : Cloud watch log group for logs.
+##-----------------------------------------------------------------------------
+## Amazon CloudWatch Logs lets you monitor and troubleshoot your systems and applications using your existing system, application and custom log files.
+##-----------------------------------------------------------------------------
 resource "aws_cloudwatch_log_group" "dmesg" {
   count             = local.autoscaling_enabled ? 1 : 0
   name              = "${var.cloudwatch_prefix}/var/log/dmesg"
@@ -8,8 +9,9 @@ resource "aws_cloudwatch_log_group" "dmesg" {
   tags              = module.labels.tags
 }
 
-#Module      : CLOUD WATCH LOG GROUP
-#Description : Cloud watch log group for logs.
+##-----------------------------------------------------------------------------
+## Amazon CloudWatch Logs lets you monitor and troubleshoot your systems and applications using your existing system, application and custom log files.
+##-----------------------------------------------------------------------------
 resource "aws_cloudwatch_log_group" "docker" {
   count             = local.autoscaling_enabled ? 1 : 0
   name              = "${var.cloudwatch_prefix}/var/log/docker"
@@ -18,8 +20,9 @@ resource "aws_cloudwatch_log_group" "docker" {
   tags              = module.labels.tags
 }
 
-#Module      : CLOUD WATCH LOG GROUP
-#Description : Cloud watch log group for logs.
+##-----------------------------------------------------------------------------
+## Amazon CloudWatch Logs lets you monitor and troubleshoot your systems and applications using your existing system, application and custom log files.
+##-----------------------------------------------------------------------------
 resource "aws_cloudwatch_log_group" "ecs-agent" {
   count             = local.autoscaling_enabled ? 1 : 0
   name              = "${var.cloudwatch_prefix}/var/log/ecs/ecs-agent.log"
@@ -28,8 +31,9 @@ resource "aws_cloudwatch_log_group" "ecs-agent" {
   tags              = module.labels.tags
 }
 
-#Module      : CLOUD WATCH LOG GROUP
-#Description : Cloud watch log group for logs.
+##-----------------------------------------------------------------------------
+## Amazon CloudWatch Logs lets you monitor and troubleshoot your systems and applications using your existing system, application and custom log files.
+##-----------------------------------------------------------------------------
 resource "aws_cloudwatch_log_group" "ecs-init" {
   count             = local.autoscaling_enabled ? 1 : 0
   name              = "${var.cloudwatch_prefix}/var/log/ecs/ecs-init.log"
@@ -38,8 +42,9 @@ resource "aws_cloudwatch_log_group" "ecs-init" {
   tags              = module.labels.tags
 }
 
-#Module      : CLOUD WATCH LOG GROUP
-#Description : Cloud watch log group for logs.
+##-----------------------------------------------------------------------------
+## Amazon CloudWatch Logs lets you monitor and troubleshoot your systems and applications using your existing system, application and custom log files.
+##-----------------------------------------------------------------------------
 resource "aws_cloudwatch_log_group" "audit" {
   count             = local.autoscaling_enabled ? 1 : 0
   name              = "${var.cloudwatch_prefix}/var/log/ecs/audit.log"
@@ -48,8 +53,9 @@ resource "aws_cloudwatch_log_group" "audit" {
   tags              = module.labels.tags
 }
 
-#Module      : CLOUD WATCH LOG GROUP
-#Description : Cloud watch log group for logs.
+##-----------------------------------------------------------------------------
+## Amazon CloudWatch Logs lets you monitor and troubleshoot your systems and applications using your existing system, application and custom log files.
+##-----------------------------------------------------------------------------
 resource "aws_cloudwatch_log_group" "messages" {
   count             = local.autoscaling_enabled ? 1 : 0
   name              = "${var.cloudwatch_prefix}/var/log/messages"

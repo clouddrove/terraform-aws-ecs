@@ -1,7 +1,13 @@
+##---------------------------------------------------------------------------------------------------------------------------
+## Provider block added, Use the Amazon Web Services (AWS) provider to interact with the many resources supported by AWS.
+##--------------------------------------------------------------------------------------------------------------------------
 provider "aws" {
   region = "eu-west-1"
 }
 
+##---------------------------------------------------------------------------------------------------------------------------
+## A key pair is a combination of a public key that is used to encrypt data and a private key that is used to decrypt data.
+##--------------------------------------------------------------------------------------------------------------------------
 module "keypair" {
   source  = "clouddrove/keypair/aws"
   version = "1.3.0"
@@ -13,9 +19,12 @@ module "keypair" {
 
 }
 
+##---------------------------------------------------------------------------------------------------------------------------
+## A VPC is a virtual network that closely resembles a traditional network that you'd operate in your own data center.
+##--------------------------------------------------------------------------------------------------------------------------
 module "vpc" {
   source  = "clouddrove/vpc/aws"
-  version = "1.3.0"
+  version = "1.3.1"
 
   name        = "vpc"
   repository  = "https://github.com/clouddrove/terraform-aws-vpc"
@@ -26,6 +35,9 @@ module "vpc" {
   cidr_block = "10.10.0.0/16"
 }
 
+##-----------------------------------------------------
+## A subnet is a range of IP addresses in your VPC.
+##-----------------------------------------------------
 module "subnets" {
   source  = "clouddrove/subnet/aws"
   version = "1.3.0"
@@ -45,6 +57,9 @@ module "subnets" {
   ipv6_cidr_block     = module.vpc.ipv6_cidr_block
 }
 
+##-----------------------------------------------------
+## An AWS security group acts as a virtual firewall for incoming and outgoing traffic with ssh.
+##-----------------------------------------------------
 module "sg_ssh" {
   source  = "clouddrove/security-group/aws"
   version = "1.3.0"
@@ -59,6 +74,9 @@ module "sg_ssh" {
   allowed_ports = [22]
 }
 
+##-----------------------------------------------------
+## An AWS security group acts as a virtual firewall for incoming and outgoing traffic.
+##-----------------------------------------------------
 module "sg_lb" {
   source  = "clouddrove/security-group/aws"
   version = "1.3.0"
@@ -73,6 +91,9 @@ module "sg_lb" {
   allowed_ports = [80]
 }
 
+##-----------------------------------------------------
+## AWS Key Management Service (AWS KMS) lets you create, manage, and control cryptographic keys across your applications and AWS services.
+##-----------------------------------------------------
 module "kms_key" {
   source  = "clouddrove/kms/aws"
   version = "1.3.0"
@@ -108,6 +129,9 @@ data "aws_iam_policy_document" "default" {
   }
 }
 
+##-----------------------------------------------------------------------------
+## ecs module call.
+##-----------------------------------------------------------------------------
 module "ecs" {
   source = "../../"
 
