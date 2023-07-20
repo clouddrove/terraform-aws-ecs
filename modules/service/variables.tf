@@ -6,8 +6,6 @@ variable "name" {
   description = "Name  (e.g. `app` or `cluster`)."
 }
 
-
-
 variable "environment" {
   type        = string
   default     = ""
@@ -45,7 +43,6 @@ variable "delimiter" {
 }
 
 ## Service
-
 variable "enabled" {
   type        = bool
   default     = false

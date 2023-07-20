@@ -9,13 +9,12 @@ provider "aws" {
 ## A key pair is a combination of a public key that is used to encrypt data and a private key that is used to decrypt data.
 ##--------------------------------------------------------------------------------------------------------------------------
 module "keypair" {
-  source          = "clouddrove/keypair/aws"
-  version         = "1.3.1"
-  
-  name        = "key"
-  environment = "test"
-  label_order = ["environment", "name"]
+  source  = "clouddrove/keypair/aws"
+  version = "1.3.1"
 
+  name                       = "key"
+  environment                = "test"
+  label_order                = ["environment", "name"]
   public_key                 = ""
   create_private_key_enabled = true
   enable_key_pair            = true
@@ -33,8 +32,7 @@ module "vpc" {
   environment = "test"
   label_order = ["name", "environment"]
   vpc_enabled = true
-
-  cidr_block = "10.10.0.0/16"
+  cidr_block  = "10.10.0.0/16"
 }
 
 ##-----------------------------------------------------
@@ -44,12 +42,11 @@ module "subnets" {
   source  = "clouddrove/subnet/aws"
   version = "1.3.0"
 
-  name        = "subnets"
-  repository  = "https://github.com/clouddrove/terraform-aws-subnet"
-  environment = "test"
-  label_order = ["name", "environment"]
-  enabled     = true
-
+  name                = "subnets"
+  repository          = "https://github.com/clouddrove/terraform-aws-subnet"
+  environment         = "test"
+  label_order         = ["name", "environment"]
+  enabled             = true
   nat_gateway_enabled = true
   availability_zones  = ["eu-west-1a", "eu-west-1b"]
   vpc_id              = module.vpc.vpc_id
@@ -66,11 +63,10 @@ module "sg_ssh" {
   source  = "clouddrove/security-group/aws"
   version = "1.3.0"
 
-  name        = "sgssh"
-  repository  = "https://github.com/clouddrove/terraform-aws-security-group"
-  environment = "test"
-  label_order = ["name", "environment"]
-
+  name          = "sgssh"
+  repository    = "https://github.com/clouddrove/terraform-aws-security-group"
+  environment   = "test"
+  label_order   = ["name", "environment"]
   vpc_id        = module.vpc.vpc_id
   allowed_ip    = ["49.36.129.122/32", module.vpc.vpc_cidr_block]
   allowed_ports = [22]
@@ -83,11 +79,10 @@ module "sg_lb" {
   source  = "clouddrove/security-group/aws"
   version = "1.3.0"
 
-  name        = "sglb"
-  repository  = "https://github.com/clouddrove/terraform-aws-security-group"
-  environment = "test"
-  label_order = ["name", "environment"]
-
+  name          = "sglb"
+  repository    = "https://github.com/clouddrove/terraform-aws-security-group"
+  environment   = "test"
+  label_order   = ["name", "environment"]
   vpc_id        = module.vpc.vpc_id
   allowed_ip    = ["0.0.0.0/0"]
   allowed_ports = [80]
@@ -100,12 +95,11 @@ module "kms_key" {
   source  = "clouddrove/kms/aws"
   version = "1.3.0"
 
-  name        = "kms"
-  repository  = "https://github.com/clouddrove/terraform-aws-kms"
-  environment = "test"
-  label_order = ["name", "environment"]
-  enabled     = true
-
+  name                     = "kms"
+  repository               = "https://github.com/clouddrove/terraform-aws-kms"
+  environment              = "test"
+  label_order              = ["name", "environment"]
+  enabled                  = true
   description              = "KMS key for ecs"
   alias                    = "alias/ecs"
   key_usage                = "ENCRYPT_DECRYPT"
@@ -169,12 +163,11 @@ module "ecs" {
   scheduler_down = "0 19 * * MON-FRI"
   scheduler_up   = "0 6 * * MON-FRI"
 
-  schedule_enabled   = true
-  min_size_scaledown = 0
-  max_size_scaledown = 1
-  scale_up_desired   = 2
-  scale_down_desired = 1
-
+  schedule_enabled        = true
+  min_size_scaledown      = 0
+  max_size_scaledown      = 1
+  scale_up_desired        = 2
+  scale_down_desired      = 1
   spot_schedule_enabled   = true
   spot_min_size_scaledown = 0
   spot_max_size_scaledown = 1
@@ -182,10 +175,9 @@ module "ecs" {
   spot_scale_down_desired = 1
 
   ## Spot
-  spot_enabled  = true
-  spot_min_size = 1
-  spot_max_size = 3
-
+  spot_enabled       = true
+  spot_min_size      = 1
+  spot_max_size      = 3
   spot_price         = "0.10"
   spot_instance_type = "m5.xlarge"
 

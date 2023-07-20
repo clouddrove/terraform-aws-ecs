@@ -166,15 +166,13 @@ module "ecs" {
   ecs_settings_enabled = "enabled"
 
   ## Schedule
-  scheduler_down = "0 19 * * MON-FRI"
-  scheduler_up   = "0 6 * * MON-FRI"
-
-  schedule_enabled   = true
-  min_size_scaledown = 0
-  max_size_scaledown = 1
-  scale_up_desired   = 2
-  scale_down_desired = 1
-
+  scheduler_down          = "0 19 * * MON-FRI"
+  scheduler_up            = "0 6 * * MON-FRI"
+  schedule_enabled        = true
+  min_size_scaledown      = 0
+  max_size_scaledown      = 1
+  scale_up_desired        = 2
+  scale_down_desired      = 1
   spot_schedule_enabled   = true
   spot_min_size_scaledown = 0
   spot_max_size_scaledown = 1
@@ -182,10 +180,9 @@ module "ecs" {
   spot_scale_down_desired = 1
 
   ## Spot
-  spot_enabled  = true
-  spot_min_size = 1
-  spot_max_size = 3
-
+  spot_enabled       = true
+  spot_min_size      = 1
+  spot_max_size      = 3
   spot_price         = "0.10"
   spot_instance_type = "m5.xlarge"
 

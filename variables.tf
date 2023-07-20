@@ -1,5 +1,6 @@
-#Module      : LABEL
-#Description : Terraform label module variables.
+##----------------------------------------------------------------------------------
+## LABEL.
+##----------------------------------------------------------------------------------
 variable "name" {
   type        = string
   default     = ""
@@ -54,8 +55,9 @@ variable "delimiter" {
   description = "Delimiter to be used between `organization`, `environment`, `name` and `attributes`."
 }
 
-## EC2
-
+##----------------------------------------------------------------------------------
+## EC2.
+##----------------------------------------------------------------------------------
 variable "enabled" {
   type        = bool
   default     = false
@@ -223,8 +225,9 @@ variable "kms_key_arn" {
   description = "AWS Key Management Service (AWS KMS) customer master key (CMK) to use when creating the encrypted volume. encrypted must be set to true when this is set."
 }
 
-## Spot
-
+##----------------------------------------------------------------------------------
+## Spot.
+##----------------------------------------------------------------------------------
 variable "spot_enabled" {
   type        = bool
   default     = false
@@ -327,8 +330,9 @@ variable "spot_schedule_enabled" {
   description = "AutoScaling Schedule resource for spot"
 }
 
-## ECS Cluster
-
+##----------------------------------------------------------------------------------
+## ECS Cluster.
+##----------------------------------------------------------------------------------
 variable "ec2_cluster_enabled" {
   type        = bool
   default     = false
@@ -353,8 +357,9 @@ variable "fargate_cluster_cp" {
   description = "The name of the capacity provider."
 }
 
-## Service
-
+##----------------------------------------------------------------------------------
+## Service.
+##----------------------------------------------------------------------------------
 variable "ec2_service_enabled" {
   type        = bool
   default     = false
@@ -495,8 +500,9 @@ variable "ec2_awsvpc_enabled" {
   description = "AWSVPC network mode is enabled or not."
 }
 
-## Task Definition
-
+##----------------------------------------------------------------------------------
+## Task Definition.
+##----------------------------------------------------------------------------------
 variable "task_role_arn" {
   type        = string
   default     = ""

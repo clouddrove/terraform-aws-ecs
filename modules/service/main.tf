@@ -51,8 +51,8 @@ data "aws_iam_policy_document" "assume_role_ecs" {
 ## Application Load Balancer (ALB) is a fully managed layer 7 load balancing service that load balances incoming traffic across multiple targets, such as Amazon EC2 instances.
 ##-----------------------------------------------------
 module "lb" {
-  source  = "clouddrove/alb/aws"
-  version = "1.3.0"
+  source       = "git::https://github.com/clouddrove/terraform-aws-alb.git?ref=issue-475"
+#  version = "1.3.0"
 
   name                       = format("%s-alb", var.name)
   environment                = var.environment
@@ -91,9 +91,7 @@ resource "aws_ecs_service" "ec2" {
   propagate_tags                     = var.propagate_tags
   scheduling_strategy                = var.scheduling_strategy
   task_definition                    = var.ec2_task_definition
-
-  tags = module.labels.tags
-
+  tags                               = module.labels.tags
   deployment_controller {
     type = var.type
   }
@@ -103,17 +101,14 @@ resource "aws_ecs_service" "ec2" {
     container_name   = var.container_name
     container_port   = var.container_port
   }
-
   dynamic "network_configuration" {
     for_each = var.ec2_awsvpc_enabled ? [1] : []
-
     content {
       subnets          = var.subnets
       security_groups  = var.security_groups
       assign_public_ip = var.assign_public_ip
     }
   }
-
   depends_on = [
     module.iam-role-ecs,
     module.lb
@@ -136,9 +131,7 @@ resource "aws_ecs_service" "fargate" {
   propagate_tags                     = var.propagate_tags
   scheduling_strategy                = var.scheduling_strategy
   task_definition                    = var.fargate_task_definition
-
-  tags = module.labels.tags
-
+  tags                               = module.labels.tags
   deployment_controller {
     type = var.type
   }
@@ -165,7 +158,6 @@ resource "aws_ecs_service" "fargate" {
     security_groups  = var.security_groups
     assign_public_ip = var.assign_public_ip
   }
-
   depends_on = [
     module.lb
   ]

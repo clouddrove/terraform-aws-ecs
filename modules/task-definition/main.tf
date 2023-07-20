@@ -29,9 +29,8 @@ module "iam-role-td" {
   label_order        = var.label_order
   enabled            = var.enabled
   assume_role_policy = data.aws_iam_policy_document.assume_role_td.json
-
-  policy_enabled = true
-  policy_arn     = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+  policy_enabled     = true
+  policy_arn         = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
 }
 
 data "aws_iam_policy_document" "assume_role_td" {

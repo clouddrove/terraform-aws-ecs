@@ -31,8 +31,9 @@ resource "aws_autoscaling_policy" "scale_up_spot" {
   autoscaling_group_name = join("", aws_autoscaling_group.spot.*.name)
 }
 
-#Module      : AUTOSCALING POLICY DOWN
-#Description : Provides an AutoScaling Scaling Policy resource.
+##-----------------------------------------------------------------------------
+## Provides an AutoScaling Scaling Policy resource..
+##-----------------------------------------------------------------------------
 resource "aws_autoscaling_policy" "scale_down" {
   count                  = local.autoscaling_enabled ? 1 : 0
   name                   = format("%s%sscale%sdown", module.labels.id, var.delimiter, var.delimiter)
