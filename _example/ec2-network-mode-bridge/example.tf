@@ -64,7 +64,7 @@ module "subnets" {
 ##-----------------------------------------------------
 module "sg_ssh" {
   source  = "clouddrove/security-group/aws"
-  version = "1.3.0"
+  version = "2.0.0"
 
   name        = "sgssh"
   repository  = "https://github.com/clouddrove/terraform-aws-security-group"
@@ -81,7 +81,7 @@ module "sg_ssh" {
 ##-----------------------------------------------------
 module "sg_lb" {
   source  = "clouddrove/security-group/aws"
-  version = "1.3.0"
+  version = "2.0.0"
 
   name        = "sglb"
   repository  = "https://github.com/clouddrove/terraform-aws-security-group"
