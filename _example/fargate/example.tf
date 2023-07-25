@@ -70,43 +70,9 @@ module "http_https" {
   allowed_ports = [80, 443]
 }
 
-module "iam-role" {
-  source  = "clouddrove/iam-role/aws"
-  version = "1.3.0"
-
-  name        = "iam-role"
-  environment = "test-test"
-  label_order = ["name", "environment"]
-
-  assume_role_policy = data.aws_iam_policy_document.iam.json
-  policy_enabled     = true
-  policy             = data.aws_iam_policy_document.iam-policy.json
-}
-
-data "aws_iam_policy_document" "iam" {
-  statement {
-    effect  = "Allow"
-    actions = ["sts:AssumeRole"]
-    principals {
-      type        = "Service"
-      identifiers = ["ec2.amazonaws.com"]
-    }
-  }
-}
-
-data "aws_iam_policy_document" "iam-policy" {
-  statement {
-    actions = [
-      "ssm:UpdateInstanceInformation",
-      "ssmmessages:CreateControlChannel",
-      "ssmmessages:CreateDataChannel",
-      "ssmmessages:OpenControlChannel",
-      "ssmmessages:OpenDataChannel"]
-    effect    = "Allow"
-    resources = ["*"]
-  }
-}
-
+####----------------------------------------------------------------------------------
+## Terraform module to create instance module on AWS.
+####----------------------------------------------------------------------------------
 module "ec2" {
   source  = "clouddrove/ec2/aws"
   version = "1.3.0"
@@ -123,7 +89,6 @@ module "ec2" {
 
   vpc_security_group_ids_list = [module.sg_lb.security_group_ids, module.http_https.security_group_ids]
   subnet_ids                  = tolist(module.subnets.public_subnet_id)
-  iam_instance_profile        = module.iam-role.name
   assign_eip_address          = true
   associate_public_ip_address = true
   instance_profile_enabled    = true
@@ -133,6 +98,9 @@ module "ec2" {
   ebs_volume_size             = 30
 }
 
+####----------------------------------------------------------------------------------
+## This terraform module is used for requesting or importing SSL/TLS certificate with validation.
+####----------------------------------------------------------------------------------
 module "acm" {
   source  = "clouddrove/acm/aws"
   version = "1.3.0"
@@ -166,13 +134,12 @@ module "ecs" {
   subnet_ids = module.subnets.private_subnet_id
 
   ## EC2
-  lb_security_group             = module.sg_lb.security_group_ids
-  service_lb_security_group     = [module.sg_lb.security_group_ids, module.http_https.security_group_ids]
-#  additional_security_group_ids =
-  ec2                           = module.ec2.instance_id
-  instance_count                = module.ec2.instance_count
-  lb_subnet                     = module.subnets.public_subnet_id
-  listener_certificate_arn      = module.acm.arn
+  lb_security_group         = module.sg_lb.security_group_ids
+  service_lb_security_group = [module.sg_lb.security_group_ids, module.http_https.security_group_ids]
+  ec2                       = module.ec2.private_ip
+  instance_count            = module.ec2.instance_count
+  lb_subnet                 = module.subnets.public_subnet_id
+  listener_certificate_arn  = module.acm.arn
 
   ## Fargate Cluster
   fargate_cluster_enabled = true
@@ -180,14 +147,14 @@ module "ecs" {
   fargate_cluster_cp      = ["FARGATE", "FARGATE_SPOT"]
 
   ## Service
-  fargate_service_enabled = false
-  desired_count           = 4
-  assign_public_ip        = false
-  propagate_tags          = "TASK_DEFINITION"
+  fargate_service_enabled          = true
+  desired_count                    = 4
+  assign_public_ip                 = true
+  propagate_tags                   = "TASK_DEFINITION"
   scheduling_strategy              = "REPLICA"
   container_name                   = "nginx"
   container_port                   = 80
-  target_type                      = "instance"
+  target_type                      = "ip"
   weight_simple                    = 1
   weight_spot                      = 2
   base                             = 1
@@ -197,6 +164,7 @@ module "ecs" {
   ## Task Definition
   fargate_td_enabled       = true
   cpu                      = 512
+  network_mode             = "bridge"
   memory                   = 1024
   file_name                = "./td-fargate.json"
   container_log_group_name = "fargate-container-logs"

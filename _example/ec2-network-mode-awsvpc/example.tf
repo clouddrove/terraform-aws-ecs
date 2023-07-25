@@ -83,47 +83,9 @@ module "ssh" {
   environment = "test"
   label_order = ["name", "environment"]
 
-
   vpc_id        = module.vpc.vpc_id
   allowed_ip    = [module.vpc.vpc_cidr_block]
   allowed_ports = [22]
-}
-
-module "iam-role" {
-  source  = "clouddrove/iam-role/aws"
-  version = "1.3.0"
-
-  name        = "iam-role"
-  environment = "test-test"
-  label_order = ["name", "environment"]
-
-  assume_role_policy = data.aws_iam_policy_document.iam.json
-  policy_enabled     = true
-  policy             = data.aws_iam_policy_document.iam-policy.json
-}
-
-data "aws_iam_policy_document" "iam" {
-  statement {
-    effect  = "Allow"
-    actions = ["sts:AssumeRole"]
-    principals {
-      type        = "Service"
-      identifiers = ["ec2.amazonaws.com"]
-    }
-  }
-}
-
-data "aws_iam_policy_document" "iam-policy" {
-  statement {
-    actions = [
-      "ssm:UpdateInstanceInformation",
-      "ssmmessages:CreateControlChannel",
-      "ssmmessages:CreateDataChannel",
-      "ssmmessages:OpenControlChannel",
-      "ssmmessages:OpenDataChannel"]
-    effect    = "Allow"
-    resources = ["*"]
-  }
 }
 
 ##-----------------------------------------------------
@@ -163,6 +125,9 @@ data "aws_iam_policy_document" "default" {
   }
 }
 
+####----------------------------------------------------------------------------------
+## Terraform module to create instance module on AWS.
+####----------------------------------------------------------------------------------
 module "ec2" {
   source  = "clouddrove/ec2/aws"
   version = "1.3.0"
@@ -171,24 +136,25 @@ module "ec2" {
   environment = "test"
   label_order = ["name", "environment"]
 
-  instance_count = 1
-  ami            = "ami-08581e2e50ad52e16"
-  instance_type  = "t2.nano"
-  monitoring     = true
-  tenancy        = "default"
-
   vpc_security_group_ids_list = [module.ssh.security_group_ids, module.http_https.security_group_ids]
   subnet_ids                  = tolist(module.subnets.public_subnet_id)
-  iam_instance_profile        = module.iam-role.name
+  monitoring                  = true
   assign_eip_address          = true
   associate_public_ip_address = true
   instance_profile_enabled    = true
   ebs_optimized               = false
   ebs_volume_enabled          = true
+  tenancy                     = "default"
+  instance_count              = 1
+  ami                         = "ami-08581e2e50ad52e16"
+  instance_type               = "t2.nano"
   ebs_volume_type             = "gp2"
   ebs_volume_size             = 30
 }
 
+####----------------------------------------------------------------------------------
+## This terraform module is used for requesting or importing SSL/TLS certificate with validation.
+####----------------------------------------------------------------------------------
 module "acm" {
   source  = "clouddrove/acm/aws"
   version = "1.3.0"
@@ -198,10 +164,10 @@ module "acm" {
   label_order = ["name", "environment"]
 
   enable_aws_certificate    = true
+  enable_dns_validation     = false
   domain_name               = "clouddrove.ca"
   subject_alternative_names = ["*.clouddrove.ca"]
   validation_method         = "DNS"
-  enable_dns_validation     = false
 }
 
 ##-----------------------------------------------------------------------------
@@ -213,14 +179,13 @@ module "ecs" {
   ## Tags
   name        = "ecs-awsvpc"
   repository  = "https://github.com/clouddrove/terraform-aws-ecs"
-  environment = "dev"
+  environment = "test"
   label_order = ["name", "environment"]
   enabled     = true # set to true after VPC, Subnets, Security Groups, KMS Key and Key Pair gets created
 
   ## Network
-  vpc_id     = module.vpc.vpc_id
-  subnet_ids = module.subnets.private_subnet_id
-
+  vpc_id                        = module.vpc.vpc_id
+  subnet_ids                    = module.subnets.private_subnet_id
   additional_security_group_ids = [module.ssh.security_group_ids, module.http_https.security_group_ids]
   ec2                           = module.ec2.private_ip
   instance_count                = module.ec2.instance_count
@@ -246,11 +211,11 @@ module "ecs" {
   scheduler_down          = "0 19 * * MON-FRI"
   scheduler_up            = "0 6 * * MON-FRI"
   schedule_enabled        = true
+  spot_schedule_enabled   = true
   min_size_scaledown      = 0
   max_size_scaledown      = 1
   scale_up_desired        = 2
   scale_down_desired      = 1
-  spot_schedule_enabled   = true
   spot_min_size_scaledown = 0
   spot_max_size_scaledown = 1
   spot_scale_up_desired   = 2

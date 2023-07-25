@@ -4,7 +4,6 @@
 # Run `make readme` to rebuild the `README.md`
 #
 
-
 # Name of this project
 name : Terraform AWS ECS
 
@@ -16,18 +15,15 @@ github_repo: clouddrove/terraform-aws-ecs
 
 # Badges to display
 badges:
-  - name: "Terraform"
-    image: "https://img.shields.io/badge/Terraform-v1.1.7-green"
-    url: "https://www.terraform.io"
-  - name: "Licence"
-    image: "https://img.shields.io/badge/License-APACHE-blue.svg"
-    url: "LICENSE.md"
+  - name: "Latest Release"
+    image: "https://img.shields.io/github/release/clouddrove/terraform-aws-ecs.svg"
+    url: "https://github.com/clouddrove/terraform-aws-ecs/releases/latest"
   - name: "tfsec"
     image: "https://github.com/clouddrove/terraform-aws-ecs/actions/workflows/tfsec.yml/badge.svg"
     url: "https://github.com/clouddrove/terraform-aws-ecs/actions/workflows/tfsec.yml"
-  - name: "static-checks"
-    image: "https://github.com/clouddrove/terraform-aws-ecs/actions/workflows/terraform.yml/badge.svg"
-    url: "https://github.com/clouddrove/terraform-aws-ecs/actions/workflows/terraform.yml"
+  - name: "Licence"
+    image: "https://img.shields.io/badge/License-APACHE-blue.svg"
+    url: "LICENSE.md"
 
 #  description of this project
 description: |-
@@ -38,13 +34,14 @@ include:
   - "terraform.md"
 
 # How to use this project
+# How to use this project
 usage : |-
   ### Network Mode AWSVPC Example
   Here is an example of how you can use this module in your inventory structure:
     ```hcl
     module "ecs" {
       source  = "clouddrove/ecs/aws"
-      version = "1.0.1"
+      version = "1.3.0"
 
       ## Tags
       name        = "ecs-awsvpc"
@@ -57,18 +54,21 @@ usage : |-
       ## Network
       vpc_id                        = module.vpc.vpc_id
       subnet_ids                    = module.subnets.private_subnet_id
-      additional_security_group_ids = [module.sg_ssh.security_group_ids]
+      additional_security_group_ids = [module.ssh.security_group_ids, module.http_https.security_group_ids]
+      ec2                           = module.ec2.private_ip
+      instance_count                = module.ec2.instance_count
+      listener_certificate_arn      = module.acm.arn
 
       ## EC2
-      autoscaling_policies_enabled = true
+      autoscaling_policies_enabled = false
       key_name                     = module.keypair.name
       image_id                     = "ami-001085c9389955bb6"
-      instance_type                = "m5.large"
+      instance_type                = "t3.medium"
       min_size                     = 1
       max_size                     = 3
       volume_size                  = 8
-      lb_security_group            = module.sg_lb.security_group_ids
-      service_lb_security_group    = [module.sg_lb.security_group_ids]
+      lb_security_group            = module.ssh.security_group_ids
+      service_lb_security_group    = [module.http_https.security_group_ids]
       cloudwatch_prefix            = "ecs-logs"
 
       ## ECS Cluster
@@ -76,26 +76,23 @@ usage : |-
       ecs_settings_enabled = "enabled"
 
       ## Schedule
-      scheduler_down = "0 19 * * MON-FRI"
-      scheduler_up   = "0 6 * * MON-FRI"
-
-      schedule_enabled   = true
-      min_size_scaledown = 0
-      max_size_scaledown = 1
-      scale_up_desired   = 2
-      scale_down_desired = 1
-
+      scheduler_down          = "0 19 * * MON-FRI"
+      scheduler_up            = "0 6 * * MON-FRI"
+      schedule_enabled        = true
       spot_schedule_enabled   = true
+      min_size_scaledown      = 0
+      max_size_scaledown      = 1
+      scale_up_desired        = 2
+      scale_down_desired      = 1
       spot_min_size_scaledown = 0
       spot_max_size_scaledown = 1
       spot_scale_up_desired   = 2
       spot_scale_down_desired = 1
 
       ## Spot
-      spot_enabled  = true
-      spot_min_size = 1
-      spot_max_size = 3
-
+      spot_enabled       = true
+      spot_min_size      = 1
+      spot_max_size      = 3
       spot_price         = "0.10"
       spot_instance_type = "m5.xlarge"
 
@@ -113,7 +110,7 @@ usage : |-
       ec2_awsvpc_enabled  = true
       desired_count       = 10
       propagate_tags      = "TASK_DEFINITION"
-      lb_subnet           = module.subnets.public_subnet_id
+      lb_subnet           = module.subnets.private_subnet_id
       scheduling_strategy = "REPLICA"
       container_name      = "nginx"
       container_port      = 80
@@ -136,12 +133,10 @@ usage : |-
     ```hcl
     module "ecs" {
       source  = "clouddrove/ecs/aws"
-      version = "1.0.1"
-
+      version = "1.3.0"
 
       ## Tags
       name        = "ecs-bridge"
-
       repository  = "https://github.com/clouddrove/terraform-aws-ecs"
       environment = "test"
       label_order = ["name", "environment"]
@@ -149,9 +144,13 @@ usage : |-
       enabled     = false      # set to true after VPC, Subnets, Security Groups, KMS Key and Key Pair gets created
 
       ## Network
-      vpc_id                        = module.vpc.vpc_id
-      subnet_ids                    = module.subnets.private_subnet_id
-      additional_security_group_ids = [module.sg_ssh.security_group_ids]
+      vpc_id     = module.vpc.vpc_id
+      subnet_ids = module.subnets.private_subnet_id
+
+      additional_security_group_ids = [module.ssh.security_group_ids, module.http_https.security_group_ids]
+      ec2                           = module.ec2.instance_id
+      instance_count                = module.ec2.instance_count
+      listener_certificate_arn      = module.acm.arn
 
       ## EC2
       autoscaling_policies_enabled = true
@@ -161,8 +160,8 @@ usage : |-
       min_size                     = 1
       max_size                     = 3
       volume_size                  = 8
-      lb_security_group            = module.sg_lb.security_group_ids
-      service_lb_security_group    = [module.sg_lb.security_group_ids]
+      lb_security_group            = module.ssh.security_group_ids
+      service_lb_security_group    = [module.http_https.security_group_ids]
       cloudwatch_prefix            = "ecs-logs"
 
       ## ECS Cluster
@@ -173,23 +172,20 @@ usage : |-
       scheduler_down = "0 19 * * MON-FRI"
       scheduler_up   = "0 6 * * MON-FRI"
 
-      schedule_enabled   = true
-      min_size_scaledown = 0
-      max_size_scaledown = 1
-      scale_up_desired   = 2
-      scale_down_desired = 1
-
-      spot_schedule_enabled   = true
+      schedule_enabled        = true
+      min_size_scaledown      = 0
+      max_size_scaledown      = 1
+      scale_up_desired        = 2
+      scale_down_desired      = 1
       spot_min_size_scaledown = 0
       spot_max_size_scaledown = 1
       spot_scale_up_desired   = 2
       spot_scale_down_desired = 1
 
       ## Spot
-      spot_enabled  = true
-      spot_min_size = 1
-      spot_max_size = 3
-
+      spot_enabled       = true
+      spot_min_size      = 1
+      spot_max_size      = 3
       spot_price         = "0.10"
       spot_instance_type = "m5.xlarge"
 
@@ -229,8 +225,7 @@ usage : |-
     ```hcl
     module "ecs" {
       source  = "clouddrove/ecs/aws"
-      version = "1.0.1"
-
+      version = "1.3.0"
 
       ## Tags
       name        = "ecs-fargate"
@@ -246,7 +241,11 @@ usage : |-
 
       ## EC2
       lb_security_group         = module.sg_lb.security_group_ids
-      service_lb_security_group = [module.sg_lb.security_group_ids]
+      service_lb_security_group = [module.sg_lb.security_group_ids, module.http_https.security_group_ids]
+      ec2                       = module.ec2.private_ip
+      instance_count            = module.ec2.instance_count
+      lb_subnet                 = module.subnets.public_subnet_id
+      listener_certificate_arn  = module.acm.arn
 
       ## Fargate Cluster
       fargate_cluster_enabled = true
@@ -258,7 +257,6 @@ usage : |-
       desired_count                    = 4
       assign_public_ip                 = true
       propagate_tags                   = "TASK_DEFINITION"
-      lb_subnet                        = module.subnets.public_subnet_id
       scheduling_strategy              = "REPLICA"
       container_name                   = "nginx"
       container_port                   = 80
@@ -272,8 +270,9 @@ usage : |-
       ## Task Definition
       fargate_td_enabled       = true
       cpu                      = 512
+      network_mode             = "bridge"
       memory                   = 1024
       file_name                = "./td-fargate.json"
-      container_log_group_name = "ec2-container-logs"
+      container_log_group_name = "fargate-container-logs"
     }
     ```

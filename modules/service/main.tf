@@ -58,24 +58,24 @@ data "aws_iam_policy_document" "assume_role_ecs" {
 module "lb" {
   source = "git::https://github.com/clouddrove/terraform-aws-alb.git?ref=issue-475"
 
-  name                     = "alb"
-  enable                   = true
-  internal                 = true
-  load_balancer_type       = "application"
-  instance_count           = var.instance_count
-  security_groups          = var.security_groups
-  subnets                  = var.lb_subnet
-  target_id                = var.ec2
-  vpc_id                   = var.vpc_id
-  listener_certificate_arn = var.listener_certificate_arn
-
+  name                       = "alb"
+  load_balancer_type         = "application"
+  enable                     = true
+  internal                   = true
   enable_deletion_protection = false
   with_target_group          = true
   https_enabled              = true
   http_enabled               = true
-  https_port                 = 443
-  listener_type              = "forward"
-  target_group_port          = 80
+  instance_count             = var.instance_count
+  security_groups            = var.security_groups
+  subnets                    = var.lb_subnet
+  target_id                  = var.ec2
+  vpc_id                     = var.vpc_id
+  listener_certificate_arn   = var.listener_certificate_arn
+
+  https_port        = 443
+  listener_type     = "forward"
+  target_group_port = 80
   target_groups = [
     {
       backend_protocol     = "HTTP"

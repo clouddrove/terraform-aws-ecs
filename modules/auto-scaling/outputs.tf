@@ -1,5 +1,4 @@
 ## EC2
-
 output "launch_configuration_id" {
   description = "The ID of the launch configuration"
   value       = join("", aws_launch_configuration.default.*.id)

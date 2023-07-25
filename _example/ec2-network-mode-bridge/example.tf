@@ -89,43 +89,6 @@ module "ssh" {
   allowed_ports = [22]
 }
 
-module "iam-role" {
-  source  = "clouddrove/iam-role/aws"
-  version = "1.3.0"
-
-  name        = "iam-role"
-  environment = "test-test"
-  label_order = ["name", "environment"]
-
-  assume_role_policy = data.aws_iam_policy_document.iam.json
-  policy_enabled     = true
-  policy             = data.aws_iam_policy_document.iam-policy.json
-}
-
-data "aws_iam_policy_document" "iam" {
-  statement {
-    effect  = "Allow"
-    actions = ["sts:AssumeRole"]
-    principals {
-      type        = "Service"
-      identifiers = ["ec2.amazonaws.com"]
-    }
-  }
-}
-
-data "aws_iam_policy_document" "iam-policy" {
-  statement {
-    actions = [
-      "ssm:UpdateInstanceInformation",
-      "ssmmessages:CreateControlChannel",
-      "ssmmessages:CreateDataChannel",
-      "ssmmessages:OpenControlChannel",
-    "ssmmessages:OpenDataChannel"]
-    effect    = "Allow"
-    resources = ["*"]
-  }
-}
-
 ##-----------------------------------------------------
 ## AWS Key Management Service (AWS KMS) lets you create, manage, and control cryptographic keys across your applications and AWS services.
 ##-----------------------------------------------------
@@ -163,6 +126,9 @@ data "aws_iam_policy_document" "default" {
   }
 }
 
+####----------------------------------------------------------------------------------
+## Terraform module to create instance module on AWS.
+####----------------------------------------------------------------------------------
 module "ec2" {
   source  = "clouddrove/ec2/aws"
   version = "1.3.0"
@@ -179,7 +145,6 @@ module "ec2" {
 
   vpc_security_group_ids_list = [module.ssh.security_group_ids, module.http_https.security_group_ids]
   subnet_ids                  = tolist(module.subnets.public_subnet_id)
-  iam_instance_profile        = module.iam-role.name
   assign_eip_address          = true
   associate_public_ip_address = true
   instance_profile_enabled    = true
@@ -189,6 +154,9 @@ module "ec2" {
   ebs_volume_size             = 30
 }
 
+####----------------------------------------------------------------------------------
+## This terraform module is used for requesting or importing SSL/TLS certificate with validation.
+####----------------------------------------------------------------------------------
 module "acm" {
   source  = "clouddrove/acm/aws"
   version = "1.3.0"
@@ -251,7 +219,6 @@ module "ecs" {
   max_size_scaledown      = 1
   scale_up_desired        = 2
   scale_down_desired      = 1
-  spot_schedule_enabled   = true
   spot_min_size_scaledown = 0
   spot_max_size_scaledown = 1
   spot_scale_up_desired   = 2
@@ -281,7 +248,7 @@ module "ecs" {
   scheduling_strategy = "REPLICA"
   container_name      = "nginx"
   container_port      = 80
-  target_type         = "ip"
+  target_type         = "instance"
 
   ## Task Definition
   ec2_td_enabled           = true

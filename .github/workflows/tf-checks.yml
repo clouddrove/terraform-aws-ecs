@@ -5,11 +5,16 @@ on:
   pull_request:
   workflow_dispatch:
 jobs:
-  tf-checks-complete-example:
+  ec2-network-mode-awsvpc:
     uses: clouddrove/github-shared-workflows/.github/workflows/tf-checks.yml@master
     with:
-      working_directory: './_examples/complete/'
-  tf-checks-basic-example:
+      working_directory: './_example/ec2-network-mode-awsvpc/'
+  ec2-network-mode-bridge:
     uses: clouddrove/github-shared-workflows/.github/workflows/tf-checks.yml@master
     with:
-      working_directory: './_examples/basic/'
+      working_directory: './_example/ec2-network-mode-bridge/'
+  fargate:
+    uses: clouddrove/github-shared-workflows/.github/workflows/tf-checks.yml@master
+    with:
+      working_directory: './_example/fargate/'
+
