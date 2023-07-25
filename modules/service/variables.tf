@@ -1,3 +1,35 @@
+
+variable "additional_security_group_ids" {
+  type        = list(string)
+  default     = []
+  description = "Additional list of security groups that will be attached to the autoscaling group."
+}
+
+variable "subnet_ids" {
+  type        = list(string)
+  default     = []
+  description = "A list of subnet IDs to launch resources in."
+}
+
+variable "instance_count" {
+  type        = number
+  default     = 0
+  description = "The count of instances."
+}
+
+variable "ec2" {
+  type        = list(any)
+  sensitive   = true
+  description = "The ID of the target. This is the Instance ID for an instance, or the container ID for an ECS container. If the target type is ip, specify an IP address."
+}
+
+variable "listener_certificate_arn" {
+  type        = string
+  sensitive   = true
+  default     = ""
+  description = "The ARN of the SSL server certificate. Exactly one certificate is required if the protocol is HTTPS."
+}
+
 #Module      : LABEL
 #Description : Terraform label module variables.
 variable "name" {

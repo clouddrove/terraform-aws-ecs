@@ -120,6 +120,9 @@ module "service" {
   vpc_id                             = var.vpc_id
   target_type                        = var.target_type
   network_mode                       = var.network_mode
+  ec2                                = var.ec2
+  instance_count                     = var.instance_count
+  listener_certificate_arn           = var.listener_certificate_arn
 }
 
 ##-----------------------------------------------------------------------------

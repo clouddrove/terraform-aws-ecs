@@ -46,7 +46,7 @@ output "autoscaling_group_default_cooldown" {
 
 output "autoscaling_group_health_check_grace_period" {
   description = "Time after instance comes into service before checking health"
-  value = join("", module.auto-scaling.autoscaling_group_health_check_grace_period,)
+  value       = join("", module.auto-scaling.autoscaling_group_health_check_grace_period, )
 }
 
 output "autoscaling_group_health_check_type" {

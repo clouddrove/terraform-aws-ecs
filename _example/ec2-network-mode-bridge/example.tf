@@ -59,33 +59,71 @@ module "subnets" {
 ##-----------------------------------------------------
 ## An AWS security group acts as a virtual firewall for incoming and outgoing traffic with ssh.
 ##-----------------------------------------------------
-module "sg_ssh" {
+module "http_https" {
   source  = "clouddrove/security-group/aws"
-  version = "1.3.0"
+  version = "2.0.0"
 
-  name          = "sgssh"
-  repository    = "https://github.com/clouddrove/terraform-aws-security-group"
-  environment   = "test"
-  label_order   = ["name", "environment"]
+  name        = "http-https"
+  environment = "test"
+  label_order = ["name", "environment"]
+
   vpc_id        = module.vpc.vpc_id
-  allowed_ip    = ["49.36.129.122/32", module.vpc.vpc_cidr_block]
-  allowed_ports = [22]
+  allowed_ip    = ["0.0.0.0/0"]
+  allowed_ports = [80, 443]
 }
 
 ##-----------------------------------------------------
-## An AWS security group acts as a virtual firewall for incoming and outgoing traffic.
+## An AWS security group acts as a virtual firewall for incoming and outgoing traffic with ssh.
 ##-----------------------------------------------------
-module "sg_lb" {
+module "ssh" {
   source  = "clouddrove/security-group/aws"
+  version = "2.0.0"
+
+  name        = "ssh"
+  environment = "test"
+  label_order = ["name", "environment"]
+
+
+  vpc_id        = module.vpc.vpc_id
+  allowed_ip    = [module.vpc.vpc_cidr_block]
+  allowed_ports = [22]
+}
+
+module "iam-role" {
+  source  = "clouddrove/iam-role/aws"
   version = "1.3.0"
 
-  name          = "sglb"
-  repository    = "https://github.com/clouddrove/terraform-aws-security-group"
-  environment   = "test"
-  label_order   = ["name", "environment"]
-  vpc_id        = module.vpc.vpc_id
-  allowed_ip    = ["0.0.0.0/0"]
-  allowed_ports = [80]
+  name        = "iam-role"
+  environment = "test-test"
+  label_order = ["name", "environment"]
+
+  assume_role_policy = data.aws_iam_policy_document.iam.json
+  policy_enabled     = true
+  policy             = data.aws_iam_policy_document.iam-policy.json
+}
+
+data "aws_iam_policy_document" "iam" {
+  statement {
+    effect  = "Allow"
+    actions = ["sts:AssumeRole"]
+    principals {
+      type        = "Service"
+      identifiers = ["ec2.amazonaws.com"]
+    }
+  }
+}
+
+data "aws_iam_policy_document" "iam-policy" {
+  statement {
+    actions = [
+      "ssm:UpdateInstanceInformation",
+      "ssmmessages:CreateControlChannel",
+      "ssmmessages:CreateDataChannel",
+      "ssmmessages:OpenControlChannel",
+    "ssmmessages:OpenDataChannel"]
+    effect    = "Allow"
+    resources = ["*"]
+  }
 }
 
 ##-----------------------------------------------------
@@ -125,6 +163,47 @@ data "aws_iam_policy_document" "default" {
   }
 }
 
+module "ec2" {
+  source  = "clouddrove/ec2/aws"
+  version = "1.3.0"
+
+  name        = "ec2-instance"
+  environment = "test"
+  label_order = ["name", "environment"]
+
+  instance_count = 1
+  ami            = "ami-08d658f84a6d84a80"
+  instance_type  = "t2.nano"
+  monitoring     = true
+  tenancy        = "default"
+
+  vpc_security_group_ids_list = [module.ssh.security_group_ids, module.http_https.security_group_ids]
+  subnet_ids                  = tolist(module.subnets.public_subnet_id)
+  iam_instance_profile        = module.iam-role.name
+  assign_eip_address          = true
+  associate_public_ip_address = true
+  instance_profile_enabled    = true
+  ebs_optimized               = false
+  ebs_volume_enabled          = true
+  ebs_volume_type             = "gp2"
+  ebs_volume_size             = 30
+}
+
+module "acm" {
+  source  = "clouddrove/acm/aws"
+  version = "1.3.0"
+
+  name        = "certificate"
+  environment = "test"
+  label_order = ["name", "environment"]
+
+  enable_aws_certificate    = true
+  domain_name               = "clouddrove.ca"
+  subject_alternative_names = ["*.clouddrove.ca"]
+  validation_method         = "DNS"
+  enable_dns_validation     = false
+}
+
 ##-----------------------------------------------------------------------------
 ## ecs module call.
 ##-----------------------------------------------------------------------------
@@ -139,9 +218,13 @@ module "ecs" {
   enabled     = true # set to true after VPC, Subnets, Security Groups, KMS Key and Key Pair gets created
 
   ## Network
-  vpc_id                        = module.vpc.vpc_id
-  subnet_ids                    = module.subnets.private_subnet_id
-  additional_security_group_ids = [module.sg_ssh.security_group_ids]
+  vpc_id     = module.vpc.vpc_id
+  subnet_ids = module.subnets.private_subnet_id
+
+  additional_security_group_ids = [module.ssh.security_group_ids, module.http_https.security_group_ids]
+  ec2                           = module.ec2.instance_id
+  instance_count                = module.ec2.instance_count
+  listener_certificate_arn      = module.acm.arn
 
   ## EC2
   autoscaling_policies_enabled = true
@@ -151,8 +234,8 @@ module "ecs" {
   min_size                     = 1
   max_size                     = 3
   volume_size                  = 8
-  lb_security_group            = module.sg_lb.security_group_ids
-  service_lb_security_group    = [module.sg_lb.security_group_ids]
+  lb_security_group            = module.ssh.security_group_ids
+  service_lb_security_group    = [module.http_https.security_group_ids]
   cloudwatch_prefix            = "ecs-logs"
 
   ## ECS Cluster
@@ -198,7 +281,7 @@ module "ecs" {
   scheduling_strategy = "REPLICA"
   container_name      = "nginx"
   container_port      = 80
-  target_type         = "instance"
+  target_type         = "ip"
 
   ## Task Definition
   ec2_td_enabled           = true
