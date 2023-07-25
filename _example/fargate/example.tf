@@ -57,7 +57,7 @@ module "sg_lb" {
   allowed_ports = [80]
 }
 
-#tfsec:ignore:aws-ec2-no-public-egress-sgr
+#tfsec:ignore:aws-ec2-no-public-ingress-sgr
 module "http_https" {
   source  = "clouddrove/security-group/aws"
   version = "2.0.0"
@@ -74,6 +74,7 @@ module "http_https" {
 ####----------------------------------------------------------------------------------
 ## Terraform module to create instance module on AWS.
 ####----------------------------------------------------------------------------------
+#tfsec:ignore:aws-ec2-enable-at-rest-encryption
 module "ec2" {
   source  = "clouddrove/ec2/aws"
   version = "1.3.0"

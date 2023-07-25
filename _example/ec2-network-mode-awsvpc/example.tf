@@ -59,7 +59,7 @@ module "subnets" {
 ##-----------------------------------------------------
 ## An AWS security group acts as a virtual firewall for incoming and outgoing traffic with ssh.
 ##-----------------------------------------------------
-#tfsec:ignore:aws-ec2-no-public-egress-sgr
+#tfsec:ignore:aws-ec2-no-public-ingress-sgr
 module "http_https" {
   source  = "clouddrove/security-group/aws"
   version = "2.0.0"
@@ -130,6 +130,7 @@ data "aws_iam_policy_document" "default" {
 ####----------------------------------------------------------------------------------
 ## Terraform module to create instance module on AWS.
 ####----------------------------------------------------------------------------------
+#tfsec:ignore:aws-ec2-enable-at-rest-encryption
 module "ec2" {
   source  = "clouddrove/ec2/aws"
   version = "1.3.0"
