@@ -56,7 +56,8 @@ data "aws_iam_policy_document" "assume_role_ecs" {
 ## Application Load Balancer (ALB) is a fully managed layer 7 load balancing service that load balances incoming traffic across multiple targets, such as Amazon EC2 instances.
 ##-----------------------------------------------------
 module "lb" {
-  source = "git::https://github.com/clouddrove/terraform-aws-alb.git?ref=issue-475"
+  source  = "clouddrove/alb/aws"
+  version = "1.3.0"
 
   name                       = "alb"
   load_balancer_type         = "application"
