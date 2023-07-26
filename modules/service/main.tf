@@ -67,10 +67,9 @@ module "lb" {
   with_target_group          = true
   https_enabled              = true
   http_enabled               = true
-  instance_count             = var.instance_count
   security_groups            = var.security_groups
   subnets                    = var.lb_subnet
-  target_id                  = var.ec2
+  target_id                  = []
   vpc_id                     = var.vpc_id
   listener_certificate_arn   = var.listener_certificate_arn
 

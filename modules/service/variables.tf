@@ -242,18 +242,6 @@ variable "subnet_ids" {
   description = "A list of subnet IDs to launch resources in."
 }
 
-variable "instance_count" {
-  type        = number
-  default     = 0
-  description = "The count of instances."
-}
-
-variable "ec2" {
-  type        = list(any)
-  sensitive   = true
-  description = "The ID of the target. This is the Instance ID for an instance, or the container ID for an ECS container. If the target type is ip, specify an IP address."
-}
-
 variable "listener_certificate_arn" {
   type        = string
   sensitive   = true

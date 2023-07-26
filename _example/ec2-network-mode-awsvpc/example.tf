@@ -2,7 +2,7 @@
 ## Provider block added, Use the Amazon Web Services (AWS) provider to interact with the many resources supported by AWS.
 ##--------------------------------------------------------------------------------------------------------------------------
 provider "aws" {
-  region = "us-east-1"
+  region = "eu-west-1"
 }
 
 ##---------------------------------------------------------------------------------------------------------------------------
@@ -48,7 +48,7 @@ module "subnets" {
   label_order         = ["name", "environment"]
   enabled             = true
   nat_gateway_enabled = true
-  availability_zones  = ["us-east-1a", "us-east-1b"]
+  availability_zones  = ["eu-west-1a", "eu-west-1b"]
   vpc_id              = module.vpc.vpc_id
   cidr_block          = module.vpc.vpc_cidr_block
   type                = "public-private"
@@ -128,34 +128,6 @@ data "aws_iam_policy_document" "default" {
 }
 
 ####----------------------------------------------------------------------------------
-## Terraform module to create instance module on AWS.
-####----------------------------------------------------------------------------------
-#tfsec:ignore:aws-ec2-enable-at-rest-encryption
-module "ec2" {
-  source  = "clouddrove/ec2/aws"
-  version = "1.3.0"
-
-  name        = "ec2-instance"
-  environment = "test"
-  label_order = ["name", "environment"]
-
-  vpc_security_group_ids_list = [module.ssh.security_group_ids, module.http_https.security_group_ids]
-  subnet_ids                  = tolist(module.subnets.public_subnet_id)
-  monitoring                  = true
-  assign_eip_address          = true
-  associate_public_ip_address = true
-  instance_profile_enabled    = true
-  ebs_optimized               = false
-  ebs_volume_enabled          = true
-  tenancy                     = "default"
-  instance_count              = 1
-  ami                         = "ami-08581e2e50ad52e16"
-  instance_type               = "t2.nano"
-  ebs_volume_type             = "gp2"
-  ebs_volume_size             = 30
-}
-
-####----------------------------------------------------------------------------------
 ## This terraform module is used for requesting or importing SSL/TLS certificate with validation.
 ####----------------------------------------------------------------------------------
 module "acm" {
@@ -190,8 +162,6 @@ module "ecs" {
   vpc_id                        = module.vpc.vpc_id
   subnet_ids                    = module.subnets.private_subnet_id
   additional_security_group_ids = [module.ssh.security_group_ids, module.http_https.security_group_ids]
-  ec2                           = module.ec2.private_ip
-  instance_count                = module.ec2.instance_count
   listener_certificate_arn      = module.acm.arn
 
   ## EC2

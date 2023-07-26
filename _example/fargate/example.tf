@@ -49,7 +49,6 @@ module "sg_lb" {
   version = "2.0.0"
 
   name = "sglb"
-  #  repository    = "https://github.com/clouddrove/terraform-aws-security-group"
   environment   = "test"
   label_order   = ["name", "environment"]
   vpc_id        = module.vpc.vpc_id
@@ -69,35 +68,6 @@ module "http_https" {
   vpc_id        = module.vpc.vpc_id
   allowed_ip    = ["0.0.0.0/0"]
   allowed_ports = [80, 443]
-}
-
-####----------------------------------------------------------------------------------
-## Terraform module to create instance module on AWS.
-####----------------------------------------------------------------------------------
-#tfsec:ignore:aws-ec2-enable-at-rest-encryption
-module "ec2" {
-  source  = "clouddrove/ec2/aws"
-  version = "1.3.0"
-
-  name        = "ec2-instance"
-  environment = "test"
-  label_order = ["name", "environment"]
-
-  instance_count = 1
-  ami            = "ami-08d658f84a6d84a80"
-  instance_type  = "t2.nano"
-  monitoring     = true
-  tenancy        = "default"
-
-  vpc_security_group_ids_list = [module.sg_lb.security_group_ids, module.http_https.security_group_ids]
-  subnet_ids                  = tolist(module.subnets.public_subnet_id)
-  assign_eip_address          = true
-  associate_public_ip_address = true
-  instance_profile_enabled    = true
-  ebs_optimized               = false
-  ebs_volume_enabled          = true
-  ebs_volume_type             = "gp2"
-  ebs_volume_size             = 30
 }
 
 ####----------------------------------------------------------------------------------
@@ -138,8 +108,6 @@ module "ecs" {
   ## EC2
   lb_security_group         = module.sg_lb.security_group_ids
   service_lb_security_group = [module.sg_lb.security_group_ids, module.http_https.security_group_ids]
-  ec2                       = module.ec2.private_ip
-  instance_count            = module.ec2.instance_count
   lb_subnet                 = module.subnets.public_subnet_id
   listener_certificate_arn  = module.acm.arn
 

@@ -85,7 +85,6 @@ module "ssh" {
   environment = "test"
   label_order = ["name", "environment"]
 
-
   vpc_id        = module.vpc.vpc_id
   allowed_ip    = [module.vpc.vpc_cidr_block]
   allowed_ports = [22]
@@ -127,36 +126,6 @@ data "aws_iam_policy_document" "default" {
     resources = ["*"]
   }
 }
-
-####----------------------------------------------------------------------------------
-## Terraform module to create instance module on AWS.
-####----------------------------------------------------------------------------------
-#tfsec:ignore:aws-ec2-enable-at-rest-encryption
-module "ec2" {
-  source  = "clouddrove/ec2/aws"
-  version = "1.3.0"
-
-  name        = "ec2-instance"
-  environment = "test"
-  label_order = ["name", "environment"]
-
-  instance_count = 1
-  ami            = "ami-08d658f84a6d84a80"
-  instance_type  = "t2.nano"
-  monitoring     = true
-  tenancy        = "default"
-
-  vpc_security_group_ids_list = [module.ssh.security_group_ids, module.http_https.security_group_ids]
-  subnet_ids                  = tolist(module.subnets.public_subnet_id)
-  assign_eip_address          = true
-  associate_public_ip_address = true
-  instance_profile_enabled    = true
-  ebs_optimized               = false
-  ebs_volume_enabled          = true
-  ebs_volume_type             = "gp2"
-  ebs_volume_size             = 30
-}
-
 ####----------------------------------------------------------------------------------
 ## This terraform module is used for requesting or importing SSL/TLS certificate with validation.
 ####----------------------------------------------------------------------------------
@@ -193,8 +162,6 @@ module "ecs" {
   subnet_ids = module.subnets.private_subnet_id
 
   additional_security_group_ids = [module.ssh.security_group_ids, module.http_https.security_group_ids]
-  ec2                           = module.ec2.instance_id
-  instance_count                = module.ec2.instance_count
   listener_certificate_arn      = module.acm.arn
 
   ## EC2
@@ -216,7 +183,6 @@ module "ecs" {
   ## Schedule
   scheduler_down = "0 19 * * MON-FRI"
   scheduler_up   = "0 6 * * MON-FRI"
-
   schedule_enabled        = true
   min_size_scaledown      = 0
   max_size_scaledown      = 1

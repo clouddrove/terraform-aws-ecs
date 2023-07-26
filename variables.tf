@@ -566,17 +566,6 @@ variable "container_log_group_name" {
 ##----------------------------------------------------------------------------------
 ## ec2.
 ##----------------------------------------------------------------------------------
-variable "instance_count" {
-  type        = number
-  default     = 0
-  description = "The count of instances."
-}
-
-variable "ec2" {
-  type        = list(any)
-  sensitive   = true
-  description = "The ID of the target. This is the Instance ID for an instance, or the container ID for an ECS container. If the target type is ip, specify an IP address."
-}
 
 variable "listener_certificate_arn" {
   type        = string
