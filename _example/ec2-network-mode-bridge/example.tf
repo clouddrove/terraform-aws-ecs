@@ -181,8 +181,8 @@ module "ecs" {
   ecs_settings_enabled = "enabled"
 
   ## Schedule
-  scheduler_down = "0 19 * * MON-FRI"
-  scheduler_up   = "0 6 * * MON-FRI"
+  scheduler_down          = "0 19 * * MON-FRI"
+  scheduler_up            = "0 6 * * MON-FRI"
   schedule_enabled        = true
   min_size_scaledown      = 0
   max_size_scaledown      = 1

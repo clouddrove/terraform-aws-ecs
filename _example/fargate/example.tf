@@ -48,7 +48,7 @@ module "sg_lb" {
   source  = "clouddrove/security-group/aws"
   version = "2.0.0"
 
-  name = "sglb"
+  name          = "sglb"
   environment   = "test"
   label_order   = ["name", "environment"]
   vpc_id        = module.vpc.vpc_id
