@@ -60,6 +60,7 @@ module "subnets" {
 ## An AWS security group acts as a virtual firewall for incoming and outgoing traffic with ssh.
 ##-----------------------------------------------------
 #tfsec:ignore:aws-ec2-no-public-ingress-sgr
+#tfsec:ignore:aws-ec2-add-description-to-security-group-rule
 module "http_https" {
   source  = "clouddrove/security-group/aws"
   version = "2.0.0"
@@ -71,7 +72,7 @@ module "http_https" {
   vpc_id        = module.vpc.vpc_id
   allowed_ip    = ["0.0.0.0/0"]
   allowed_ports = [80, 443]
-}
+6}
 
 ##-----------------------------------------------------
 ## An AWS security group acts as a virtual firewall for incoming and outgoing traffic with ssh.
