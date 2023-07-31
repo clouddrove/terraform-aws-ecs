@@ -31,7 +31,6 @@ module "vpc" {
   repository  = "https://github.com/clouddrove/terraform-aws-vpc"
   environment = "test"
   label_order = ["name", "environment"]
-  vpc_enabled = true
   cidr_block  = "10.10.0.0/16"
 }
 
