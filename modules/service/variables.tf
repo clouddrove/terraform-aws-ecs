@@ -6,8 +6,6 @@ variable "name" {
   description = "Name  (e.g. `app` or `cluster`)."
 }
 
-
-
 variable "environment" {
   type        = string
   default     = ""
@@ -26,12 +24,6 @@ variable "attributes" {
   description = "Additional attributes (e.g. `1`)."
 }
 
-variable "tags" {
-  type        = map(any)
-  default     = {}
-  description = "Additional tags (e.g. map(`BusinessUnit`,`XYZ`)."
-}
-
 variable "managedby" {
   type        = string
   default     = "anmol@clouddrove.com"
@@ -45,7 +37,6 @@ variable "delimiter" {
 }
 
 ## Service
-
 variable "enabled" {
   type        = bool
   default     = false
@@ -230,4 +221,11 @@ variable "network_mode" {
   type        = string
   default     = ""
   description = "The Docker networking mode to use for the containers in the task. The valid values are none, bridge, awsvpc, and host."
+}
+
+variable "listener_certificate_arn" {
+  type        = string
+  sensitive   = true
+  default     = ""
+  description = "The ARN of the SSL server certificate. Exactly one certificate is required if the protocol is HTTPS."
 }

@@ -9,13 +9,12 @@ provider "aws" {
 ## A key pair is a combination of a public key that is used to encrypt data and a private key that is used to decrypt data.
 ##--------------------------------------------------------------------------------------------------------------------------
 module "keypair" {
-  source          = "clouddrove/keypair/aws"
-  version         = "1.3.1"
-  
-  name        = "key"
-  environment = "test"
-  label_order = ["environment", "name"]
+  source  = "clouddrove/keypair/aws"
+  version = "1.3.1"
 
+  name                       = "key"
+  environment                = "test"
+  label_order                = ["environment", "name"]
   public_key                 = ""
   create_private_key_enabled = true
   enable_key_pair            = true
@@ -26,15 +25,13 @@ module "keypair" {
 ##--------------------------------------------------------------------------------------------------------------------------
 module "vpc" {
   source  = "clouddrove/vpc/aws"
-  version = "1.3.1"
+  version = "2.0.0"
 
   name        = "vpc"
   repository  = "https://github.com/clouddrove/terraform-aws-vpc"
   environment = "test"
   label_order = ["name", "environment"]
-  vpc_enabled = true
-
-  cidr_block = "10.10.0.0/16"
+  cidr_block  = "10.10.0.0/16"
 }
 
 ##-----------------------------------------------------
@@ -42,14 +39,12 @@ module "vpc" {
 ##-----------------------------------------------------
 module "subnets" {
   source  = "clouddrove/subnet/aws"
-  version = "1.3.0"
+  version = "2.0.0"
 
-  name        = "subnets"
-  repository  = "https://github.com/clouddrove/terraform-aws-subnet"
-  environment = "test"
-  label_order = ["name", "environment"]
-  enabled     = true
-
+  name                = "subnets"
+  repository          = "https://github.com/clouddrove/terraform-aws-subnet"
+  environment         = "test"
+  label_order         = ["name", "environment"]
   nat_gateway_enabled = true
   availability_zones  = ["eu-west-1a", "eu-west-1b"]
   vpc_id              = module.vpc.vpc_id
@@ -62,35 +57,37 @@ module "subnets" {
 ##-----------------------------------------------------
 ## An AWS security group acts as a virtual firewall for incoming and outgoing traffic with ssh.
 ##-----------------------------------------------------
-module "sg_ssh" {
+#tfsec:ignore:aws-ec2-no-public-ingress-sgr
+#tfsec:ignore:aws-ec2-add-description-to-security-group-rule
+module "http_https" {
   source  = "clouddrove/security-group/aws"
-  version = "1.3.0"
+  version = "2.0.0"
 
-  name        = "sgssh"
-  repository  = "https://github.com/clouddrove/terraform-aws-security-group"
-  environment = "test"
-  label_order = ["name", "environment"]
-
-  vpc_id        = module.vpc.vpc_id
-  allowed_ip    = ["49.36.129.122/32", module.vpc.vpc_cidr_block]
-  allowed_ports = [22]
-}
-
-##-----------------------------------------------------
-## An AWS security group acts as a virtual firewall for incoming and outgoing traffic.
-##-----------------------------------------------------
-module "sg_lb" {
-  source  = "clouddrove/security-group/aws"
-  version = "1.3.0"
-
-  name        = "sglb"
-  repository  = "https://github.com/clouddrove/terraform-aws-security-group"
+  name        = "http-https"
   environment = "test"
   label_order = ["name", "environment"]
 
   vpc_id        = module.vpc.vpc_id
   allowed_ip    = ["0.0.0.0/0"]
-  allowed_ports = [80]
+  allowed_ports = [80, 443]
+}
+
+##-----------------------------------------------------
+## An AWS security group acts as a virtual firewall for incoming and outgoing traffic with ssh.
+##-----------------------------------------------------
+#tfsec:ignore:aws-ec2-no-public-egress-sgr
+#tfsec:ignore:aws-ec2-add-description-to-security-group-rule
+module "ssh" {
+  source  = "clouddrove/security-group/aws"
+  version = "2.0.0"
+
+  name        = "ssh"
+  environment = "test"
+  label_order = ["name", "environment"]
+
+  vpc_id        = module.vpc.vpc_id
+  allowed_ip    = [module.vpc.vpc_cidr_block]
+  allowed_ports = [22]
 }
 
 ##-----------------------------------------------------
@@ -100,12 +97,11 @@ module "kms_key" {
   source  = "clouddrove/kms/aws"
   version = "1.3.0"
 
-  name        = "kms"
-  repository  = "https://github.com/clouddrove/terraform-aws-kms"
-  environment = "test"
-  label_order = ["name", "environment"]
-  enabled     = true
-
+  name                     = "kms"
+  repository               = "https://github.com/clouddrove/terraform-aws-kms"
+  environment              = "test"
+  label_order              = ["name", "environment"]
+  enabled                  = true
   description              = "KMS key for ecs"
   alias                    = "alias/ecs"
   key_usage                = "ENCRYPT_DECRYPT"
@@ -130,6 +126,23 @@ data "aws_iam_policy_document" "default" {
     resources = ["*"]
   }
 }
+####----------------------------------------------------------------------------------
+## This terraform module is used for requesting or importing SSL/TLS certificate with validation.
+####----------------------------------------------------------------------------------
+module "acm" {
+  source  = "clouddrove/acm/aws"
+  version = "1.3.0"
+
+  name        = "certificate"
+  environment = "test"
+  label_order = ["name", "environment"]
+
+  enable_aws_certificate    = true
+  domain_name               = "clouddrove.ca"
+  subject_alternative_names = ["*.clouddrove.ca"]
+  validation_method         = "DNS"
+  enable_dns_validation     = false
+}
 
 ##-----------------------------------------------------------------------------
 ## ecs module call.
@@ -145,9 +158,11 @@ module "ecs" {
   enabled     = true # set to true after VPC, Subnets, Security Groups, KMS Key and Key Pair gets created
 
   ## Network
-  vpc_id                        = module.vpc.vpc_id
-  subnet_ids                    = module.subnets.private_subnet_id
-  additional_security_group_ids = [module.sg_ssh.security_group_ids]
+  vpc_id     = module.vpc.vpc_id
+  subnet_ids = module.subnets.private_subnet_id
+
+  additional_security_group_ids = [module.ssh.security_group_ids, module.http_https.security_group_ids]
+  listener_certificate_arn      = module.acm.arn
 
   ## EC2
   autoscaling_policies_enabled = true
@@ -157,8 +172,8 @@ module "ecs" {
   min_size                     = 1
   max_size                     = 3
   volume_size                  = 8
-  lb_security_group            = module.sg_lb.security_group_ids
-  service_lb_security_group    = [module.sg_lb.security_group_ids]
+  lb_security_group            = module.ssh.security_group_ids
+  service_lb_security_group    = [module.http_https.security_group_ids]
   cloudwatch_prefix            = "ecs-logs"
 
   ## ECS Cluster
@@ -166,26 +181,22 @@ module "ecs" {
   ecs_settings_enabled = "enabled"
 
   ## Schedule
-  scheduler_down = "0 19 * * MON-FRI"
-  scheduler_up   = "0 6 * * MON-FRI"
-
-  schedule_enabled   = true
-  min_size_scaledown = 0
-  max_size_scaledown = 1
-  scale_up_desired   = 2
-  scale_down_desired = 1
-
-  spot_schedule_enabled   = true
+  scheduler_down          = "0 19 * * MON-FRI"
+  scheduler_up            = "0 6 * * MON-FRI"
+  schedule_enabled        = true
+  min_size_scaledown      = 0
+  max_size_scaledown      = 1
+  scale_up_desired        = 2
+  scale_down_desired      = 1
   spot_min_size_scaledown = 0
   spot_max_size_scaledown = 1
   spot_scale_up_desired   = 2
   spot_scale_down_desired = 1
 
   ## Spot
-  spot_enabled  = true
-  spot_min_size = 1
-  spot_max_size = 3
-
+  spot_enabled       = true
+  spot_min_size      = 1
+  spot_max_size      = 3
   spot_price         = "0.10"
   spot_instance_type = "m5.xlarge"
 

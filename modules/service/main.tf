@@ -47,6 +47,11 @@ data "aws_iam_policy_document" "assume_role_ecs" {
   }
 }
 
+
+##-----------------------------------------------------
+## An AWS security group acts as a virtual firewall for incoming and outgoing traffic with http-https.
+##-----------------------------------------------------
+
 ##-----------------------------------------------------
 ## Application Load Balancer (ALB) is a fully managed layer 7 load balancing service that load balances incoming traffic across multiple targets, such as Amazon EC2 instances.
 ##-----------------------------------------------------
@@ -54,24 +59,42 @@ module "lb" {
   source  = "clouddrove/alb/aws"
   version = "1.3.0"
 
-  name                       = format("%s-alb", var.name)
-  environment                = var.environment
-  label_order                = var.label_order
-  internal                   = false
+  name                       = "alb"
   load_balancer_type         = "application"
+  enable                     = true
+  internal                   = true
+  enable_deletion_protection = false
+  with_target_group          = true
+  https_enabled              = true
+  http_enabled               = true
   security_groups            = var.security_groups
   subnets                    = var.lb_subnet
-  enable_deletion_protection = false
-  enable                     = var.enabled
-  target_type                = var.target_type
-  vpc_id                     = var.vpc_id
-  target_group_port          = 80
-  http_enabled               = false
-  https_enabled              = true
-  https_port                 = 80
   target_id                  = []
-  listener_type              = "forward"
-  listener_protocol          = "HTTP"
+  vpc_id                     = var.vpc_id
+  listener_certificate_arn   = var.listener_certificate_arn
+
+  https_port        = 443
+  listener_type     = "forward"
+  target_group_port = 80
+  target_groups = [
+    {
+      backend_protocol     = "HTTP"
+      backend_port         = 80
+      target_type          = var.target_type
+      deregistration_delay = 300
+      health_check = {
+        enabled             = true
+        interval            = 30
+        path                = "/"
+        port                = "traffic-port"
+        healthy_threshold   = 3
+        unhealthy_threshold = 3
+        timeout             = 10
+        protocol            = "HTTP"
+        matcher             = "200-399"
+      }
+    }
+  ]
 }
 
 ##-----------------------------------------------------
@@ -91,9 +114,7 @@ resource "aws_ecs_service" "ec2" {
   propagate_tags                     = var.propagate_tags
   scheduling_strategy                = var.scheduling_strategy
   task_definition                    = var.ec2_task_definition
-
-  tags = module.labels.tags
-
+  tags                               = module.labels.tags
   deployment_controller {
     type = var.type
   }
@@ -103,17 +124,14 @@ resource "aws_ecs_service" "ec2" {
     container_name   = var.container_name
     container_port   = var.container_port
   }
-
   dynamic "network_configuration" {
     for_each = var.ec2_awsvpc_enabled ? [1] : []
-
     content {
       subnets          = var.subnets
       security_groups  = var.security_groups
       assign_public_ip = var.assign_public_ip
     }
   }
-
   depends_on = [
     module.iam-role-ecs,
     module.lb
@@ -136,9 +154,7 @@ resource "aws_ecs_service" "fargate" {
   propagate_tags                     = var.propagate_tags
   scheduling_strategy                = var.scheduling_strategy
   task_definition                    = var.fargate_task_definition
-
-  tags = module.labels.tags
-
+  tags                               = module.labels.tags
   deployment_controller {
     type = var.type
   }
@@ -165,7 +181,6 @@ resource "aws_ecs_service" "fargate" {
     security_groups  = var.security_groups
     assign_public_ip = var.assign_public_ip
   }
-
   depends_on = [
     module.lb
   ]

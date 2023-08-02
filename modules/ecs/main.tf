@@ -25,7 +25,6 @@ resource "aws_ecs_cluster" "ec2" {
   count = local.ec2_enabled ? 1 : 0
   name  = module.labels.id
   tags  = module.labels.tags
-
   setting {
     name  = "containerInsights"
     value = var.ecs_settings_enabled
@@ -39,13 +38,13 @@ resource "aws_ecs_cluster" "fargate" {
   count = local.fargate_enabled ? 1 : 0
   name  = module.labels.id
   tags  = module.labels.tags
-
 }
 
+##-----------------------------------------------------------------------------
+## Manages the capacity providers of an ECS Cluster.
+##-----------------------------------------------------------------------------
 resource "aws_ecs_cluster_capacity_providers" "example" {
-  count        = local.fargate_enabled ? 1 : 0
-  cluster_name = join("", aws_ecs_cluster.fargate.*.name)
-
+  count              = local.fargate_enabled ? 1 : 0
+  cluster_name       = join("", aws_ecs_cluster.fargate[*].name)
   capacity_providers = var.fargate_cluster_cp
-
 }

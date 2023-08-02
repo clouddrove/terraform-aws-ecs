@@ -36,12 +36,6 @@ variable "attributes" {
   description = "Additional attributes (e.g. `1`)."
 }
 
-variable "tags" {
-  type        = map(any)
-  default     = {}
-  description = "Additional tags (e.g. map(`BusinessUnit`,`XYZ`)."
-}
-
 variable "managedby" {
   type        = string
   default     = "hello@clouddrove.com"
@@ -385,12 +379,6 @@ variable "spot_enabled" {
   type        = bool
   default     = false
   description = "Whether to create the spot instance. Set to `false` to prevent the module from creating any  spot instances."
-}
-
-variable "instance_interruption_behavior" {
-  type        = string
-  default     = "terminate"
-  description = "The behavior when a Spot Instance is interrupted. Can be hibernate, stop, or terminate. (Default: terminate)."
 }
 
 variable "spot_price" {

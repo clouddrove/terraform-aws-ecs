@@ -1,5 +1,6 @@
-#Module      : LABEL
-#Description : Terraform label module variables.
+##----------------------------------------------------------------------------------
+## LABEL.
+##----------------------------------------------------------------------------------
 variable "name" {
   type        = string
   default     = ""
@@ -54,8 +55,9 @@ variable "delimiter" {
   description = "Delimiter to be used between `organization`, `environment`, `name` and `attributes`."
 }
 
-## EC2
-
+##----------------------------------------------------------------------------------
+## EC2.
+##----------------------------------------------------------------------------------
 variable "enabled" {
   type        = bool
   default     = false
@@ -80,13 +82,6 @@ variable "key_name" {
   default     = ""
   sensitive   = true
   description = "The SSH key name that should be used for the instance."
-}
-
-variable "security_group_ids" {
-  type        = list(string)
-  default     = []
-  sensitive   = true
-  description = "A list of associated security group IDs."
 }
 
 variable "associate_public_ip_address" {
@@ -223,8 +218,9 @@ variable "kms_key_arn" {
   description = "AWS Key Management Service (AWS KMS) customer master key (CMK) to use when creating the encrypted volume. encrypted must be set to true when this is set."
 }
 
-## Spot
-
+##----------------------------------------------------------------------------------
+## Spot.
+##----------------------------------------------------------------------------------
 variable "spot_enabled" {
   type        = bool
   default     = false
@@ -327,8 +323,9 @@ variable "spot_schedule_enabled" {
   description = "AutoScaling Schedule resource for spot"
 }
 
-## ECS Cluster
-
+##----------------------------------------------------------------------------------
+## ECS Cluster.
+##----------------------------------------------------------------------------------
 variable "ec2_cluster_enabled" {
   type        = bool
   default     = false
@@ -353,8 +350,9 @@ variable "fargate_cluster_cp" {
   description = "The name of the capacity provider."
 }
 
-## Service
-
+##----------------------------------------------------------------------------------
+## Service.
+##----------------------------------------------------------------------------------
 variable "ec2_service_enabled" {
   type        = bool
   default     = false
@@ -472,14 +470,12 @@ variable "weight_spot" {
 variable "service_lb_security_group" {
   type        = list(string)
   default     = []
-  sensitive   = true
   description = "The service LB security groups."
 }
 
 variable "lb_subnet" {
   type        = list(string)
   default     = []
-  sensitive   = true
   description = "The subnet associated with the load balancer."
 }
 
@@ -495,8 +491,9 @@ variable "ec2_awsvpc_enabled" {
   description = "AWSVPC network mode is enabled or not."
 }
 
-## Task Definition
-
+##----------------------------------------------------------------------------------
+## Task Definition.
+##----------------------------------------------------------------------------------
 variable "task_role_arn" {
   type        = string
   default     = ""
@@ -556,4 +553,15 @@ variable "container_log_group_name" {
   type        = string
   default     = "log-group"
   description = "Log group name for the container."
+}
+
+
+##----------------------------------------------------------------------------------
+## ec2.
+##----------------------------------------------------------------------------------
+variable "listener_certificate_arn" {
+  type        = string
+  sensitive   = true
+  default     = ""
+  description = "The ARN of the SSL server certificate. Exactly one certificate is required if the protocol is HTTPS."
 }

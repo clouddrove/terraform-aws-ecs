@@ -9,12 +9,11 @@ locals {
 module "labels" {
   source  = "clouddrove/labels/aws"
   version = "1.3.0"
-  name    = var.name
-  //application = var.application
+
+  name        = var.name
   environment = var.environment
   managedby   = var.managedby
   delimiter   = var.delimiter
-  attributes  = compact(concat(var.attributes, ["task-definition"]))
   label_order = var.label_order
 }
 
@@ -29,9 +28,8 @@ module "iam-role-td" {
   label_order        = var.label_order
   enabled            = var.enabled
   assume_role_policy = data.aws_iam_policy_document.assume_role_td.json
-
-  policy_enabled = true
-  policy_arn     = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+  policy_enabled     = true
+  policy_arn         = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
 }
 
 data "aws_iam_policy_document" "assume_role_td" {

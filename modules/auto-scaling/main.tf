@@ -102,7 +102,7 @@ resource "aws_security_group_rule" "egress" {
   to_port           = 0
   protocol          = "-1"
   cidr_blocks       = ["0.0.0.0/0"]
-  security_group_id = join("", aws_security_group.default.*.id)
+  security_group_id = join("", aws_security_group.default[*].id)
   type              = "egress"
 }
 
@@ -116,7 +116,7 @@ resource "aws_security_group_rule" "ingress_alb" {
   from_port                = 0
   to_port                  = 65535
   protocol                 = "-1"
-  security_group_id        = join("", aws_security_group.default.*.id)
+  security_group_id        = join("", aws_security_group.default[*].id)
   source_security_group_id = var.lb_security_group
   type                     = "ingress"
 }
@@ -140,11 +140,11 @@ resource "aws_launch_configuration" "default" {
   name_prefix                 = format("%s%s", module.labels.id, var.delimiter)
   image_id                    = var.image_id
   instance_type               = var.instance_type
-  iam_instance_profile        = join("", aws_iam_instance_profile.default.*.name)
+  iam_instance_profile        = join("", aws_iam_instance_profile.default[*].name)
   key_name                    = var.key_name
-  security_groups             = compact(concat([join("", aws_security_group.default.*.id)], var.additional_security_group_ids))
+  security_groups             = compact(concat([join("", aws_security_group.default[*].id)], var.additional_security_group_ids))
   associate_public_ip_address = var.associate_public_ip_address
-  user_data_base64            = base64encode(join("", data.template_file.ec2.*.rendered))
+  user_data_base64            = base64encode(join("", data.template_file.ec2[*].rendered))
   enable_monitoring           = var.enable_monitoring
   ebs_optimized               = var.ebs_optimized
 
@@ -165,11 +165,11 @@ resource "aws_launch_configuration" "spot" {
   name_prefix                 = format("%sspot%s", module.labels.id, var.delimiter)
   image_id                    = var.image_id
   instance_type               = var.spot_instance_type
-  iam_instance_profile        = join("", aws_iam_instance_profile.default.*.name)
+  iam_instance_profile        = join("", aws_iam_instance_profile.default[*].name)
   key_name                    = var.key_name
-  security_groups             = compact(concat([join("", aws_security_group.default.*.id)], var.additional_security_group_ids))
+  security_groups             = compact(concat([join("", aws_security_group.default[*].id)], var.additional_security_group_ids))
   associate_public_ip_address = var.associate_public_ip_address
-  user_data_base64            = base64encode(join("", data.template_file.ec2.*.rendered))
+  user_data_base64            = base64encode(join("", data.template_file.ec2[*].rendered))
   enable_monitoring           = var.enable_monitoring
   ebs_optimized               = var.ebs_optimized
   spot_price                  = var.spot_price
@@ -207,7 +207,7 @@ resource "aws_autoscaling_group" "default" {
   wait_for_capacity_timeout = var.wait_for_capacity_timeout
   protect_from_scale_in     = var.protect_from_scale_in
   service_linked_role_arn   = var.service_linked_role_arn
-  launch_configuration      = join("", aws_launch_configuration.default.*.name)
+  launch_configuration      = join("", aws_launch_configuration.default[*].name)
 
   tag {
     key                 = "name"
@@ -251,7 +251,7 @@ resource "aws_autoscaling_group" "spot" {
   wait_for_capacity_timeout = var.wait_for_capacity_timeout
   protect_from_scale_in     = var.protect_from_scale_in
   service_linked_role_arn   = var.service_linked_role_arn
-  launch_configuration      = join("", aws_launch_configuration.spot.*.name)
+  launch_configuration      = join("", aws_launch_configuration.spot[*].name)
 
   tag {
     key                 = "name"

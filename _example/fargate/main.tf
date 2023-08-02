@@ -10,15 +10,13 @@ provider "aws" {
 ##--------------------------------------------------------------------------------------------------------------------------
 module "vpc" {
   source  = "clouddrove/vpc/aws"
-  version = "1.3.1"
+  version = "2.0.0"
 
   name        = "vpc"
   repository  = "https://github.com/clouddrove/terraform-aws-vpc"
   environment = "test"
   label_order = ["name", "environment"]
-  vpc_enabled = true
-
-  cidr_block = "10.10.0.0/16"
+  cidr_block  = "10.10.0.0/16"
 }
 
 ##-----------------------------------------------------
@@ -26,14 +24,12 @@ module "vpc" {
 ##-----------------------------------------------------
 module "subnets" {
   source  = "clouddrove/subnet/aws"
-  version = "1.3.0"
+  version = "2.0.0"
 
-  name        = "subnets"
-  repository  = "https://github.com/clouddrove/terraform-aws-subnet"
-  environment = "test"
-  label_order = ["name", "environment"]
-  enabled     = true
-
+  name                = "subnets"
+  repository          = "https://github.com/clouddrove/terraform-aws-subnet"
+  environment         = "test"
+  label_order         = ["name", "environment"]
   nat_gateway_enabled = true
   availability_zones  = ["eu-west-1a", "eu-west-1b"]
   vpc_id              = module.vpc.vpc_id
@@ -48,16 +44,50 @@ module "subnets" {
 ##-----------------------------------------------------
 module "sg_lb" {
   source  = "clouddrove/security-group/aws"
-  version = "1.3.0"
+  version = "2.0.0"
 
-  name        = "sglb"
-  repository  = "https://github.com/clouddrove/terraform-aws-security-group"
+  name          = "sglb"
+  environment   = "test"
+  label_order   = ["name", "environment"]
+  vpc_id        = module.vpc.vpc_id
+  allowed_ip    = ["0.0.0.0/0"]
+  allowed_ports = [80]
+}
+
+##-----------------------------------------------------
+## An AWS security group acts as a virtual firewall for incoming and outgoing traffic with ssh.
+##-----------------------------------------------------
+#tfsec:ignore:aws-ec2-no-public-ingress-sgr
+#tfsec:ignore:aws-ec2-add-description-to-security-group-rule
+module "http_https" {
+  source  = "clouddrove/security-group/aws"
+  version = "2.0.0"
+
+  name        = "http-https"
   environment = "test"
   label_order = ["name", "environment"]
 
   vpc_id        = module.vpc.vpc_id
   allowed_ip    = ["0.0.0.0/0"]
-  allowed_ports = [80]
+  allowed_ports = [80, 443]
+}
+
+####----------------------------------------------------------------------------------
+## This terraform module is used for requesting or importing SSL/TLS certificate with validation.
+####----------------------------------------------------------------------------------
+module "acm" {
+  source  = "clouddrove/acm/aws"
+  version = "1.3.0"
+
+  name        = "certificate"
+  environment = "test"
+  label_order = ["name", "environment"]
+
+  enable_aws_certificate    = true
+  domain_name               = "clouddrove.ca"
+  subject_alternative_names = ["*.clouddrove.ca"]
+  validation_method         = "DNS"
+  enable_dns_validation     = false
 }
 
 ##-----------------------------------------------------------------------------
@@ -79,7 +109,9 @@ module "ecs" {
 
   ## EC2
   lb_security_group         = module.sg_lb.security_group_ids
-  service_lb_security_group = [module.sg_lb.security_group_ids]
+  service_lb_security_group = [module.sg_lb.security_group_ids, module.http_https.security_group_ids]
+  lb_subnet                 = module.subnets.public_subnet_id
+  listener_certificate_arn  = module.acm.arn
 
   ## Fargate Cluster
   fargate_cluster_enabled = true
@@ -91,7 +123,6 @@ module "ecs" {
   desired_count                    = 4
   assign_public_ip                 = true
   propagate_tags                   = "TASK_DEFINITION"
-  lb_subnet                        = module.subnets.public_subnet_id
   scheduling_strategy              = "REPLICA"
   container_name                   = "nginx"
   container_port                   = 80
@@ -105,6 +136,7 @@ module "ecs" {
   ## Task Definition
   fargate_td_enabled       = true
   cpu                      = 512
+  network_mode             = "bridge"
   memory                   = 1024
   file_name                = "./td-fargate.json"
   container_log_group_name = "fargate-container-logs"
