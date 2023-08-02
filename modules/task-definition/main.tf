@@ -10,7 +10,7 @@ module "labels" {
   source  = "clouddrove/labels/aws"
   version = "1.3.0"
 
-  name    = var.name
+  name        = var.name
   environment = var.environment
   managedby   = var.managedby
   delimiter   = var.delimiter
