@@ -45,6 +45,6 @@ resource "aws_ecs_cluster" "fargate" {
 ##-----------------------------------------------------------------------------
 resource "aws_ecs_cluster_capacity_providers" "example" {
   count              = local.fargate_enabled ? 1 : 0
-  cluster_name       = join("", aws_ecs_cluster.fargate.*.name)
+  cluster_name       = join("", aws_ecs_cluster.fargate[*].name)
   capacity_providers = var.fargate_cluster_cp
 }

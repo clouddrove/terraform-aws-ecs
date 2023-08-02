@@ -24,12 +24,6 @@ variable "attributes" {
   description = "Additional attributes (e.g. `1`)."
 }
 
-variable "tags" {
-  type        = map(any)
-  default     = {}
-  description = "Additional tags (e.g. map(`BusinessUnit`,`XYZ`)."
-}
-
 variable "managedby" {
   type        = string
   default     = "anmol@clouddrove.com"
@@ -227,19 +221,6 @@ variable "network_mode" {
   type        = string
   default     = ""
   description = "The Docker networking mode to use for the containers in the task. The valid values are none, bridge, awsvpc, and host."
-}
-
-
-variable "additional_security_group_ids" {
-  type        = list(string)
-  default     = []
-  description = "Additional list of security groups that will be attached to the autoscaling group."
-}
-
-variable "subnet_ids" {
-  type        = list(string)
-  default     = []
-  description = "A list of subnet IDs to launch resources in."
 }
 
 variable "listener_certificate_arn" {

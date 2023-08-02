@@ -9,8 +9,6 @@ module "auto-scaling" {
   managedby                                 = var.managedby
   delimiter                                 = var.delimiter
   label_order                               = var.label_order
-  attributes                                = var.attributes
-  tags                                      = var.tags
   image_id                                  = var.image_id
   instance_type                             = var.instance_type
   vpc_id                                    = var.vpc_id
@@ -67,9 +65,7 @@ module "ecs" {
   environment             = var.environment
   managedby               = var.managedby
   delimiter               = var.delimiter
-  attributes              = var.attributes
   label_order             = var.label_order
-  tags                    = var.tags
   enabled                 = var.enabled
   ec2_cluster_enabled     = var.ec2_cluster_enabled
   fargate_cluster_enabled = var.fargate_cluster_enabled
@@ -86,9 +82,7 @@ module "service" {
   environment                        = var.environment
   managedby                          = var.managedby
   delimiter                          = var.delimiter
-  attributes                         = var.attributes
   label_order                        = var.label_order
-  tags                               = var.tags
   enabled                            = var.enabled
   ec2_service_enabled                = var.ec2_service_enabled
   ec2_cluster_name                   = module.ecs.ec2_id
@@ -132,9 +126,7 @@ module "task-definition" {
   environment              = var.environment
   managedby                = var.managedby
   delimiter                = var.delimiter
-  attributes               = var.attributes
   label_order              = var.label_order
-  tags                     = var.tags
   enabled                  = var.enabled
   ec2_td_enabled           = var.ec2_td_enabled
   fargate_td_enabled       = var.fargate_td_enabled

@@ -9,12 +9,11 @@ locals {
 module "labels" {
   source  = "clouddrove/labels/aws"
   version = "1.3.0"
+
   name    = var.name
-  //application = var.application
   environment = var.environment
   managedby   = var.managedby
   delimiter   = var.delimiter
-  attributes  = compact(concat(var.attributes, ["task-definition"]))
   label_order = var.label_order
 }
 

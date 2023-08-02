@@ -39,13 +39,12 @@ module "vpc" {
 ##-----------------------------------------------------
 module "subnets" {
   source  = "clouddrove/subnet/aws"
-  version = "1.3.0"
+  version = "2.0.0"
 
   name                = "subnets"
   repository          = "https://github.com/clouddrove/terraform-aws-subnet"
   environment         = "test"
   label_order         = ["name", "environment"]
-  enabled             = true
   nat_gateway_enabled = true
   availability_zones  = ["eu-west-1a", "eu-west-1b"]
   vpc_id              = module.vpc.vpc_id
@@ -126,6 +125,7 @@ data "aws_iam_policy_document" "default" {
     resources = ["*"]
   }
 }
+
 ####----------------------------------------------------------------------------------
 ## This terraform module is used for requesting or importing SSL/TLS certificate with validation.
 ####----------------------------------------------------------------------------------
@@ -138,10 +138,10 @@ module "acm" {
   label_order = ["name", "environment"]
 
   enable_aws_certificate    = true
+  enable_dns_validation     = false
   domain_name               = "clouddrove.ca"
   subject_alternative_names = ["*.clouddrove.ca"]
   validation_method         = "DNS"
-  enable_dns_validation     = false
 }
 
 ##-----------------------------------------------------------------------------
@@ -151,21 +151,20 @@ module "ecs" {
   source = "../../"
 
   ## Tags
-  name        = "ecs-bridge"
+  name        = "ecs-awsvpc"
   repository  = "https://github.com/clouddrove/terraform-aws-ecs"
   environment = "test"
   label_order = ["name", "environment"]
   enabled     = true # set to true after VPC, Subnets, Security Groups, KMS Key and Key Pair gets created
 
   ## Network
-  vpc_id     = module.vpc.vpc_id
-  subnet_ids = module.subnets.private_subnet_id
-
+  vpc_id                        = module.vpc.vpc_id
+  subnet_ids                    = module.subnets.private_subnet_id
   additional_security_group_ids = [module.ssh.security_group_ids, module.http_https.security_group_ids]
   listener_certificate_arn      = module.acm.arn
 
   ## EC2
-  autoscaling_policies_enabled = true
+  autoscaling_policies_enabled = false
   key_name                     = module.keypair.name
   image_id                     = "ami-001085c9389955bb6"
   instance_type                = "t3.medium"
@@ -184,6 +183,7 @@ module "ecs" {
   scheduler_down          = "0 19 * * MON-FRI"
   scheduler_up            = "0 6 * * MON-FRI"
   schedule_enabled        = true
+  spot_schedule_enabled   = true
   min_size_scaledown      = 0
   max_size_scaledown      = 1
   scale_up_desired        = 2
@@ -211,21 +211,22 @@ module "ecs" {
 
   ## Service
   ec2_service_enabled = true
-  desired_count       = 6
+  ec2_awsvpc_enabled  = true
+  desired_count       = 10
   propagate_tags      = "TASK_DEFINITION"
-  lb_subnet           = module.subnets.public_subnet_id
+  lb_subnet           = module.subnets.private_subnet_id
   scheduling_strategy = "REPLICA"
   container_name      = "nginx"
   container_port      = 80
-  target_type         = "instance"
+  target_type         = "ip"
 
   ## Task Definition
   ec2_td_enabled           = true
-  network_mode             = "bridge"
+  network_mode             = "awsvpc"
   ipc_mode                 = "task"
   pid_mode                 = "task"
   cpu                      = 512
   memory                   = 1024
-  file_name                = "./td-ec2-bridge.json"
+  file_name                = "./td-ec2-awsvpc.json"
   container_log_group_name = "ec2-container-logs"
 }

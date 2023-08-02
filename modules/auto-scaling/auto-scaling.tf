@@ -15,7 +15,7 @@ resource "aws_autoscaling_policy" "scale_up" {
   adjustment_type        = var.scale_up_adjustment_type
   policy_type            = var.scale_up_policy_type
   cooldown               = var.scale_up_cooldown_seconds
-  autoscaling_group_name = join("", aws_autoscaling_group.default.*.name)
+  autoscaling_group_name = join("", aws_autoscaling_group.default[*].name)
 }
 
 ##-----------------------------------------------------------------------------
@@ -28,7 +28,7 @@ resource "aws_autoscaling_policy" "scale_up_spot" {
   adjustment_type        = var.scale_up_adjustment_type
   policy_type            = var.scale_up_policy_type
   cooldown               = var.scale_up_cooldown_seconds
-  autoscaling_group_name = join("", aws_autoscaling_group.spot.*.name)
+  autoscaling_group_name = join("", aws_autoscaling_group.spot[*].name)
 }
 
 ##-----------------------------------------------------------------------------
@@ -41,7 +41,7 @@ resource "aws_autoscaling_policy" "scale_down" {
   adjustment_type        = var.scale_down_adjustment_type
   policy_type            = var.scale_down_policy_type
   cooldown               = var.scale_down_cooldown_seconds
-  autoscaling_group_name = join("", aws_autoscaling_group.default.*.name)
+  autoscaling_group_name = join("", aws_autoscaling_group.default[*].name)
 }
 
 ##-----------------------------------------------------------------------------
@@ -54,7 +54,7 @@ resource "aws_autoscaling_policy" "scale_down_spot" {
   adjustment_type        = var.scale_down_adjustment_type
   policy_type            = var.scale_down_policy_type
   cooldown               = var.scale_down_cooldown_seconds
-  autoscaling_group_name = join("", aws_autoscaling_group.spot.*.name)
+  autoscaling_group_name = join("", aws_autoscaling_group.spot[*].name)
 }
 
 ##-----------------------------------------------------------------------------
@@ -78,7 +78,7 @@ resource "aws_cloudwatch_metric_alarm" "memory_high" {
   }
 
   alarm_description = format("Scale up if memory reservation is above %s for %s seconds", var.memory_reservation_high_threshold_percent, var.memory_reservation_high_period_seconds)
-  alarm_actions     = [join("", aws_autoscaling_policy.scale_up.*.arn)]
+  alarm_actions     = [join("", aws_autoscaling_policy.scale_up[*].arn)]
 }
 
 ##-----------------------------------------------------------------------------
@@ -102,7 +102,7 @@ resource "aws_cloudwatch_metric_alarm" "memory_high_spot" {
   }
 
   alarm_description = format("Scale up if memory reservation is above %s for %s seconds", var.memory_reservation_high_threshold_percent, var.memory_reservation_high_period_seconds)
-  alarm_actions     = [join("", aws_autoscaling_policy.scale_up_spot.*.arn)]
+  alarm_actions     = [join("", aws_autoscaling_policy.scale_up_spot[*].arn)]
 }
 
 ##-----------------------------------------------------------------------------
@@ -125,7 +125,7 @@ resource "aws_cloudwatch_metric_alarm" "memory_low" {
   }
 
   alarm_description = format("Scale down if memory reservation is above %s for %s seconds", var.memory_reservation_high_threshold_percent, var.memory_reservation_high_period_seconds)
-  alarm_actions     = [join("", aws_autoscaling_policy.scale_down.*.arn)]
+  alarm_actions     = [join("", aws_autoscaling_policy.scale_down[*].arn)]
 }
 
 ##-----------------------------------------------------------------------------
@@ -148,7 +148,7 @@ resource "aws_cloudwatch_metric_alarm" "memory_low_spot" {
   }
 
   alarm_description = format("Scale down if memory reservation is above %s for %s seconds", var.memory_reservation_high_threshold_percent, var.memory_reservation_high_period_seconds)
-  alarm_actions     = [join("", aws_autoscaling_policy.scale_down_spot.*.arn)]
+  alarm_actions     = [join("", aws_autoscaling_policy.scale_down_spot[*].arn)]
 }
 
 ##-----------------------------------------------------------------------------

@@ -84,13 +84,6 @@ variable "key_name" {
   description = "The SSH key name that should be used for the instance."
 }
 
-variable "security_group_ids" {
-  type        = list(string)
-  default     = []
-  sensitive   = true
-  description = "A list of associated security group IDs."
-}
-
 variable "associate_public_ip_address" {
   type        = bool
   default     = false
