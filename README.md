@@ -13,17 +13,14 @@
 
 <p align="center">
 
-<a href="https://www.terraform.io">
-  <img src="https://img.shields.io/badge/Terraform-v1.1.7-green" alt="Terraform">
-</a>
-<a href="LICENSE.md">
-  <img src="https://img.shields.io/badge/License-APACHE-blue.svg" alt="Licence">
+<a href="https://github.com/clouddrove/terraform-aws-ecs/releases/latest">
+  <img src="https://img.shields.io/github/release/clouddrove/terraform-aws-ecs.svg" alt="Latest Release">
 </a>
 <a href="https://github.com/clouddrove/terraform-aws-ecs/actions/workflows/tfsec.yml">
   <img src="https://github.com/clouddrove/terraform-aws-ecs/actions/workflows/tfsec.yml/badge.svg" alt="tfsec">
 </a>
-<a href="https://github.com/clouddrove/terraform-aws-ecs/actions/workflows/terraform.yml">
-  <img src="https://github.com/clouddrove/terraform-aws-ecs/actions/workflows/terraform.yml/badge.svg" alt="static-checks">
+<a href="LICENSE.md">
+  <img src="https://img.shields.io/badge/License-APACHE-blue.svg" alt="Licence">
 </a>
 
 
@@ -56,11 +53,7 @@ We have [*fifty plus terraform modules*][terraform_modules]. A few of them are c
 ## Prerequisites
 
 This module has a few dependencies: 
-
-- [Terraform 1.x.x](https://learn.hashicorp.com/terraform/getting-started/install.html)
-- [Go](https://golang.org/doc/install)
-- [github.com/stretchr/testify/assert](https://github.com/stretchr/testify)
-- [github.com/gruntwork-io/terratest/modules/terraform](https://github.com/gruntwork-io/terratest)
+- [Terraform 1.4.6](https://learn.hashicorp.com/terraform/getting-started/install.html)
 
 
 
@@ -79,7 +72,7 @@ Here is an example of how you can use this module in your inventory structure:
   ```hcl
   module "ecs" {
     source  = "clouddrove/ecs/aws"
-    version = "1.0.1"
+    version = "1.3.0"
 
     ## Tags
     name        = "ecs-awsvpc"
@@ -92,18 +85,21 @@ Here is an example of how you can use this module in your inventory structure:
     ## Network
     vpc_id                        = module.vpc.vpc_id
     subnet_ids                    = module.subnets.private_subnet_id
-    additional_security_group_ids = [module.sg_ssh.security_group_ids]
+    additional_security_group_ids = [module.ssh.security_group_ids, module.http_https.security_group_ids]
+    ec2                           = module.ec2.private_ip
+    instance_count                = module.ec2.instance_count
+    listener_certificate_arn      = module.acm.arn
 
     ## EC2
-    autoscaling_policies_enabled = true
+    autoscaling_policies_enabled = false
     key_name                     = module.keypair.name
     image_id                     = "ami-001085c9389955bb6"
-    instance_type                = "m5.large"
+    instance_type                = "t3.medium"
     min_size                     = 1
     max_size                     = 3
     volume_size                  = 8
-    lb_security_group            = module.sg_lb.security_group_ids
-    service_lb_security_group    = [module.sg_lb.security_group_ids]
+    lb_security_group            = module.ssh.security_group_ids
+    service_lb_security_group    = [module.http_https.security_group_ids]
     cloudwatch_prefix            = "ecs-logs"
 
     ## ECS Cluster
@@ -111,26 +107,23 @@ Here is an example of how you can use this module in your inventory structure:
     ecs_settings_enabled = "enabled"
 
     ## Schedule
-    scheduler_down = "0 19 * * MON-FRI"
-    scheduler_up   = "0 6 * * MON-FRI"
-
-    schedule_enabled   = true
-    min_size_scaledown = 0
-    max_size_scaledown = 1
-    scale_up_desired   = 2
-    scale_down_desired = 1
-
+    scheduler_down          = "0 19 * * MON-FRI"
+    scheduler_up            = "0 6 * * MON-FRI"
+    schedule_enabled        = true
     spot_schedule_enabled   = true
+    min_size_scaledown      = 0
+    max_size_scaledown      = 1
+    scale_up_desired        = 2
+    scale_down_desired      = 1
     spot_min_size_scaledown = 0
     spot_max_size_scaledown = 1
     spot_scale_up_desired   = 2
     spot_scale_down_desired = 1
 
     ## Spot
-    spot_enabled  = true
-    spot_min_size = 1
-    spot_max_size = 3
-
+    spot_enabled       = true
+    spot_min_size      = 1
+    spot_max_size      = 3
     spot_price         = "0.10"
     spot_instance_type = "m5.xlarge"
 
@@ -148,7 +141,7 @@ Here is an example of how you can use this module in your inventory structure:
     ec2_awsvpc_enabled  = true
     desired_count       = 10
     propagate_tags      = "TASK_DEFINITION"
-    lb_subnet           = module.subnets.public_subnet_id
+    lb_subnet           = module.subnets.private_subnet_id
     scheduling_strategy = "REPLICA"
     container_name      = "nginx"
     container_port      = 80
@@ -171,12 +164,10 @@ Here is an example of how you can use this module in your inventory structure:
   ```hcl
   module "ecs" {
     source  = "clouddrove/ecs/aws"
-    version = "1.0.1"
-
+    version = "1.3.0"
 
     ## Tags
     name        = "ecs-bridge"
-
     repository  = "https://github.com/clouddrove/terraform-aws-ecs"
     environment = "test"
     label_order = ["name", "environment"]
@@ -184,9 +175,13 @@ Here is an example of how you can use this module in your inventory structure:
     enabled     = false      # set to true after VPC, Subnets, Security Groups, KMS Key and Key Pair gets created
 
     ## Network
-    vpc_id                        = module.vpc.vpc_id
-    subnet_ids                    = module.subnets.private_subnet_id
-    additional_security_group_ids = [module.sg_ssh.security_group_ids]
+    vpc_id     = module.vpc.vpc_id
+    subnet_ids = module.subnets.private_subnet_id
+
+    additional_security_group_ids = [module.ssh.security_group_ids, module.http_https.security_group_ids]
+    ec2                           = module.ec2.instance_id
+    instance_count                = module.ec2.instance_count
+    listener_certificate_arn      = module.acm.arn
 
     ## EC2
     autoscaling_policies_enabled = true
@@ -196,8 +191,8 @@ Here is an example of how you can use this module in your inventory structure:
     min_size                     = 1
     max_size                     = 3
     volume_size                  = 8
-    lb_security_group            = module.sg_lb.security_group_ids
-    service_lb_security_group    = [module.sg_lb.security_group_ids]
+    lb_security_group            = module.ssh.security_group_ids
+    service_lb_security_group    = [module.http_https.security_group_ids]
     cloudwatch_prefix            = "ecs-logs"
 
     ## ECS Cluster
@@ -208,23 +203,20 @@ Here is an example of how you can use this module in your inventory structure:
     scheduler_down = "0 19 * * MON-FRI"
     scheduler_up   = "0 6 * * MON-FRI"
 
-    schedule_enabled   = true
-    min_size_scaledown = 0
-    max_size_scaledown = 1
-    scale_up_desired   = 2
-    scale_down_desired = 1
-
-    spot_schedule_enabled   = true
+    schedule_enabled        = true
+    min_size_scaledown      = 0
+    max_size_scaledown      = 1
+    scale_up_desired        = 2
+    scale_down_desired      = 1
     spot_min_size_scaledown = 0
     spot_max_size_scaledown = 1
     spot_scale_up_desired   = 2
     spot_scale_down_desired = 1
 
     ## Spot
-    spot_enabled  = true
-    spot_min_size = 1
-    spot_max_size = 3
-
+    spot_enabled       = true
+    spot_min_size      = 1
+    spot_max_size      = 3
     spot_price         = "0.10"
     spot_instance_type = "m5.xlarge"
 
@@ -264,8 +256,7 @@ Here is an example of how you can use this module in your inventory structure:
   ```hcl
   module "ecs" {
     source  = "clouddrove/ecs/aws"
-    version = "1.0.1"
-
+    version = "1.3.0"
 
     ## Tags
     name        = "ecs-fargate"
@@ -281,7 +272,11 @@ Here is an example of how you can use this module in your inventory structure:
 
     ## EC2
     lb_security_group         = module.sg_lb.security_group_ids
-    service_lb_security_group = [module.sg_lb.security_group_ids]
+    service_lb_security_group = [module.sg_lb.security_group_ids, module.http_https.security_group_ids]
+    ec2                       = module.ec2.private_ip
+    instance_count            = module.ec2.instance_count
+    lb_subnet                 = module.subnets.public_subnet_id
+    listener_certificate_arn  = module.acm.arn
 
     ## Fargate Cluster
     fargate_cluster_enabled = true
@@ -293,7 +288,6 @@ Here is an example of how you can use this module in your inventory structure:
     desired_count                    = 4
     assign_public_ip                 = true
     propagate_tags                   = "TASK_DEFINITION"
-    lb_subnet                        = module.subnets.public_subnet_id
     scheduling_strategy              = "REPLICA"
     container_name                   = "nginx"
     container_port                   = 80
@@ -307,9 +301,10 @@ Here is an example of how you can use this module in your inventory structure:
     ## Task Definition
     fargate_td_enabled       = true
     cpu                      = 512
+    network_mode             = "bridge"
     memory                   = 1024
     file_name                = "./td-fargate.json"
-    container_log_group_name = "ec2-container-logs"
+    container_log_group_name = "fargate-container-logs"
   }
   ```
 
@@ -364,6 +359,7 @@ Here is an example of how you can use this module in your inventory structure:
 | label\_order | Label order, e.g. `name`,`application`. | `list(any)` | `[]` | no |
 | lb\_security\_group | The LB security groups. | `string` | `""` | no |
 | lb\_subnet | The subnet associated with the load balancer. | `list(string)` | `[]` | no |
+| listener\_certificate\_arn | The ARN of the SSL server certificate. Exactly one certificate is required if the protocol is HTTPS. | `string` | `""` | no |
 | load\_balancers | A list of elastic load balancer names to add to the autoscaling group names. Only valid for classic load balancers. For ALBs, use `target_group_arns` instead. | `list(string)` | `[]` | no |
 | managedby | ManagedBy, eg 'CloudDrove'. | `string` | `"hello@clouddrove.com"` | no |
 | max\_size | The maximum size of the autoscale group. | `number` | `3` | no |
@@ -386,7 +382,6 @@ Here is an example of how you can use this module in your inventory structure:
 | scheduler\_down | What is the recurrency for scaling up operations ? | `string` | `"0 19 * * MON-FRI"` | no |
 | scheduler\_up | What is the recurrency for scaling down operations ? | `string` | `"0 6 * * MON-FRI"` | no |
 | scheduling\_strategy | The scheduling strategy to use for the service. The valid values are REPLICA and DAEMON. | `string` | `"REPLICA"` | no |
-| security\_group\_ids | A list of associated security group IDs. | `list(string)` | `[]` | no |
 | service\_lb\_security\_group | The service LB security groups. | `list(string)` | `[]` | no |
 | spot\_enabled | Whether to create the spot instance. Set to `false` to prevent the module from creating any  spot instances. | `bool` | `false` | no |
 | spot\_instance\_type | Sport instance type to launch. | `string` | `"t2.medium"` | no |
