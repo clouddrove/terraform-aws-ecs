@@ -46,12 +46,19 @@ module "sg_lb" {
   source  = "clouddrove/security-group/aws"
   version = "2.0.0"
 
-  name          = "sglb"
-  environment   = "test"
-  label_order   = ["name", "environment"]
-  vpc_id        = module.vpc.vpc_id
-  allowed_ip    = ["0.0.0.0/0"]
-  allowed_ports = [80]
+  name        = "sglb"
+  environment = "test"
+  # vpc_id      = module.vpc.vpc_id
+  new_sg_ingress_rules_with_cidr_blocks = [{
+    rule_count  = 1
+    from_port   = 80
+    protocol    = "http"
+    to_port     = 80
+    cidr_blocks = ["0.0.0.0/0"]
+    vpc_id      = module.vpc.vpc_id
+    label_order = ["name", "environment"]
+    }
+  ]
 }
 
 ##-----------------------------------------------------
@@ -59,6 +66,7 @@ module "sg_lb" {
 ##-----------------------------------------------------
 #tfsec:ignore:aws-ec2-no-public-ingress-sgr
 #tfsec:ignore:aws-ec2-add-description-to-security-group-rule
+
 module "http_https" {
   source  = "clouddrove/security-group/aws"
   version = "2.0.0"
@@ -67,9 +75,25 @@ module "http_https" {
   environment = "test"
   label_order = ["name", "environment"]
 
-  vpc_id        = module.vpc.vpc_id
-  allowed_ip    = ["0.0.0.0/0"]
-  allowed_ports = [80, 443]
+  vpc_id = module.vpc.vpc_id
+  new_sg_ingress_rules_with_cidr_blocks = [
+    {
+      rule_count  = 2
+      from_port   = 80
+      protocol    = "tcp"
+      to_port     = 80
+      cidr_blocks = ["0.0.0.0/0"]
+      description = "Allow http traffic."
+    },
+    {
+      rule_count  = 3
+      from_port   = 443
+      protocol    = "tcp"
+      to_port     = 443
+      cidr_blocks = ["0.0.0.0/0"]
+      description = "Allow https traffic."
+    }
+  ]
 }
 
 ####----------------------------------------------------------------------------------
@@ -108,8 +132,8 @@ module "ecs" {
   subnet_ids = module.subnets.private_subnet_id
 
   ## EC2
-  lb_security_group         = module.sg_lb.security_group_ids
-  service_lb_security_group = [module.sg_lb.security_group_ids, module.http_https.security_group_ids]
+  lb_security_group         = module.sg_lb.security_group_id
+  service_lb_security_group = [module.sg_lb.security_group_id, module.http_https.security_group_id]
   lb_subnet                 = module.subnets.public_subnet_id
   listener_certificate_arn  = module.acm.arn
 
