@@ -132,7 +132,7 @@ data "aws_iam_policy_document" "default" {
 ####----------------------------------------------------------------------------------
 module "acm" {
   source  = "clouddrove/acm/aws"
-  version = "1.3.0"
+  version = "1.4.0"
 
   name        = "certificate"
   environment = "test"
