@@ -54,7 +54,7 @@ module "sg_lb" {
     from_port   = 80
     protocol    = "http"
     to_port     = 80
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = [module.vpc.vpc_cidr_block]
     vpc_id      = module.vpc.vpc_id
     label_order = ["name", "environment"]
     }
@@ -62,10 +62,8 @@ module "sg_lb" {
 }
 
 ##-----------------------------------------------------
-## An AWS security group acts as a virtual firewall for incoming and outgoing traffic with ssh.
+## An AWS security group acts as a virtual firewall for incoming and outgoing traffic.
 ##-----------------------------------------------------
-#tfsec:ignore:aws-ec2-no-public-ingress-sgr
-#tfsec:ignore:aws-ec2-add-description-to-security-group-rule
 
 module "http_https" {
   source  = "clouddrove/security-group/aws"
@@ -82,7 +80,7 @@ module "http_https" {
       from_port   = 80
       protocol    = "tcp"
       to_port     = 80
-      cidr_blocks = ["0.0.0.0/0"]
+      cidr_blocks = [module.vpc.vpc_cidr_block]
       description = "Allow http traffic."
     },
     {
@@ -90,7 +88,7 @@ module "http_https" {
       from_port   = 443
       protocol    = "tcp"
       to_port     = 443
-      cidr_blocks = ["0.0.0.0/0"]
+      cidr_blocks = [module.vpc.vpc_cidr_block]
       description = "Allow https traffic."
     }
   ]
