@@ -57,24 +57,6 @@ module "subnets" {
 ##-----------------------------------------------------
 ## An AWS security group acts as a virtual firewall for incoming and outgoing traffic with ssh.
 ##-----------------------------------------------------
-#tfsec:ignore:aws-ec2-no-public-ingress-sgr
-#tfsec:ignore:aws-ec2-add-description-to-security-group-rule
-module "http_https" {
-  source  = "clouddrove/security-group/aws"
-  version = "2.0.0"
-
-  name        = "http-https"
-  environment = "test"
-  label_order = ["name", "environment"]
-
-  vpc_id        = module.vpc.vpc_id
-  allowed_ip    = ["0.0.0.0/0"]
-  allowed_ports = [80, 443]
-}
-
-##-----------------------------------------------------
-## An AWS security group acts as a virtual firewall for incoming and outgoing traffic with ssh.
-##-----------------------------------------------------
 #tfsec:ignore:aws-ec2-no-public-egress-sgr
 #tfsec:ignore:aws-ec2-add-description-to-security-group-rule
 module "ssh" {
@@ -83,11 +65,45 @@ module "ssh" {
 
   name        = "ssh"
   environment = "test"
+  vpc_id      = module.vpc.vpc_id
+  new_sg_ingress_rules_with_cidr_blocks = [{
+    rule_count  = 1
+    from_port   = 22
+    protocol    = "tcp"
+    to_port     = 22
+    cidr_blocks = [module.vpc.vpc_cidr_block]
+    description = "Allow ssh traffic."
+    }
+  ]
+}
+
+module "http_https" {
+  source  = "clouddrove/security-group/aws"
+  version = "2.0.0"
+
+  name        = "http-https"
+  environment = "test"
   label_order = ["name", "environment"]
 
-  vpc_id        = module.vpc.vpc_id
-  allowed_ip    = [module.vpc.vpc_cidr_block]
-  allowed_ports = [22]
+  vpc_id = module.vpc.vpc_id
+  new_sg_ingress_rules_with_cidr_blocks = [
+    {
+      rule_count  = 2
+      from_port   = 80
+      protocol    = "tcp"
+      to_port     = 80
+      cidr_blocks = [module.vpc.vpc_cidr_block]
+      description = "Allow http traffic."
+    },
+    {
+      rule_count  = 3
+      from_port   = 443
+      protocol    = "tcp"
+      to_port     = 443
+      cidr_blocks = [module.vpc.vpc_cidr_block]
+      description = "Allow https traffic."
+    }
+  ]
 }
 
 ##-----------------------------------------------------
@@ -95,7 +111,7 @@ module "ssh" {
 ##-----------------------------------------------------
 module "kms_key" {
   source  = "clouddrove/kms/aws"
-  version = "1.3.0"
+  version = "1.3.1"
 
   name                     = "kms"
   repository               = "https://github.com/clouddrove/terraform-aws-kms"
@@ -161,7 +177,7 @@ module "ecs" {
   ## Network
   vpc_id                        = module.vpc.vpc_id
   subnet_ids                    = module.subnets.private_subnet_id
-  additional_security_group_ids = [module.ssh.security_group_ids, module.http_https.security_group_ids]
+  additional_security_group_ids = [module.ssh.security_group_id, module.http_https.security_group_id]
   listener_certificate_arn      = module.acm.arn
 
   ## EC2
@@ -172,8 +188,8 @@ module "ecs" {
   min_size                     = 1
   max_size                     = 3
   volume_size                  = 8
-  lb_security_group            = module.ssh.security_group_ids
-  service_lb_security_group    = [module.http_https.security_group_ids]
+  lb_security_group            = module.ssh.security_group_id
+  service_lb_security_group    = [module.http_https.security_group_id]
   cloudwatch_prefix            = "ecs-logs"
 
   ## ECS Cluster
