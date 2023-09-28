@@ -57,23 +57,6 @@ module "subnets" {
 ##-----------------------------------------------------
 ## An AWS security group acts as a virtual firewall for incoming and outgoing traffic with ssh.
 ##-----------------------------------------------------
-module "ssh" {
-  source  = "clouddrove/security-group/aws"
-  version = "2.0.0"
-
-  name        = "ssh"
-  environment = "test"
-  vpc_id      = module.vpc.vpc_id
-  new_sg_ingress_rules_with_cidr_blocks = [{
-    rule_count  = 1
-    from_port   = 22
-    protocol    = "tcp"
-    to_port     = 22
-    cidr_blocks = [module.vpc.vpc_cidr_block]
-    description = "Allow ssh traffic."
-    }
-  ]
-}
 
 module "http_https" {
   source  = "clouddrove/security-group/aws"
@@ -100,6 +83,24 @@ module "http_https" {
       to_port     = 443
       cidr_blocks = [module.vpc.vpc_cidr_block]
       description = "Allow https traffic."
+    }
+  ]
+}
+
+module "ssh" {
+  source  = "clouddrove/security-group/aws"
+  version = "2.0.0"
+
+  name        = "ssh"
+  environment = "test"
+  vpc_id      = module.vpc.vpc_id
+  new_sg_ingress_rules_with_cidr_blocks = [{
+    rule_count  = 1
+    from_port   = 22
+    protocol    = "tcp"
+    to_port     = 22
+    cidr_blocks = [module.vpc.vpc_cidr_block]
+    description = "Allow ssh traffic."
     }
   ]
 }
