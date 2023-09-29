@@ -210,7 +210,7 @@ module "ecs" {
   ## Network
   vpc_id                        = module.vpc.vpc_id
   subnet_ids                    = module.subnets.private_subnet_id
-  additional_security_group_ids = ["${module.ssh.security_group_id}", "${module.http_https.security_group_id}"]
+  additional_security_group_ids = [module.ssh.security_group_id, module.http_https.security_group_id]
   listener_certificate_arn      = module.acm.arn
 
   ## EC2

@@ -162,7 +162,7 @@ module "ecs" {
 
   ## EC2
   lb_security_group         = module.sg_lb.security_group_id
-  service_lb_security_group = ["${module.sg_lb.security_group_id}", "${module.http_https.security_group_id}"]
+  service_lb_security_group = [module.sg_lb.security_group_id, module.http_https.security_group_id]
   lb_subnet                 = module.subnets.public_subnet_id
   listener_certificate_arn  = module.acm.arn
 
