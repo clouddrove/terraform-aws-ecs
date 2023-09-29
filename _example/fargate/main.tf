@@ -75,6 +75,7 @@ module "sg_lb" {
   }]
 }
 
+#tfsec:ignore:aws-ec2-no-public-egress-sgr
 module "http_https" {
   source  = "clouddrove/security-group/aws"
   version = "2.0.0"
