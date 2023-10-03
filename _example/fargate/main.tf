@@ -5,6 +5,10 @@ provider "aws" {
   region = "eu-west-1"
 }
 
+locals {
+  vpc_cidr_block        = module.vpc.vpc_cidr_block
+  additional_cidr_block = "172.16.0.0/16"
+}
 ##---------------------------------------------------------------------------------------------------------------------------
 ## A VPC is a virtual network that closely resembles a traditional network that you'd operate in your own data center.
 ##--------------------------------------------------------------------------------------------------------------------------
@@ -39,26 +43,39 @@ module "subnets" {
   ipv6_cidr_block     = module.vpc.ipv6_cidr_block
 }
 
-##-----------------------------------------------------
-## An AWS security group acts as a virtual firewall for incoming and outgoing traffic.
-##-----------------------------------------------------
+# ################################################################################
+# Security Groups module call
+################################################################################
+
 module "sg_lb" {
   source  = "clouddrove/security-group/aws"
   version = "2.0.0"
 
-  name          = "sglb"
-  environment   = "test"
-  label_order   = ["name", "environment"]
-  vpc_id        = module.vpc.vpc_id
-  allowed_ip    = ["0.0.0.0/0"]
-  allowed_ports = [80]
+  name        = "ssh"
+  environment = "test"
+  label_order = ["name", "environment"]
+  vpc_id      = module.vpc.vpc_id
+  new_sg_ingress_rules_with_cidr_blocks = [{
+    rule_count  = 1
+    from_port   = 22
+    protocol    = "tcp"
+    to_port     = 22
+    cidr_blocks = [local.vpc_cidr_block, local.additional_cidr_block]
+    description = "Allow ssh traffic."
+  }]
+
+  ## EGRESS Rules
+  new_sg_egress_rules_with_cidr_blocks = [{
+    rule_count  = 1
+    from_port   = 22
+    protocol    = "tcp"
+    to_port     = 22
+    cidr_blocks = [local.vpc_cidr_block, local.additional_cidr_block]
+    description = "Allow ssh outbound traffic."
+  }]
 }
 
-##-----------------------------------------------------
-## An AWS security group acts as a virtual firewall for incoming and outgoing traffic with ssh.
-##-----------------------------------------------------
-#tfsec:ignore:aws-ec2-no-public-ingress-sgr
-#tfsec:ignore:aws-ec2-add-description-to-security-group-rule
+#tfsec:ignore:aws-ec2-no-public-egress-sgr
 module "http_https" {
   source  = "clouddrove/security-group/aws"
   version = "2.0.0"
@@ -67,9 +84,45 @@ module "http_https" {
   environment = "test"
   label_order = ["name", "environment"]
 
-  vpc_id        = module.vpc.vpc_id
-  allowed_ip    = ["0.0.0.0/0"]
-  allowed_ports = [80, 443]
+  vpc_id = module.vpc.vpc_id
+  ## INGRESS Rules
+  new_sg_ingress_rules_with_cidr_blocks = [{
+    rule_count  = 1
+    from_port   = 22
+    protocol    = "tcp"
+    to_port     = 22
+    cidr_blocks = [local.vpc_cidr_block]
+    description = "Allow ssh traffic."
+    },
+    {
+      rule_count  = 2
+      from_port   = 80
+      protocol    = "tcp"
+      to_port     = 80
+      cidr_blocks = [local.vpc_cidr_block]
+      description = "Allow http traffic."
+    },
+    {
+      rule_count  = 3
+      from_port   = 443
+      protocol    = "tcp"
+      to_port     = 443
+      cidr_blocks = [local.vpc_cidr_block]
+      description = "Allow https traffic."
+    }
+  ]
+
+  ## EGRESS Rules
+  new_sg_egress_rules_with_cidr_blocks = [{
+    rule_count       = 1
+    from_port        = 0
+    protocol         = "-1"
+    to_port          = 0
+    cidr_blocks      = ["0.0.0.0/0"]
+    ipv6_cidr_blocks = ["::/0"]
+    description      = "Allow all traffic."
+    }
+  ]
 }
 
 ####----------------------------------------------------------------------------------
@@ -108,8 +161,8 @@ module "ecs" {
   subnet_ids = module.subnets.private_subnet_id
 
   ## EC2
-  lb_security_group         = module.sg_lb.security_group_ids
-  service_lb_security_group = [module.sg_lb.security_group_ids, module.http_https.security_group_ids]
+  lb_security_group         = module.sg_lb.security_group_id
+  service_lb_security_group = [module.sg_lb.security_group_id, module.http_https.security_group_id]
   lb_subnet                 = module.subnets.public_subnet_id
   listener_certificate_arn  = module.acm.arn
 
