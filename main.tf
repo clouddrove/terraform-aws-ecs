@@ -108,7 +108,6 @@ module "service" {
   weight_spot                        = var.weight_spot
   base                               = var.base
   subnets                            = var.subnet_ids
-  security_groups                    = var.service_lb_security_group
   assign_public_ip                   = var.assign_public_ip
   lb_subnet                          = var.lb_subnet
   vpc_id                             = var.vpc_id

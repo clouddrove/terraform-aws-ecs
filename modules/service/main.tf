@@ -57,7 +57,7 @@ data "aws_iam_policy_document" "assume_role_ecs" {
 ##-----------------------------------------------------
 module "lb" {
   source  = "clouddrove/alb/aws"
-  version = "1.3.0"
+  version = "2.0.0"
 
   name                       = "alb"
   load_balancer_type         = "application"
@@ -67,7 +67,6 @@ module "lb" {
   with_target_group          = true
   https_enabled              = true
   http_enabled               = true
-  security_groups            = var.security_groups
   subnets                    = var.lb_subnet
   target_id                  = []
   vpc_id                     = var.vpc_id
@@ -128,7 +127,6 @@ resource "aws_ecs_service" "ec2" {
     for_each = var.ec2_awsvpc_enabled ? [1] : []
     content {
       subnets          = var.subnets
-      security_groups  = var.security_groups
       assign_public_ip = var.assign_public_ip
     }
   }
@@ -178,7 +176,6 @@ resource "aws_ecs_service" "fargate" {
 
   network_configuration {
     subnets          = var.subnets
-    security_groups  = var.security_groups
     assign_public_ip = var.assign_public_ip
   }
   depends_on = [

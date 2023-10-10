@@ -455,12 +455,6 @@ variable "weight_spot" {
   description = "The relative percentage of the total number of launched tasks that should use the specified capacity provider."
 }
 
-variable "service_lb_security_group" {
-  type        = list(string)
-  default     = []
-  description = "The service LB security groups."
-}
-
 variable "lb_subnet" {
   type        = list(string)
   default     = []

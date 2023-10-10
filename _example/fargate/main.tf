@@ -130,7 +130,7 @@ module "http_https" {
 ####----------------------------------------------------------------------------------
 module "acm" {
   source  = "clouddrove/acm/aws"
-  version = "1.3.0"
+  version = "1.4.1"
 
   name        = "certificate"
   environment = "test"
@@ -161,10 +161,9 @@ module "ecs" {
   subnet_ids = module.subnets.private_subnet_id
 
   ## EC2
-  lb_security_group         = module.sg_lb.security_group_id
-  service_lb_security_group = [module.sg_lb.security_group_id, module.http_https.security_group_id]
-  lb_subnet                 = module.subnets.public_subnet_id
-  listener_certificate_arn  = module.acm.arn
+  lb_security_group        = module.sg_lb.security_group_id
+  lb_subnet                = module.subnets.public_subnet_id
+  listener_certificate_arn = module.acm.arn
 
   ## Fargate Cluster
   fargate_cluster_enabled = true
