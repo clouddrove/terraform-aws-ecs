@@ -1,6 +1,6 @@
 # Terraform version
 terraform {
-  required_version = ">= 1.6.0"
+  required_version = ">= 1.5.7"
 
   required_providers {
     aws = {
@@ -9,7 +9,7 @@ terraform {
     }
     template = {
       source  = "hashicorp/template"
-      version = ">= 2.1.2"
+      version = "~>2.2.0"
     }
   }
 }
