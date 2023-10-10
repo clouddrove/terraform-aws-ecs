@@ -9,7 +9,7 @@ terraform {
     }
     template = {
       source  = "hashicorp/template"
-      version = ">= 2.2.0"
+      version = ">= 2.1.2"
     }
   }
 }

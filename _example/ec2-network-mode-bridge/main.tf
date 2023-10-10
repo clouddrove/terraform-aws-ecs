@@ -223,7 +223,6 @@ module "ecs" {
   max_size                     = 3
   volume_size                  = 8
   lb_security_group            = module.ssh.security_group_id
-  service_lb_security_group    = [module.http_https.security_group_id]
   cloudwatch_prefix            = "ecs-logs"
 
   ## ECS Cluster
