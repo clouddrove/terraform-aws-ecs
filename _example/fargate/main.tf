@@ -75,56 +75,6 @@ module "sg_lb" {
   }]
 }
 
-#tfsec:ignore:aws-ec2-no-public-egress-sgr
-module "http_https" {
-  source  = "clouddrove/security-group/aws"
-  version = "2.0.0"
-
-  name        = "http-https"
-  environment = "test"
-  label_order = ["name", "environment"]
-
-  vpc_id = module.vpc.vpc_id
-  ## INGRESS Rules
-  new_sg_ingress_rules_with_cidr_blocks = [{
-    rule_count  = 1
-    from_port   = 22
-    protocol    = "tcp"
-    to_port     = 22
-    cidr_blocks = [local.vpc_cidr_block]
-    description = "Allow ssh traffic."
-    },
-    {
-      rule_count  = 2
-      from_port   = 80
-      protocol    = "tcp"
-      to_port     = 80
-      cidr_blocks = [local.vpc_cidr_block]
-      description = "Allow http traffic."
-    },
-    {
-      rule_count  = 3
-      from_port   = 443
-      protocol    = "tcp"
-      to_port     = 443
-      cidr_blocks = [local.vpc_cidr_block]
-      description = "Allow https traffic."
-    }
-  ]
-
-  ## EGRESS Rules
-  new_sg_egress_rules_with_cidr_blocks = [{
-    rule_count       = 1
-    from_port        = 0
-    protocol         = "-1"
-    to_port          = 0
-    cidr_blocks      = ["0.0.0.0/0"]
-    ipv6_cidr_blocks = ["::/0"]
-    description      = "Allow all traffic."
-    }
-  ]
-}
-
 ####----------------------------------------------------------------------------------
 ## This terraform module is used for requesting or importing SSL/TLS certificate with validation.
 ####----------------------------------------------------------------------------------
