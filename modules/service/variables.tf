@@ -187,12 +187,6 @@ variable "vpc_id" {
   description = "VPC ID for the EKS cluster."
 }
 
-variable "security_groups" {
-  type        = list(string)
-  default     = []
-  description = "The security groups associated with the task or service."
-}
-
 variable "assign_public_ip" {
   type        = bool
   default     = false

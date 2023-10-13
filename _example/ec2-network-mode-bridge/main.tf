@@ -181,7 +181,7 @@ data "aws_iam_policy_document" "default" {
 ####----------------------------------------------------------------------------------
 module "acm" {
   source  = "clouddrove/acm/aws"
-  version = "1.3.0"
+  version = "1.4.1"
 
   name        = "certificate"
   environment = "test"
@@ -223,7 +223,6 @@ module "ecs" {
   max_size                     = 3
   volume_size                  = 8
   lb_security_group            = module.ssh.security_group_id
-  service_lb_security_group    = [module.http_https.security_group_id]
   cloudwatch_prefix            = "ecs-logs"
 
   ## ECS Cluster
