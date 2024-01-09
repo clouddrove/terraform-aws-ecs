@@ -8,5 +8,5 @@ jobs:
     secrets:
       GITHUB: ${{ secrets.GITHUB }}
     with:
-      tfcheck: 'ec2-network-mode-bridge / Evaluate Terraform versions (1.6.6, ./_example/ec2-network-mode-bridge/)'
+      tfcheck: 'ec2-network-mode-awsvpc / Check code format'
 ...
