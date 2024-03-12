@@ -22,7 +22,7 @@ module "labels" {
 ##-----------------------------------------------------
 module "iam-role-td" {
   source             = "clouddrove/iam-role/aws"
-  version            = "1.3.0"
+  version            = "1.3.1"
   name               = format("%s-td", var.name)
   environment        = var.environment
   label_order        = var.label_order
