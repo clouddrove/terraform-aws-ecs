@@ -23,7 +23,7 @@ module "labels" {
 ##-----------------------------------------------------
 module "iam-role-ecs" {
   source  = "clouddrove/iam-role/aws"
-  version = "1.3.0"
+  version = "1.3.1"
 
   name               = format("%s-lb", var.name)
   environment        = var.environment
