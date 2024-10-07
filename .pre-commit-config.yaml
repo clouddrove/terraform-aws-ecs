@@ -1,6 +1,6 @@
 repos:
 
-  - repo: git://github.com/antonbabenko/pre-commit-terraform
+  - repo: https://github.com/antonbabenko/pre-commit-terraform
     rev: v1.45.0
 
 
@@ -12,7 +12,7 @@ repos:
 
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v3.4.0
+    rev: v5.0.0
     hooks:
       - id: end-of-file-fixer
       - id: trailing-whitespace
