@@ -9,6 +9,7 @@ locals {
   vpc_cidr_block        = module.vpc.vpc_cidr_block
   additional_cidr_block = "172.16.0.0/16"
 }
+
 ##---------------------------------------------------------------------------------------------------------------------------
 ## A VPC is a virtual network that closely resembles a traditional network that you'd operate in your own data center.
 ##--------------------------------------------------------------------------------------------------------------------------
@@ -34,8 +35,8 @@ module "subnets" {
   repository          = "https://github.com/clouddrove/terraform-aws-subnet"
   environment         = "test"
   label_order         = ["name", "environment"]
-  nat_gateway_enabled = true
-  availability_zones  = ["eu-west-1a", "eu-west-1b"]
+  # nat_gateway_enabled = true
+  availability_zones  = ["eu-west-1a", "eu-west-1b", "eu-west-1c"]
   vpc_id              = module.vpc.vpc_id
   cidr_block          = module.vpc.vpc_cidr_block
   type                = "public-private"
@@ -108,7 +109,7 @@ module "ecs" {
 
   ## Network
   vpc_id     = module.vpc.vpc_id
-  subnet_ids = module.subnets.private_subnet_id
+  subnet_ids = module.subnets.public_subnet_id
 
   ## EC2
   lb_security_group        = module.sg_lb.security_group_id
