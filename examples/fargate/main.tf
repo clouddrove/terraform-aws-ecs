@@ -31,17 +31,17 @@ module "subnets" {
   source  = "clouddrove/subnet/aws"
   version = "2.0.1"
 
-  name                = "subnets"
-  repository          = "https://github.com/clouddrove/terraform-aws-subnet"
-  environment         = "test"
-  label_order         = ["name", "environment"]
+  name        = "subnets"
+  repository  = "https://github.com/clouddrove/terraform-aws-subnet"
+  environment = "test"
+  label_order = ["name", "environment"]
   # nat_gateway_enabled = true
-  availability_zones  = ["eu-west-1a", "eu-west-1b", "eu-west-1c"]
-  vpc_id              = module.vpc.vpc_id
-  cidr_block          = module.vpc.vpc_cidr_block
-  type                = "public-private"
-  igw_id              = module.vpc.igw_id
-  ipv6_cidr_block     = module.vpc.ipv6_cidr_block
+  availability_zones = ["eu-west-1a", "eu-west-1b", "eu-west-1c"]
+  vpc_id             = module.vpc.vpc_id
+  cidr_block         = module.vpc.vpc_cidr_block
+  type               = "public-private"
+  igw_id             = module.vpc.igw_id
+  ipv6_cidr_block    = module.vpc.ipv6_cidr_block
 }
 
 # ################################################################################
@@ -97,50 +97,149 @@ module "acm" {
 ##-----------------------------------------------------------------------------
 ## ecs module call.
 ##-----------------------------------------------------------------------------
-module "ecs" {
-  source = "../../"
+module "ecs_cluster" {
+  source = "../../modules/ecs"
 
-  ## Tags
-  name        = "ecs-fargate"
+  name        = "ecs-fargate-cluster"
   repository  = "https://github.com/clouddrove/terraform-aws-ecs"
   environment = "test"
   label_order = ["name", "environment"]
-  enabled     = true # set to true after VPC, Subnets and Security Groups gets created
-
-  ## Network
-  vpc_id     = module.vpc.vpc_id
-  subnet_ids = module.subnets.public_subnet_id
-
-  ## EC2
-  lb_security_group        = module.sg_lb.security_group_id
-  lb_subnet                = module.subnets.public_subnet_id
-  listener_certificate_arn = module.acm.arn
+  enabled     = true
+  managedby   = "Clouddrove"
 
   ## Fargate Cluster
   fargate_cluster_enabled = true
   ecs_settings_enabled    = "enabled"
   fargate_cluster_cp      = ["FARGATE", "FARGATE_SPOT"]
+}
+
+################################################################################
+# Service 1
+################################################################################
+
+module "ecs_service1" {
+  source = "../../modules/service"
+
+  name        = "ecs-fargate-service1"
+  environment = "test"
+  label_order = ["name", "environment"]
+  enabled     = true
+
+  ## Network
+  vpc_id  = module.vpc.vpc_id
+  subnets = module.subnets.public_subnet_id
+
+  //EC2
+  lb_subnet                = module.subnets.public_subnet_id
+  listener_certificate_arn = module.acm.arn
 
   ## Service
+  fargate_cluster_name             = module.ecs_cluster.fargate_name
+  fargate_task_definition          = module.TASK_DEFINITION.fargate_arn
   fargate_service_enabled          = true
-  desired_count                    = 4
+  desired_count                    = 1
   assign_public_ip                 = true
   propagate_tags                   = "TASK_DEFINITION"
   scheduling_strategy              = "REPLICA"
   container_name                   = "nginx"
   container_port                   = 80
-  target_type                      = "ip"
   weight_simple                    = 1
   weight_spot                      = 2
   base                             = 1
   fargate_capacity_provider_simple = "FARGATE"
   fargate_capacity_provider_spot   = "FARGATE_SPOT"
+  lb_target_group_arn              = module.lb.main_target_group_arn
+}
 
-  ## Task Definition
+module "ecs_service2" {
+  source = "../../modules/service"
+
+  name        = "ecs-fargate-service2"
+  environment = "test"
+  label_order = ["name", "environment"]
+  enabled     = true
+
+  ## Network
+  vpc_id  = module.vpc.vpc_id
+  subnets = module.subnets.public_subnet_id
+
+  //EC2
+  lb_subnet                = module.subnets.public_subnet_id
+  listener_certificate_arn = module.acm.arn
+
+
+  ## Service
+  fargate_cluster_name             = module.ecs_cluster.fargate_name
+  fargate_task_definition          = module.TASK_DEFINITION.fargate_arn
+  fargate_service_enabled          = true
+  desired_count                    = 1
+  assign_public_ip                 = true
+  propagate_tags                   = "TASK_DEFINITION"
+  scheduling_strategy              = "REPLICA"
+  container_name                   = "nginx"
+  container_port                   = 80
+  weight_simple                    = 1
+  weight_spot                      = 2
+  base                             = 1
+  fargate_capacity_provider_simple = "FARGATE"
+  fargate_capacity_provider_spot   = "FARGATE_SPOT"
+  lb_target_group_arn              = module.lb.main_target_group_arn
+}
+
+
+module "TASK_DEFINITION" {
+  source = "../../modules/task-definition"
+
+  name        = "task_1"
+  environment = "test"
+  label_order = ["name", "environment"]
+  enabled     = true
+
   fargate_td_enabled       = true
   cpu                      = 512
   network_mode             = "bridge"
   memory                   = 1024
   file_name                = "./td-fargate.json"
   container_log_group_name = "fargate-container-logs"
+}
+
+module "lb" {
+  source  = "clouddrove/alb/aws"
+  version = "2.0.0"
+
+  name                       = "alb"
+  load_balancer_type         = "application"
+  enable                     = true
+  internal                   = true
+  enable_deletion_protection = false
+  with_target_group          = true
+  https_enabled              = true
+  http_enabled               = true
+  subnets                    = module.subnets.public_subnet_id
+  target_id                  = []
+  vpc_id                     = module.vpc.vpc_id
+  listener_certificate_arn   = module.acm.arn
+
+  https_port        = 443
+  listener_type     = "forward"
+  target_group_port = 80
+  target_groups = [
+    {
+      backend_protocol     = "HTTP"
+      backend_port         = 80
+      target_type          = "ip"
+      deregistration_delay = 300
+      health_check = {
+        enabled             = true
+        interval            = 30
+        path                = "/"
+        port                = "traffic-port"
+        healthy_threshold   = 3
+        unhealthy_threshold = 3
+        timeout             = 10
+        protocol            = "HTTP"
+        matcher             = "200-399"
+      }
+    }
+  ]
 }
