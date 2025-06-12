@@ -10,8 +10,42 @@ locals {
   additional_cidr_block = "172.16.0.0/16"
   environment           = "test"
 
-  container_name = "ecsdemo-frontend"
-  container_port = 3000
+  container_name = "nginx"
+  container_port = 80
+}
+
+module "kms_key" {
+  source  = "clouddrove/kms/aws"
+  version = "1.3.1"
+
+  name                     = "kms"
+  repository               = "https://github.com/clouddrove/terraform-aws-kms"
+  environment              = "test"
+  label_order              = ["name", "environment"]
+  enabled                  = true
+  description              = "KMS key for ecs"
+  alias                    = "alias/ecs"
+  key_usage                = "ENCRYPT_DECRYPT"
+  customer_master_key_spec = "SYMMETRIC_DEFAULT"
+  deletion_window_in_days  = 7
+  is_enabled               = true
+  enable_key_rotation      = false
+  policy                   = data.aws_iam_policy_document.default.json
+}
+
+data "aws_iam_policy_document" "default" {
+  version = "2012-10-17"
+
+  statement {
+    sid    = "Enable IAM User Permissions"
+    effect = "Allow"
+    principals {
+      type        = "AWS"
+      identifiers = ["*"]
+    }
+    actions   = ["kms:*"]
+    resources = ["*"]
+  }
 }
 
 ################################################################################
@@ -22,6 +56,11 @@ module "ecs_cluster" {
   source = "../../modules/cluster"
 
   cluster_name = local.name
+  cluster_configuration = {
+    managed_storage_configuration = {
+      kms_key_id = module.kms_key.key_arn
+    }
+  }
 
   # Capacity provider
   fargate_capacity_providers = {
@@ -37,10 +76,12 @@ module "ecs_cluster" {
       }
     }
   }
+
+  depends_on = [ module.kms_key ]
 }
 
 ################################################################################
-# Service
+# Service and Task Definition
 ################################################################################
 
 module "ecs_service" {
@@ -54,27 +95,16 @@ module "ecs_service" {
 
   # Enables ECS Exec
   enable_execute_command = true
+  assign_public_ip       = true
 
-  # Container definition(s)
+  # Task definition(s)
   container_definitions = {
 
-    fluent-bit = {
+    nginx = {
       cpu       = 512
       memory    = 1024
       essential = true
-      image     = nonsensitive(data.aws_ssm_parameter.fluentbit.value)
-      firelens_configuration = {
-        type = "fluentbit"
-      }
-      memory_reservation = 50
-      user               = "0"
-    }
-
-    (local.container_name) = {
-      cpu       = 512
-      memory    = 1024
-      essential = true
-      image     = "public.ecr.aws/aws-containers/ecsdemo-frontend:776fd50"
+      image     = "nginx:latest"
       port_mappings = [
         {
           name          = local.container_name
@@ -83,42 +113,26 @@ module "ecs_service" {
           protocol      = "tcp"
         }
       ]
+      memory_reservation = 50
+      user               = "0"
 
-      # Example image used requires access to write to root filesystem
       readonly_root_filesystem = false
 
-      dependencies = [{
-        containerName = "fluent-bit"
-        condition     = "START"
-      }]
-
-      enable_cloudwatch_logging = false
       log_configuration = {
-        logDriver = "awsfirelens"
+        logDriver = "awslogs"
         options = {
-          Name                    = "firehose"
-          region                  = local.region
-          delivery_stream         = "my-stream"
-          log-driver-buffer-limit = "2097152"
+          awslogs-group         = "/aws/ecs/${local.name}/nginx"
+          awslogs-region        = local.region
+          awslogs-stream-prefix = "nginx"
         }
       }
 
       linux_parameters = {
         capabilities = {
-          add = []
-          drop = [
-            "NET_RAW"
-          ]
+          add  = []
+          drop = ["NET_RAW"]
         }
       }
-
-      # Not required for fluent-bit, just an example
-      volumes_from = [{
-        sourceContainer = "fluent-bit"
-        readOnly        = false
-      }]
-
-      memory_reservation = 100
     }
   }
 
@@ -133,6 +147,12 @@ module "ecs_service" {
       discovery_name = local.container_name
     }
   }
+
+  # service_registries = {
+  #   registry_arn = aws_service_discovery_private_dns_namespace.this.arn
+  #   container_name = local.container_name
+  #   container_port = local.container_port
+  # }
 
   load_balancer = {
     service = {
@@ -150,7 +170,7 @@ module "ecs_service" {
       to_port                  = local.container_port
       protocol                 = "tcp"
       description              = "Service port"
-      source_security_group_id = module.sg_lb.security_group_id
+      source_security_group_id = module.lb.security_group_id
     }
     egress_all = {
       type        = "egress"
@@ -231,6 +251,12 @@ resource "aws_service_discovery_http_namespace" "this" {
   description = "CloudMap namespace for ${local.name}"
 }
 
+resource "aws_service_discovery_private_dns_namespace" "this" {
+  name        = local.name
+  vpc         = module.vpc.vpc_id
+  description = "Private namespace for ${local.name}"
+}
+
 module "acm" {
   source  = "clouddrove/acm/aws"
   version = "1.4.1"
@@ -244,34 +270,6 @@ module "acm" {
   subject_alternative_names = ["*.clouddrove.ca"]
   validation_method         = "DNS"
   enable_dns_validation     = false
-}
-
-module "sg_lb" {
-  source  = "clouddrove/security-group/aws"
-  version = "2.0.0"
-
-  name        = "ssh"
-  environment = "test"
-  label_order = ["name", "environment"]
-  vpc_id      = module.vpc.vpc_id
-  new_sg_ingress_rules_with_cidr_blocks = [{
-    rule_count  = 1
-    from_port   = 22
-    protocol    = "tcp"
-    to_port     = 22
-    cidr_blocks = [local.vpc_cidr_block, local.additional_cidr_block]
-    description = "Allow ssh traffic."
-  }]
-
-  ## EGRESS Rules
-  new_sg_egress_rules_with_cidr_blocks = [{
-    rule_count  = 1
-    from_port   = 22
-    protocol    = "tcp"
-    to_port     = 22
-    cidr_blocks = [local.vpc_cidr_block, local.additional_cidr_block]
-    description = "Allow ssh outbound traffic."
-  }]
 }
 
 module "lb" {
@@ -347,4 +345,26 @@ module "subnets" {
   type                = "public-private"
   igw_id              = module.vpc.igw_id
   ipv6_cidr_block     = module.vpc.ipv6_cidr_block
+
+  private_inbound_acl_rules = [
+    {
+      rule_number = 100
+      rule_action = "allow"
+      from_port   = 0
+      to_port     = 0
+      protocol    = "-1"
+      cidr_block  = "0.0.0.0/0"
+    },
+  ]
+
+  private_outbound_acl_rules = [
+    {
+      rule_number = 100
+      rule_action = "allow"
+      from_port   = 0
+      to_port     = 0
+      protocol    = "-1"
+      cidr_block  = "0.0.0.0/0"
+    },
+  ]
 }

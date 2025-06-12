@@ -15,10 +15,46 @@ locals {
   container_port = 3000
 
   tags = {
-    Name       = local.name
+    Name        = local.name
     environment = local.environment
-    label_order = local.label_order
-    Repository = "https://github.com/clouddrove/terraform-aws-ecs"
+    Repository  = "https://github.com/clouddrove/terraform-aws-ecs"
+  }
+}
+
+################################################################################
+# KMS Key
+################################################################################
+module "kms_key" {
+  source  = "clouddrove/kms/aws"
+  version = "1.3.1"
+
+  name                     = "kms"
+  repository               = "https://github.com/clouddrove/terraform-aws-kms"
+  environment              = "test"
+  label_order              = ["name", "environment"]
+  enabled                  = true
+  description              = "KMS key for ecs"
+  alias                    = "alias/ecs"
+  key_usage                = "ENCRYPT_DECRYPT"
+  customer_master_key_spec = "SYMMETRIC_DEFAULT"
+  deletion_window_in_days  = 7
+  is_enabled               = true
+  enable_key_rotation      = false
+  policy                   = data.aws_iam_policy_document.default.json
+}
+
+data "aws_iam_policy_document" "default" {
+  version = "2012-10-17"
+
+  statement {
+    sid    = "Enable IAM User Permissions"
+    effect = "Allow"
+    principals {
+      type        = "AWS"
+      identifiers = ["*"]
+    }
+    actions   = ["kms:*"]
+    resources = ["*"]
   }
 }
 
@@ -30,6 +66,11 @@ module "ecs" {
   source = "../../"
 
   cluster_name = local.name
+  cluster_configuration = {
+    managed_storage_configuration = {
+      kms_key_id = module.kms_key.key_arn
+    }
+  }
 
   # Capacity provider
   fargate_capacity_providers = {
@@ -86,6 +127,7 @@ module "ecs" {
 
           # Example image used requires access to write to root filesystem
           readonly_root_filesystem = false
+          assign_public_ip       = true
 
           dependencies = [{
             containerName = "fluent-bit"
@@ -146,7 +188,7 @@ module "ecs" {
           to_port                  = local.container_port
           protocol                 = "tcp"
           description              = "Service port"
-          source_security_group_id = module.sg_lb.security_group_id
+          source_security_group_id = module.lb.security_group_id
         }
         egress_all = {
           type        = "egress"
@@ -158,6 +200,8 @@ module "ecs" {
       }
     }
   }
+
+  depends_on = [module.kms_key]
 
   tags = local.tags
 }
@@ -176,32 +220,19 @@ resource "aws_service_discovery_http_namespace" "this" {
   tags        = local.tags
 }
 
-module "sg_lb" {
-  source  = "clouddrove/security-group/aws"
-  version = "2.0.0"
+module "acm" {
+  source  = "clouddrove/acm/aws"
+  version = "1.4.1"
 
-  name        = "ssh"
+  name        = "certificate"
   environment = "test"
   label_order = ["name", "environment"]
-  vpc_id      = module.vpc.vpc_id
-  new_sg_ingress_rules_with_cidr_blocks = [{
-    rule_count  = 1
-    from_port   = 22
-    protocol    = "tcp"
-    to_port     = 22
-    cidr_blocks = [local.vpc_cidr_block, local.additional_cidr_block]
-    description = "Allow ssh traffic."
-  }]
 
-  ## EGRESS Rules
-  new_sg_egress_rules_with_cidr_blocks = [{
-    rule_count  = 1
-    from_port   = 22
-    protocol    = "tcp"
-    to_port     = 22
-    cidr_blocks = [local.vpc_cidr_block, local.additional_cidr_block]
-    description = "Allow ssh outbound traffic."
-  }]
+  enable_aws_certificate    = true
+  domain_name               = "clouddrove.ca"
+  subject_alternative_names = ["*.clouddrove.ca"]
+  validation_method         = "DNS"
+  enable_dns_validation     = false
 }
 
 module "lb" {
@@ -277,4 +308,26 @@ module "subnets" {
   type                = "public-private"
   igw_id              = module.vpc.igw_id
   ipv6_cidr_block     = module.vpc.ipv6_cidr_block
+
+    private_inbound_acl_rules = [
+    {
+      rule_number = 100
+      rule_action = "allow"
+      from_port   = 0
+      to_port     = 0
+      protocol    = "-1"
+      cidr_block  = "0.0.0.0/0"
+    },
+  ]
+
+  private_outbound_acl_rules = [
+    {
+      rule_number = 100
+      rule_action = "allow"
+      from_port   = 0
+      to_port     = 0
+      protocol    = "-1"
+      cidr_block  = "0.0.0.0/0"
+    },
+  ]
 }

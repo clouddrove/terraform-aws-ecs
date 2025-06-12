@@ -9,6 +9,11 @@ locals {
       cloud_watch_log_group_name = try(aws_cloudwatch_log_group.this[0].name, null)
     }
   }
+
+  managed_storage_configuration = {
+    kms_key_id                           = var.kms_key_id
+    fargate_ephemeral_storage_kms_key_id = var.kms_key_id
+  }
 }
 
 module "labels" {
@@ -49,6 +54,15 @@ resource "aws_ecs_cluster" "this" {
               s3_key_prefix                  = try(log_configuration.value.s3_key_prefix, null)
             }
           }
+        }
+      }
+
+      dynamic "managed_storage_configuration" {
+        for_each = try([merge(local.managed_storage_configuration, configuration.value.managed_storage_configuration)], [{}])
+
+        content {
+          kms_key_id                           = try(managed_storage_configuration.value.kms_key_id, null)
+          fargate_ephemeral_storage_kms_key_id = try(managed_storage_configuration.value.fargate_ephemeral_storage_kms_key_id, null)
         }
       }
     }

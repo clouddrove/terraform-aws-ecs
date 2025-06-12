@@ -9,7 +9,7 @@ locals {
   vpc_cidr_block        = module.vpc.vpc_cidr_block
   additional_cidr_block = "172.16.0.0/16"
   environment           = "test"
-  label_order = ["name", "environment"]
+  label_order           = ["name", "environment"]
 
   container_name = "ecs-sample"
   container_port = 80
