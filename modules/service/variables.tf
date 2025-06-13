@@ -53,6 +53,24 @@ variable "attributes" {
 # Service
 ################################################################################
 
+variable "enable_http_namespace" {
+  description = "Enable CloudMap HTTP namespace"
+  type        = bool
+  default     = false
+}
+
+variable "enable_private_dns_namespace" {
+  description = "Enable CloudMap Private DNS namespace"
+  type        = bool
+  default     = false
+}
+
+variable "dns_namespace_vpc_id" {
+  description = "VPC ID required for private DNS namespace"
+  type        = string
+  default     = null
+}
+
 variable "ignore_task_definition_changes" {
   description = "Whether changes to service `task_definition` changes should be ignored"
   type        = bool

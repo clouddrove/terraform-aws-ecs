@@ -147,7 +147,7 @@ module "ecs_service" {
       to_port                  = local.container_port
       protocol                 = "tcp"
       description              = "Service port"
-      source_security_group_id = module.sg_lb.security_group_id
+      source_security_group_id = module.lb.security_group_id
     }
   }
 }
@@ -159,34 +159,6 @@ module "ecs_service" {
 # https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-optimized_AMI.html#ecs-optimized-ami-linux
 data "aws_ssm_parameter" "ecs_optimized_ami" {
   name = "/aws/service/ecs/optimized-ami/amazon-linux-2/recommended"
-}
-
-module "sg_lb" {
-  source  = "clouddrove/security-group/aws"
-  version = "2.0.0"
-
-  name        = "ssh"
-  environment = "test"
-  label_order = ["name", "environment"]
-  vpc_id      = module.vpc.vpc_id
-  new_sg_ingress_rules_with_cidr_blocks = [{
-    rule_count  = 1
-    from_port   = 22
-    protocol    = "tcp"
-    to_port     = 22
-    cidr_blocks = [local.vpc_cidr_block, local.additional_cidr_block]
-    description = "Allow ssh traffic."
-  }]
-
-  ## EGRESS Rules
-  new_sg_egress_rules_with_cidr_blocks = [{
-    rule_count  = 1
-    from_port   = 22
-    protocol    = "tcp"
-    to_port     = 22
-    cidr_blocks = [local.vpc_cidr_block, local.additional_cidr_block]
-    description = "Allow ssh outbound traffic."
-  }]
 }
 
 module "alb" {
@@ -408,4 +380,26 @@ module "subnets" {
   type                = "public-private"
   igw_id              = module.vpc.igw_id
   ipv6_cidr_block     = module.vpc.ipv6_cidr_block
+
+  private_inbound_acl_rules = [
+    {
+      rule_number = 100
+      rule_action = "allow"
+      from_port   = 0
+      to_port     = 0
+      protocol    = "-1"
+      cidr_block  = "0.0.0.0/0"
+    },
+  ]
+
+  private_outbound_acl_rules = [
+    {
+      rule_number = 100
+      rule_action = "allow"
+      from_port   = 0
+      to_port     = 0
+      protocol    = "-1"
+      cidr_block  = "0.0.0.0/0"
+    },
+  ]
 }

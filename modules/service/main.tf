@@ -39,6 +39,45 @@ module "labels" {
   label_order = var.label_order
 }
 
+resource "aws_service_discovery_private_dns_namespace" "this" {
+  count       = var.enable_private_dns_namespace ? 1 : 0
+  name        = var.name
+  vpc         = var.dns_namespace_vpc_id
+  description = "Private DNS namespace"
+}
+
+resource "time_sleep" "wait_for_namespace" {
+  depends_on = [aws_service_discovery_private_dns_namespace.this]
+
+  create_duration = "30s"
+}
+
+
+# Create service inside that namespace
+resource "aws_service_discovery_service" "this" {
+  count = var.enable_private_dns_namespace ? 1 : 0
+
+  name = var.name
+  namespace_id = aws_service_discovery_private_dns_namespace.this[0].id
+
+  dns_config {
+    namespace_id = aws_service_discovery_private_dns_namespace.this[0].id
+    routing_policy = "MULTIVALUE"
+    dns_records {
+      type = "A"
+      ttl  = 10
+    }
+  }
+
+  health_check_custom_config {
+    failure_threshold = 1
+  }
+
+  depends_on = [
+    aws_service_discovery_private_dns_namespace.this
+  ]
+}
+
 resource "aws_ecs_service" "this" {
   count = local.create_service && !var.ignore_task_definition_changes ? 1 : 0
 
@@ -163,7 +202,8 @@ resource "aws_ecs_service" "this" {
         }
       }
 
-      namespace = lookup(service_connect_configuration.value, "namespace", null)
+      namespace = aws_service_discovery_private_dns_namespace.this[0].name
+
 
       dynamic "service" {
         for_each = try([service_connect_configuration.value.service], [])
@@ -195,7 +235,7 @@ resource "aws_ecs_service" "this" {
       container_name = try(service_registries.value.container_name, null)
       container_port = try(service_registries.value.container_port, null)
       port           = try(service_registries.value.port, null)
-      registry_arn   = service_registries.value.registry_arn
+      registry_arn   = aws_service_discovery_service.this[0].arn
     }
   }
 
@@ -213,7 +253,7 @@ resource "aws_ecs_service" "this" {
   }
 
   depends_on = [
-    aws_iam_role_policy_attachment.service
+    aws_iam_role_policy_attachment.service, aws_service_discovery_service.this, time_sleep.wait_for_namespace
   ]
 
   lifecycle {
@@ -351,7 +391,8 @@ resource "aws_ecs_service" "ignore_task_definition" {
         }
       }
 
-      namespace = lookup(service_connect_configuration.value, "namespace", null)
+      namespace = aws_service_discovery_private_dns_namespace.this[0].name
+
 
       dynamic "service" {
         for_each = try([service_connect_configuration.value.service], [])
@@ -383,7 +424,7 @@ resource "aws_ecs_service" "ignore_task_definition" {
       container_name = try(service_registries.value.container_name, null)
       container_port = try(service_registries.value.container_port, null)
       port           = try(service_registries.value.port, null)
-      registry_arn   = service_registries.value.registry_arn
+      registry_arn   = aws_service_discovery_service.this[0].arn
     }
   }
 
@@ -401,7 +442,7 @@ resource "aws_ecs_service" "ignore_task_definition" {
   }
 
   depends_on = [
-    aws_iam_role_policy_attachment.service
+    aws_iam_role_policy_attachment.service, aws_service_discovery_service.this, time_sleep.wait_for_namespace
   ]
 
   lifecycle {
@@ -1085,7 +1126,7 @@ resource "aws_ecs_task_set" "this" {
       container_name = try(service_registries.value.container_name, null)
       container_port = try(service_registries.value.container_port, null)
       port           = try(service_registries.value.port, null)
-      registry_arn   = service_registries.value.registry_arn
+      registry_arn   = aws_service_discovery_service.this[0].arn
     }
   }
 
@@ -1117,6 +1158,8 @@ resource "aws_ecs_task_set" "this" {
   wait_until_stable_timeout = var.wait_until_stable_timeout
 
   tags = module.labels.tags
+
+  depends_on = [ time_sleep.wait_for_namespace ]
 
   lifecycle {
     ignore_changes = [
@@ -1166,7 +1209,7 @@ resource "aws_ecs_task_set" "ignore_task_definition" {
       container_name = try(service_registries.value.container_name, null)
       container_port = try(service_registries.value.container_port, null)
       port           = try(service_registries.value.port, null)
-      registry_arn   = service_registries.value.registry_arn
+      registry_arn   = aws_service_discovery_service.this[0].arn
     }
   }
 
@@ -1198,6 +1241,8 @@ resource "aws_ecs_task_set" "ignore_task_definition" {
   wait_until_stable_timeout = var.wait_until_stable_timeout
 
   tags = module.labels.tags
+
+  depends_on = [ time_sleep.wait_for_namespace ]
 
   lifecycle {
     ignore_changes = [

@@ -136,8 +136,9 @@ module "ecs_service" {
     }
   }
 
+##### Enabling DNS Namespace for Service Connect and Service Discovery #####
+  enable_private_dns_namespace = true
   service_connect_configuration = {
-    namespace = aws_service_discovery_http_namespace.this.arn
     service = {
       client_alias = {
         port     = local.container_port
@@ -148,11 +149,12 @@ module "ecs_service" {
     }
   }
 
-  # service_registries = {
-  #   registry_arn = aws_service_discovery_private_dns_namespace.this.arn
-  #   container_name = local.container_name
-  #   container_port = local.container_port
-  # }
+##### vpc id for dns namespace attached to service registries #####
+  dns_namespace_vpc_id = module.vpc.vpc_id
+  service_registries = {
+    container_name = local.container_name
+    # container_port = local.container_port
+  }
 
   load_balancer = {
     service = {
@@ -180,6 +182,8 @@ module "ecs_service" {
       cidr_blocks = ["0.0.0.0/0"]
     }
   }
+
+  # depends_on = [ aws_service_discovery_private_dns_namespace.this ]
 
   service_tags = {
     "ServiceTag" = "Tag on service level"
@@ -242,20 +246,28 @@ module "ecs_task_definition" {
 # Supporting Resources
 ################################################################################
 
-data "aws_ssm_parameter" "fluentbit" {
-  name = "/aws/service/aws-for-fluent-bit/stable"
-}
+# resource "aws_service_discovery_private_dns_namespace" "this" {
+#   name        = local.name
+#   vpc         = module.vpc.vpc_id
+#   description = "Private namespace for ${local.name}"
+# }
 
-resource "aws_service_discovery_http_namespace" "this" {
-  name        = local.name
-  description = "CloudMap namespace for ${local.name}"
-}
+# resource "aws_service_discovery_service" "this" {
+#   name = local.name
 
-resource "aws_service_discovery_private_dns_namespace" "this" {
-  name        = local.name
-  vpc         = module.vpc.vpc_id
-  description = "Private namespace for ${local.name}"
-}
+#   dns_config {
+#     namespace_id = aws_service_discovery_private_dns_namespace.this.id
+#     routing_policy = "MULTIVALUE"
+#     dns_records {
+#       type = "A"
+#       ttl  = 10
+#     }
+#   }
+
+#   health_check_custom_config {
+#     failure_threshold = 1
+#   }
+# }
 
 module "acm" {
   source  = "clouddrove/acm/aws"
