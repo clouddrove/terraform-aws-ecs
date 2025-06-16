@@ -4,14 +4,10 @@ provider "aws" {
 
 locals {
   region = "eu-west-1"
-  name   = "clouddrove-${basename(path.cwd)}"
 
   vpc_cidr_block        = module.vpc.vpc_cidr_block
   additional_cidr_block = "172.16.0.0/16"
   environment           = "test"
-
-  container_name = "nginx"
-  container_port = 80
 }
 
 module "kms_key" {
@@ -55,11 +51,15 @@ data "aws_iam_policy_document" "default" {
 module "ecs_cluster" {
   source = "../../modules/cluster"
 
-  cluster_name = local.name
+  cluster_name = "clouddrove-ecs-cluster"
   cluster_configuration = {
     managed_storage_configuration = {
       kms_key_id = module.kms_key.key_arn
     }
+  }
+  cluster_settings = {
+    name  = "containerInsights"
+    value = "enhanced"
   }
 
   # Capacity provider
@@ -77,7 +77,8 @@ module "ecs_cluster" {
     }
   }
 
-  depends_on = [ module.kms_key ]
+
+  depends_on = [module.kms_key]
 }
 
 ################################################################################
@@ -87,15 +88,17 @@ module "ecs_cluster" {
 module "ecs_service" {
   source = "../../modules/service"
 
-  name        = local.name
+  name        = "clouddrove-ecs-service"
   cluster_arn = module.ecs_cluster.arn
-
-  cpu    = 1024
-  memory = 4096
 
   # Enables ECS Exec
   enable_execute_command = true
   assign_public_ip       = true
+
+  // Creating security group for the service
+  create_security_group  = true
+  security_group_name    = "within-service-sg"
+  enable_autoscaling     = false
 
   # Task definition(s)
   container_definitions = {
@@ -107,9 +110,9 @@ module "ecs_service" {
       image     = "nginx:latest"
       port_mappings = [
         {
-          name          = local.container_name
-          containerPort = local.container_port
-          hostPort      = local.container_port
+          name          = "nginx"
+          containerPort = 80
+          hostPort      = 80
           protocol      = "tcp"
         }
       ]
@@ -121,11 +124,16 @@ module "ecs_service" {
       log_configuration = {
         logDriver = "awslogs"
         options = {
-          awslogs-group         = "/aws/ecs/${local.name}/nginx"
+          awslogs-group         = "/aws/ecs/clouddrove-ecs-service/nginx"
           awslogs-region        = local.region
           awslogs-stream-prefix = "nginx"
         }
       }
+
+      secrets = [{
+        "name" : "test/ecs/env-secret",
+        "valueFrom" : "arn:aws:secretsmanager:eu-west-1:924144197303:secret:test/ecs/env-secret-cVgb73"
+      }]
 
       linux_parameters = {
         capabilities = {
@@ -136,31 +144,30 @@ module "ecs_service" {
     }
   }
 
-##### Enabling DNS Namespace for Service Connect and Service Discovery #####
+  ##### Enabling DNS Namespace for Service Connect and Service Discovery #####
   enable_private_dns_namespace = true
   service_connect_configuration = {
     service = {
       client_alias = {
-        port     = local.container_port
-        dns_name = local.container_name
+        port     = 80
+        dns_name = "nginx"
       }
-      port_name      = local.container_name
-      discovery_name = local.container_name
+      port_name      = "nginx"
+      discovery_name = "nginx"
     }
   }
 
-##### vpc id for dns namespace attached to service registries #####
+  ##### vpc id for dns namespace attached to service registries #####
   dns_namespace_vpc_id = module.vpc.vpc_id
   service_registries = {
-    container_name = local.container_name
-    # container_port = local.container_port
+    container_name = "nginx"
   }
 
   load_balancer = {
     service = {
       target_group_arn = module.lb.main_target_group_arn
-      container_name   = local.container_name
-      container_port   = local.container_port
+      container_name   = "nginx"
+      container_port   = 80
     }
   }
 
@@ -168,8 +175,8 @@ module "ecs_service" {
   security_group_rules = {
     alb_ingress_3000 = {
       type                     = "ingress"
-      from_port                = local.container_port
-      to_port                  = local.container_port
+      from_port                = 80
+      to_port                  = 80
       protocol                 = "tcp"
       description              = "Service port"
       source_security_group_id = module.lb.security_group_id
@@ -182,12 +189,6 @@ module "ecs_service" {
       cidr_blocks = ["0.0.0.0/0"]
     }
   }
-
-  # depends_on = [ aws_service_discovery_private_dns_namespace.this ]
-
-  service_tags = {
-    "ServiceTag" = "Tag on service level"
-  }
 }
 
 ################################################################################
@@ -198,7 +199,7 @@ module "ecs_task_definition" {
   source = "../../modules/service"
 
   # Service
-  name           = "${local.name}-standalone"
+  name           = "clouddrove-ecs-standalone-task"
   cluster_arn    = module.ecs_cluster.arn
   create_service = false
 
@@ -245,29 +246,6 @@ module "ecs_task_definition" {
 ################################################################################
 # Supporting Resources
 ################################################################################
-
-# resource "aws_service_discovery_private_dns_namespace" "this" {
-#   name        = local.name
-#   vpc         = module.vpc.vpc_id
-#   description = "Private namespace for ${local.name}"
-# }
-
-# resource "aws_service_discovery_service" "this" {
-#   name = local.name
-
-#   dns_config {
-#     namespace_id = aws_service_discovery_private_dns_namespace.this.id
-#     routing_policy = "MULTIVALUE"
-#     dns_records {
-#       type = "A"
-#       ttl  = 10
-#     }
-#   }
-
-#   health_check_custom_config {
-#     failure_threshold = 1
-#   }
-# }
 
 module "acm" {
   source  = "clouddrove/acm/aws"

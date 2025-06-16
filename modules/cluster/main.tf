@@ -30,7 +30,7 @@ module "labels" {
 resource "aws_ecs_cluster" "this" {
   count = var.create ? 1 : 0
 
-  name = var.cluster_name
+  name = module.labels.id
 
   dynamic "configuration" {
     for_each = var.create_cloudwatch_log_group ? [var.cluster_configuration] : []

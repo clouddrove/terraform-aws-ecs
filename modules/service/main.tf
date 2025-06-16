@@ -143,7 +143,7 @@ resource "aws_ecs_service" "this" {
     }
   }
 
-  name = var.name
+  name = module.labels.id
 
   dynamic "network_configuration" {
     # Set by task set if deployment controller is external
@@ -332,7 +332,7 @@ resource "aws_ecs_service" "ignore_task_definition" {
     }
   }
 
-  name = var.name
+  name = module.labels.id
 
   dynamic "network_configuration" {
     # Set by task set if deployment controller is external
