@@ -97,7 +97,7 @@ module "ecs_service" {
 
   // Creating security group for the service
   create_security_group  = true
-  security_group_name    = "within-service-sg"
+  security_group_name    = "clouddrove-ecs-service-sg"
   enable_autoscaling     = false
 
   # Task definition(s)
