@@ -57,11 +57,11 @@ resource "time_sleep" "wait_for_namespace" {
 resource "aws_service_discovery_service" "this" {
   count = var.enable_private_dns_namespace ? 1 : 0
 
-  name = var.name
+  name         = var.name
   namespace_id = aws_service_discovery_private_dns_namespace.this[0].id
 
   dns_config {
-    namespace_id = aws_service_discovery_private_dns_namespace.this[0].id
+    namespace_id   = aws_service_discovery_private_dns_namespace.this[0].id
     routing_policy = "MULTIVALUE"
     dns_records {
       type = "A"
@@ -179,7 +179,8 @@ resource "aws_ecs_service" "this" {
   scheduling_strategy = local.is_fargate ? "REPLICA" : var.scheduling_strategy
 
   dynamic "service_connect_configuration" {
-    for_each = length(var.service_connect_configuration) > 0 ? [var.service_connect_configuration] : []
+    for_each = var.enable_private_dns_namespace && length(var.service_connect_configuration) > 0 && length(aws_service_discovery_private_dns_namespace.this) > 0 ? [var.service_connect_configuration] : []
+
 
     content {
       enabled = try(service_connect_configuration.value.enabled, true)
@@ -202,7 +203,8 @@ resource "aws_ecs_service" "this" {
         }
       }
 
-      namespace = aws_service_discovery_private_dns_namespace.this[0].name
+      namespace = try(aws_service_discovery_private_dns_namespace.this[0].name, null)
+
 
 
       dynamic "service" {
@@ -368,7 +370,8 @@ resource "aws_ecs_service" "ignore_task_definition" {
   scheduling_strategy = local.is_fargate ? "REPLICA" : var.scheduling_strategy
 
   dynamic "service_connect_configuration" {
-    for_each = length(var.service_connect_configuration) > 0 ? [var.service_connect_configuration] : []
+    for_each = var.enable_private_dns_namespace && length(var.service_connect_configuration) > 0 && length(aws_service_discovery_private_dns_namespace.this) > 0 ? [var.service_connect_configuration] : []
+
 
     content {
       enabled = try(service_connect_configuration.value.enabled, true)
@@ -684,14 +687,14 @@ resource "aws_ecs_task_definition" "this" {
   execution_role_arn = try(aws_iam_role.task_exec[0].arn, var.task_exec_iam_role_arn)
   family             = coalesce(var.family, var.name)
 
-  dynamic "inference_accelerator" {
-    for_each = var.inference_accelerator
+  # dynamic "inference_accelerator" {
+  #   for_each = var.inference_accelerator
 
-    content {
-      device_name = inference_accelerator.value.device_name
-      device_type = inference_accelerator.value.device_type
-    }
-  }
+  #   content {
+  #     device_name = inference_accelerator.value.device_name
+  #     device_type = inference_accelerator.value.device_type
+  #   }
+  # }
 
   ipc_mode     = var.ipc_mode
   memory       = var.memory
@@ -1159,7 +1162,7 @@ resource "aws_ecs_task_set" "this" {
 
   tags = module.labels.tags
 
-  depends_on = [ time_sleep.wait_for_namespace ]
+  depends_on = [time_sleep.wait_for_namespace]
 
   lifecycle {
     ignore_changes = [
@@ -1242,7 +1245,7 @@ resource "aws_ecs_task_set" "ignore_task_definition" {
 
   tags = module.labels.tags
 
-  depends_on = [ time_sleep.wait_for_namespace ]
+  depends_on = [time_sleep.wait_for_namespace]
 
   lifecycle {
     ignore_changes = [

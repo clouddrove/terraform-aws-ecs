@@ -127,7 +127,7 @@ module "ecs" {
 
           # Example image used requires access to write to root filesystem
           readonly_root_filesystem = false
-          assign_public_ip       = true
+          assign_public_ip         = true
 
           dependencies = [{
             containerName = "fluent-bit"
@@ -309,7 +309,7 @@ module "subnets" {
   igw_id              = module.vpc.igw_id
   ipv6_cidr_block     = module.vpc.ipv6_cidr_block
 
-    private_inbound_acl_rules = [
+  private_inbound_acl_rules = [
     {
       rule_number = 100
       rule_action = "allow"

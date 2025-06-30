@@ -31,7 +31,7 @@ module "wrapper" {
   capacity_provider_strategy         = try(each.value.capacity_provider_strategy, var.defaults.capacity_provider_strategy, {})
   cluster_arn                        = try(each.value.cluster_arn, var.defaults.cluster_arn, "")
   container_definition_defaults      = try(each.value.container_definition_defaults, var.defaults.container_definition_defaults, {})
-  container_definitions                   = try(each.value.container_definitions, var.defaults.container_definitions, {})
+  container_definitions              = try(each.value.container_definitions, var.defaults.container_definitions, {})
   cpu                                = try(each.value.cpu, var.defaults.cpu, 1024)
   create                             = try(each.value.create, var.defaults.create, true)
   create_iam_role                    = try(each.value.create_iam_role, var.defaults.create_iam_role, true)

@@ -96,9 +96,9 @@ module "ecs_service" {
   assign_public_ip       = true
 
   // Creating security group for the service
-  create_security_group  = true
-  security_group_name    = "clouddrove-ecs-service-sg"
-  enable_autoscaling     = false
+  create_security_group = true
+  security_group_name   = "clouddrove-ecs-service-sg"
+  enable_autoscaling    = false
 
   # Task definition(s)
   container_definitions = {
