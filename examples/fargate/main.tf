@@ -8,6 +8,8 @@ provider "aws" {
 locals {
   vpc_cidr_block        = module.vpc.vpc_cidr_block
   additional_cidr_block = "172.16.0.0/16"
+  environment = "test"
+  label_order = ["name", "environment"]
 }
 ##---------------------------------------------------------------------------------------------------------------------------
 ## A VPC is a virtual network that closely resembles a traditional network that you'd operate in your own data center.
@@ -18,8 +20,8 @@ module "vpc" {
 
   name        = "vpc"
   repository  = "https://github.com/clouddrove/terraform-aws-vpc"
-  environment = "test"
-  label_order = ["name", "environment"]
+  environment = local.environment
+  label_order = local.label_order
   cidr_block  = "10.10.0.0/16"
 }
 
@@ -32,8 +34,8 @@ module "subnets" {
 
   name                = "subnets"
   repository          = "https://github.com/clouddrove/terraform-aws-subnet"
-  environment         = "test"
-  label_order         = ["name", "environment"]
+  environment         = local.environment
+  label_order         = local.label_order
   nat_gateway_enabled = true
   availability_zones  = ["eu-west-1a", "eu-west-1b"]
   vpc_id              = module.vpc.vpc_id
@@ -52,8 +54,8 @@ module "sg_lb" {
   version = "2.0.0"
 
   name        = "ssh"
-  environment = "test"
-  label_order = ["name", "environment"]
+  environment = local.environment
+  label_order = local.label_order
   vpc_id      = module.vpc.vpc_id
   new_sg_ingress_rules_with_cidr_blocks = [{
     rule_count  = 1
@@ -83,8 +85,8 @@ module "acm" {
   version = "1.4.1"
 
   name        = "certificate"
-  environment = "test"
-  label_order = ["name", "environment"]
+  environment = local.environment
+  label_order = local.label_order
 
   enable_aws_certificate    = true
   domain_name               = "clouddrove.ca"
@@ -102,8 +104,8 @@ module "ecs" {
   ## Tags
   name        = "ecs-fargate"
   repository  = "https://github.com/clouddrove/terraform-aws-ecs"
-  environment = "test"
-  label_order = ["name", "environment"]
+  environment = local.environment
+  label_order = local.label_order
   enabled     = true # set to true after VPC, Subnets and Security Groups gets created
 
   ## Network
