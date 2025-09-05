@@ -5,8 +5,9 @@ data "aws_caller_identity" "current" {}
 locals {
   account_id = data.aws_caller_identity.current.account_id
   partition  = data.aws_partition.current.partition
-  region     = data.aws_region.current.name
+  region     = data.aws_region.current.id
 }
+
 
 ################################################################################
 # Service
@@ -70,7 +71,7 @@ resource "aws_service_discovery_service" "this" {
   }
 
   health_check_custom_config {
-    failure_threshold = 1
+    # failure_threshold = 1
   }
 
   depends_on = [
@@ -182,7 +183,7 @@ resource "aws_ecs_service" "this" {
     for_each = length(var.service_connect_configuration) > 0 ? [var.service_connect_configuration] : []
 
     content {
-      enabled = try(service_connect_configuration.value.enabled, true)
+      enabled = try(service_connect_configuration.value.enabled, false)
 
       dynamic "log_configuration" {
         for_each = try([service_connect_configuration.value.log_configuration], [])
@@ -202,8 +203,7 @@ resource "aws_ecs_service" "this" {
         }
       }
 
-      namespace = aws_service_discovery_private_dns_namespace.this[0].name
-
+      namespace = try(aws_service_discovery_private_dns_namespace.this[0].name, null)
 
       dynamic "service" {
         for_each = try([service_connect_configuration.value.service], [])
@@ -391,7 +391,7 @@ resource "aws_ecs_service" "ignore_task_definition" {
         }
       }
 
-      namespace = aws_service_discovery_private_dns_namespace.this[0].name
+      namespace = try(aws_service_discovery_private_dns_namespace.this[0].id, null)
 
 
       dynamic "service" {

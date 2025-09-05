@@ -20,7 +20,7 @@ locals {
     { for k, v in {
       logDriver = "awslogs",
       options = {
-        awslogs-region        = data.aws_region.current.name,
+        awslogs-region        = data.aws_region.current.id,
         awslogs-group         = try(aws_cloudwatch_log_group.this[0].name, ""),
         awslogs-stream-prefix = "ecs"
       },
