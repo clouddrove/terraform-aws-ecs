@@ -35,12 +35,3 @@ output "services" {
   description = "Map of services created and their attributes"
   value       = module.ecs.services
 }
-
-################################################################################
-# Application Load Balancer
-################################################################################
-
-output "alb_dns_name" {
-  description = "The DNS name of the load balancer"
-  value       = module.lb.dns_name
-}
