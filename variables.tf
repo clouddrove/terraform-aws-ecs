@@ -48,24 +48,6 @@ variable "create" {
   default     = true
 }
 
-# variable "tags" {
-#   description = "A map of tags to add to all resources"
-#   type        = map(string)
-#   default     = {}
-# }
-
-# variable "environment" {
-#   type        = string
-#   default     = ""
-#   description = "Environment (e.g. `prod`, `dev`, `staging`)."
-# }
-
-# variable "label_order" {
-#   type        = list(any)
-#   default     = ["name", "environment"]
-#   description = "Label order, e.g. `name`,`application`."
-# }
-
 ################################################################################
 # Cluster
 ################################################################################
