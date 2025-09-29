@@ -4,7 +4,8 @@ provider "aws" {
 
 locals {
   region = "eu-west-1"
-  name   = "clouddrove-${basename(path.cwd)}"
+  # name   = "clouddrove-${basename(path.cwd)}"
+  name   = "clouddrove"
 
   vpc_cidr_block        = module.vpc.vpc_cidr_block
   additional_cidr_block = "172.16.0.0/16"
