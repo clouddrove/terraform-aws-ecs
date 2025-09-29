@@ -22,6 +22,19 @@ locals {
   }
 }
 
+
+module "keypair" {
+  source  = "clouddrove/keypair/aws"
+  version = "1.3.1"
+
+  name                       = "${local.name}-key"
+  environment                = local.environment
+  public_key                 = ""
+  create_private_key_enabled = true
+  enable_key_pair            = true
+}
+
+
 ################################################################################
 # Cluster
 ################################################################################
@@ -36,7 +49,7 @@ module "ecs_cluster" {
   autoscaling_capacity_providers = {
     # On-demand instances
     ex_1 = {
-      auto_scaling_group_arn         = module.autoscaling["ex_1"].autoscaling_group_arn
+      auto_scaling_group_arn         = module.ec2-autoscale["ex_1"].autoscaling_group_arn
       managed_termination_protection = "ENABLED"
 
       managed_scaling = {
@@ -53,7 +66,7 @@ module "ecs_cluster" {
     }
     # Spot instances
     ex_2 = {
-      auto_scaling_group_arn         = module.autoscaling["ex_2"].autoscaling_group_arn
+      auto_scaling_group_arn         = module.ec2-autoscale["ex_2"].autoscaling_group_arn
       managed_termination_protection = "ENABLED"
 
       managed_scaling = {
@@ -133,7 +146,7 @@ module "ecs_service" {
 
   load_balancer = {
     service = {
-      target_group_arn = module.lb.main_target_group_arn
+      target_group_arns           = []
       container_name   = local.container_name
       container_port   = local.container_port
     }
@@ -150,6 +163,64 @@ module "ecs_service" {
       source_security_group_id = module.lb.security_group_id
     }
   }
+}
+
+
+
+module "acm" {
+  source  = "clouddrove/acm/aws"
+  version = "1.4.1"
+
+  name        = "certificate"
+  environment = "test"
+  label_order = ["name", "environment"]
+
+  enable_aws_certificate    = true
+  domain_name               = "clouddrove.ca"
+  subject_alternative_names = ["*.clouddrove.ca"]
+  validation_method         = "DNS"
+  enable_dns_validation     = false
+}
+
+module "lb" {
+  source  = "clouddrove/alb/aws"
+  version = "2.0.0"
+
+  name                       = "alb"
+  load_balancer_type         = "application"
+  enable                     = true
+  internal                   = true
+  enable_deletion_protection = false
+  with_target_group          = true
+  https_enabled              = true
+  http_enabled               = true
+  subnets                    = module.subnets.public_subnet_id
+  target_id                  = []
+  vpc_id                     = module.vpc.vpc_id
+  listener_certificate_arn   = module.acm.arn
+
+  https_port        = 443
+  listener_type     = "forward"
+  target_group_port = 80
+  target_groups = [
+    {
+      backend_protocol     = "HTTP"
+      backend_port         = 80
+      target_type          = "ip"
+      deregistration_delay = 300
+      health_check = {
+        enabled             = true
+        interval            = 30
+        path                = "/"
+        port                = "traffic-port"
+        healthy_threshold   = 3
+        unhealthy_threshold = 3
+        timeout             = 10
+        protocol            = "HTTP"
+        matcher             = "200-399"
+      }
+    }
+  ]
 }
 
 ################################################################################
@@ -187,7 +258,7 @@ module "alb" {
   security_group_egress_rules = {
     all = {
       ip_protocol = "-1"
-      cidr_ipv4   = module.vpc.cidr_ipv4
+      cidr_block          = module.vpc.vpc_cidr_block
     }
   }
 

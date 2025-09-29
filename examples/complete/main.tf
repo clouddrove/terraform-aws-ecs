@@ -66,9 +66,9 @@ data "aws_iam_policy_document" "default" {
 module "ecs" {
   source = "../../"
 
-  cluster_name = local.name
-  # environment = local.environment
-  # label_order = local.label_order
+  name = local.name
+  environment = local.environment
+  label_order = local.label_order
   cluster_configuration = {
     managed_storage_configuration = {
       kms_key_id = module.kms_key.key_arn

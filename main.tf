@@ -1,3 +1,20 @@
+#Module      : label
+#Description : Terraform module to create consistent naming for multiple names.
+
+module "labels" {
+  source  = "clouddrove/labels/aws"
+  version = "1.3.0"
+
+  name        = var.name
+  repository  = var.repository
+  environment = var.environment
+  managedby   = var.managedby
+  attributes  = compact(concat(var.attributes, ["cluster"]))
+  extra_tags  = var.tags
+  label_order = var.label_order
+}
+
+
 ################################################################################
 # Cluster
 ################################################################################
@@ -8,7 +25,7 @@ module "cluster" {
   create = var.create
 
   # Cluster
-  cluster_name                     = var.cluster_name
+  cluster_name                     = module.labels.id
   cluster_configuration            = var.cluster_configuration
   cluster_settings                 = var.cluster_settings
   cluster_service_connect_defaults = var.cluster_service_connect_defaults

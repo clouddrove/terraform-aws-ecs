@@ -4,10 +4,12 @@ provider "aws" {
 
 locals {
   region = "eu-west-1"
+  name   = "clouddrove"
 
   vpc_cidr_block        = module.vpc.vpc_cidr_block
   additional_cidr_block = "172.16.0.0/16"
   environment           = "test"
+  label_order           = ["name", "environment"]
 }
 
 module "kms_key" {
@@ -51,7 +53,9 @@ data "aws_iam_policy_document" "default" {
 module "ecs_cluster" {
   source = "../../modules/cluster"
 
-  cluster_name = "clouddrove-ecs-cluster"
+  name = local.name
+  environment = local.environment
+  label_order = local.label_order
   cluster_configuration = {
     managed_storage_configuration = {
       kms_key_id = module.kms_key.key_arn

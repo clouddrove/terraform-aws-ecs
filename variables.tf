@@ -1,13 +1,15 @@
-variable "create" {
-  description = "Determines whether resources will be created (affects all resources)"
-  type        = bool
-  default     = true
+#Module      : LABEL
+#Description : Terraform label module variables.
+variable "name" {
+  type        = string
+  default     = ""
+  description = "Name  (e.g. `app` or `cluster`)."
 }
 
-variable "tags" {
-  description = "A map of tags to add to all resources"
-  type        = map(string)
-  default     = {}
+variable "repository" {
+  type        = string
+  default     = "https://github.com/clouddrove/terraform-aws-eks"
+  description = "Terraform current module repo"
 }
 
 variable "environment" {
@@ -21,6 +23,48 @@ variable "label_order" {
   default     = ["name", "environment"]
   description = "Label order, e.g. `name`,`application`."
 }
+
+variable "managedby" {
+  type        = string
+  default     = "hello@clouddrove.com"
+  description = "ManagedBy, eg 'CloudDrove' or 'AnmolNagpal'."
+}
+
+variable "attributes" {
+  type        = list(any)
+  default     = []
+  description = "Additional attributes (e.g. `1`)."
+}
+
+variable "tags" {
+  type        = map(any)
+  default     = {}
+  description = "Additional tags (e.g. map(`BusinessUnit`,`XYZ`)."
+}
+
+variable "create" {
+  description = "Determines whether resources will be created (affects all resources)"
+  type        = bool
+  default     = true
+}
+
+# variable "tags" {
+#   description = "A map of tags to add to all resources"
+#   type        = map(string)
+#   default     = {}
+# }
+
+# variable "environment" {
+#   type        = string
+#   default     = ""
+#   description = "Environment (e.g. `prod`, `dev`, `staging`)."
+# }
+
+# variable "label_order" {
+#   type        = list(any)
+#   default     = ["name", "environment"]
+#   description = "Label order, e.g. `name`,`application`."
+# }
 
 ################################################################################
 # Cluster
