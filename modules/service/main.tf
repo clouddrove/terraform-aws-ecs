@@ -69,9 +69,7 @@ resource "aws_service_discovery_service" "this" {
     }
   }
 
-  health_check_custom_config {
-    failure_threshold = 1
-  }
+  health_check_custom_config {}
 
   depends_on = [
     aws_service_discovery_private_dns_namespace.this
