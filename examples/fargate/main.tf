@@ -30,7 +30,7 @@ module "vpc" {
 ##-----------------------------------------------------
 module "subnets" {
   source  = "clouddrove/subnet/aws"
-  version = "2.0.1"
+  version = "2.0.2"
 
   name                = "subnets"
   repository          = "https://github.com/clouddrove/terraform-aws-subnet"
