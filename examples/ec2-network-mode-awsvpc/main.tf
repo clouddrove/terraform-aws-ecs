@@ -146,7 +146,7 @@ module "http_https" {
 ##-----------------------------------------------------
 module "kms_key" {
   source  = "clouddrove/kms/aws"
-  version = "1.3.1"
+  version = "1.3.2"
 
   name                     = "kms"
   repository               = "https://github.com/clouddrove/terraform-aws-kms"
