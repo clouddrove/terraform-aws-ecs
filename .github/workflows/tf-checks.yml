@@ -3,7 +3,7 @@ on:
   push:
     branches: [ master ]
   pull_request:
-  workflow_dispatch: 
+  workflow_dispatch:
 jobs:
   ec2-network-mode-awsvpc:
     uses: clouddrove/github-shared-workflows/.github/workflows/tf-checks.yml@master
