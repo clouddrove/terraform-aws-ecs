@@ -51,7 +51,7 @@ module "subnets" {
 
 module "sg_lb" {
   source  = "clouddrove/security-group/aws"
-  version = "2.0.0"
+  version = "2.0.2"
 
   name        = "ssh"
   environment = local.environment
