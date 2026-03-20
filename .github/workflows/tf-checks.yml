@@ -9,12 +9,15 @@ jobs:
     uses: clouddrove/github-shared-workflows/.github/workflows/tf-checks.yml@master
     with:
       working_directory: './examples/ec2-network-mode-awsvpc/'
+      provider: none
   ec2-network-mode-bridge:
     uses: clouddrove/github-shared-workflows/.github/workflows/tf-checks.yml@master
     with:
       working_directory: './examples/ec2-network-mode-bridge/'
+      provider: none
   fargate:
     uses: clouddrove/github-shared-workflows/.github/workflows/tf-checks.yml@master
     with:
       working_directory: './examples/fargate/'
+      provider: none
 
