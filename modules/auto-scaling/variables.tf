@@ -6,6 +6,12 @@ variable "name" {
   description = "Name  (e.g. `app` or `cluster`)."
 }
 
+variable "tags" {
+  type        = map(any)
+  default     = {}
+  description = "Additional tags (e.g. map(`BusinessUnit`,`XYZ`)."
+}
+
 variable "repository" {
   type        = string
   default     = ""
