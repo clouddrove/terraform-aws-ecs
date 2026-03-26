@@ -5,6 +5,7 @@ on:
   pull_request:
 jobs:
   ec2-network-mode-awsvpc:
+    if: github.actor != 'dependabot[bot]'
     uses: clouddrove/github-shared-workflows/.github/workflows/tf-checks.yml@master
     with:
       working_directory: './examples/ec2-network-mode-awsvpc/'
@@ -12,6 +13,7 @@ jobs:
     secrets: 
       BUILD_ROLE: ${{ secrets.BUILD_ROLE }}
   ec2-network-mode-bridge:
+    if: github.actor != 'dependabot[bot]'
     uses: clouddrove/github-shared-workflows/.github/workflows/tf-checks.yml@master
     with:
       working_directory: './examples/ec2-network-mode-bridge/'
@@ -19,6 +21,7 @@ jobs:
     secrets: 
       BUILD_ROLE: ${{ secrets.BUILD_ROLE }}
   fargate:
+    if: github.actor != 'dependabot[bot]'
     uses: clouddrove/github-shared-workflows/.github/workflows/tf-checks.yml@master
     with:
       working_directory: './examples/fargate/'
