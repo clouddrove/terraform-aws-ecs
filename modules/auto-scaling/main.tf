@@ -20,7 +20,7 @@ module "labels" {
 ##-----------------------------------------------------
 module "iam-role" {
   source  = "clouddrove/iam-role/aws"
-  version = "1.3.2"
+  version = "1.3.4"
 
   name               = format("%s-instance-role", var.name)
   repository         = var.repository
