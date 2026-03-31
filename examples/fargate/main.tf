@@ -30,7 +30,7 @@ module "vpc" {
 ##-----------------------------------------------------
 module "subnets" {
   source  = "clouddrove/subnet/aws"
-  version = "2.0.1"
+  version = "2.0.2"
 
   name                = "subnets"
   repository          = "https://github.com/clouddrove/terraform-aws-subnet"
@@ -51,7 +51,7 @@ module "subnets" {
 
 module "sg_lb" {
   source  = "clouddrove/security-group/aws"
-  version = "2.0.0"
+  version = "2.0.2"
 
   name        = "ssh"
   environment = local.environment
@@ -82,7 +82,7 @@ module "sg_lb" {
 ####----------------------------------------------------------------------------------
 module "acm" {
   source  = "clouddrove/acm/aws"
-  version = "1.4.1"
+  version = "1.4.2"
 
   name        = "certificate"
   environment = local.environment

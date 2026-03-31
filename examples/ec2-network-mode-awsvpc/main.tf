@@ -16,7 +16,7 @@ locals {
 ##--------------------------------------------------------------------------------------------------------------------------
 module "keypair" {
   source  = "clouddrove/keypair/aws"
-  version = "1.3.1"
+  version = "1.3.2"
 
   name                       = "key"
   environment                = local.environment
@@ -66,7 +66,7 @@ module "subnets" {
 
 module "ssh" {
   source  = "clouddrove/security-group/aws"
-  version = "2.0.0"
+  version = "2.0.2"
 
   name        = "ssh"
   environment = local.environment
@@ -94,7 +94,7 @@ module "ssh" {
 #tfsec:ignore:aws-ec2-no-public-egress-sgr
 module "http_https" {
   source  = "clouddrove/security-group/aws"
-  version = "2.0.0"
+  version = "2.0.2"
 
   name        = "http-https"
   environment = local.environment
@@ -146,7 +146,7 @@ module "http_https" {
 ##-----------------------------------------------------
 module "kms_key" {
   source  = "clouddrove/kms/aws"
-  version = "1.3.1"
+  version = "1.3.2"
 
   name                     = "kms"
   repository               = "https://github.com/clouddrove/terraform-aws-kms"
@@ -183,7 +183,7 @@ data "aws_iam_policy_document" "default" {
 ####----------------------------------------------------------------------------------
 module "acm" {
   source  = "clouddrove/acm/aws"
-  version = "1.4.1"
+  version = "1.4.2"
 
   name        = "certificate"
   environment = local.environment
