@@ -11,6 +11,7 @@ jobs:
       working_directory: './examples/ec2-network-mode-awsvpc/'
       provider: aws
       enable_plan: true
+      show_plan: false
     secrets: 
       BUILD_ROLE: ${{ secrets.BUILD_ROLE }}
   ec2-network-mode-bridge:
@@ -20,6 +21,7 @@ jobs:
       working_directory: './examples/ec2-network-mode-bridge/'
       provider: aws
       enable_plan: true
+      show_plan: false
     secrets: 
       BUILD_ROLE: ${{ secrets.BUILD_ROLE }}
   fargate:
@@ -29,6 +31,7 @@ jobs:
       working_directory: './examples/fargate/'
       provider: aws
       enable_plan: true
+      show_plan: false
     secrets: 
       BUILD_ROLE: ${{ secrets.BUILD_ROLE }}
 
