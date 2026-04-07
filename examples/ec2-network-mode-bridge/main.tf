@@ -8,8 +8,8 @@ provider "aws" {
 locals {
   vpc_cidr_block        = module.vpc.vpc_cidr_block
   additional_cidr_block = "172.16.0.0/16"
-  environment = "test"
-  label_order = ["name", "environment"]
+  environment           = "test"
+  label_order           = ["name", "environment"]
 }
 ##---------------------------------------------------------------------------------------------------------------------------
 ## A key pair is a combination of a public key that is used to encrypt data and a private key that is used to decrypt data.
