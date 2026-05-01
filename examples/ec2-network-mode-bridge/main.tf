@@ -16,7 +16,7 @@ locals {
 ##--------------------------------------------------------------------------------------------------------------------------
 module "keypair" {
   source  = "clouddrove/keypair/aws"
-  version = "1.3.2"
+  version = "1.3.3"
 
   name                       = "key"
   environment                = local.environment
