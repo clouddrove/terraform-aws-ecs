@@ -41,6 +41,12 @@ variable "managedby" {
   default     = "hello@clouddrove.com"
   description = "ManagedBy, eg 'CloudDrove'."
 }
+variable "extra_tags" {
+  type        = map(string)
+  default     = {}
+  description = "Additional tags (e.g. map(`CostCenter`,`platform`))."
+}
+
 
 variable "delimiter" {
   type        = string

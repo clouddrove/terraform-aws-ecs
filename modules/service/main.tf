@@ -16,6 +16,7 @@ module "labels" {
   delimiter   = var.delimiter
   attributes  = compact(concat(var.attributes, ["service"]))
   label_order = var.label_order
+  extra_tags  = var.extra_tags
 }
 
 ##-----------------------------------------------------

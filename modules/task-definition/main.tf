@@ -15,6 +15,7 @@ module "labels" {
   managedby   = var.managedby
   delimiter   = var.delimiter
   label_order = var.label_order
+  extra_tags  = var.extra_tags
 }
 
 ##-----------------------------------------------------
