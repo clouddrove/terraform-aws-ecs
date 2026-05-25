@@ -16,14 +16,13 @@ locals {
 ##--------------------------------------------------------------------------------------------------------------------------
 module "keypair" {
   source  = "clouddrove/keypair/aws"
-  version = "1.3.1"
+  version = "1.3.4"
 
-  name                       = "key"
-  environment                = local.environment
-  label_order                = ["environment", "name"]
-  public_key                 = ""
-  create_private_key_enabled = true
-  enable_key_pair            = true
+  name            = "key"
+  environment     = local.environment
+  label_order     = ["environment", "name"]
+  public_key      = ""
+  enable_key_pair = true
 }
 
 ##---------------------------------------------------------------------------------------------------------------------------
@@ -146,7 +145,7 @@ module "http_https" {
 ##-----------------------------------------------------
 module "kms_key" {
   source  = "clouddrove/kms/aws"
-  version = "1.3.1"
+  version = "1.3.3"
 
   name                     = "kms"
   repository               = "https://github.com/clouddrove/terraform-aws-kms"
@@ -158,7 +157,6 @@ module "kms_key" {
   key_usage                = "ENCRYPT_DECRYPT"
   customer_master_key_spec = "SYMMETRIC_DEFAULT"
   deletion_window_in_days  = 7
-  is_enabled               = true
   enable_key_rotation      = false
   policy                   = data.aws_iam_policy_document.default.json
 }
