@@ -1,6 +1,7 @@
 locals {
-  ec2_enabled     = var.enabled && var.ec2_service_enabled ? true : false
-  fargate_enabled = var.enabled && var.fargate_service_enabled ? true : false
+  ec2_enabled          = var.enabled && var.ec2_service_enabled ? true : false
+  ecs_iam_role_enabled = var.enabled && var.network_mode == "bridge" ? true : false
+  fargate_enabled      = var.enabled && var.fargate_service_enabled ? true : false
 }
 
 ##-----------------------------------------------------------------------------
@@ -22,18 +23,30 @@ module "labels" {
 ##-----------------------------------------------------
 ## When your trusted identities assume IAM roles, they are granted only the permissions scoped by those IAM roles.
 ##-----------------------------------------------------
-module "iam-role-ecs" {
-  source  = "clouddrove/iam-role/aws"
-  version = "1.3.2"
+module "iam_role_ecs_labels" {
+  source  = "clouddrove/labels/aws"
+  version = "1.3.0"
 
-  name               = format("%s-lb", var.name)
-  environment        = var.environment
-  label_order        = var.label_order
-  enabled            = var.enabled && var.network_mode == "bridge" ? true : false
+  enabled     = local.ecs_iam_role_enabled
+  name        = format("%s-lb", var.name)
+  environment = var.environment
+  managedby   = var.managedby
+  delimiter   = var.delimiter
+  label_order = var.label_order
+  extra_tags  = var.extra_tags
+}
+
+resource "aws_iam_role" "ecs_service" {
+  count              = local.ecs_iam_role_enabled ? 1 : 0
+  name               = module.iam_role_ecs_labels.id
   assume_role_policy = data.aws_iam_policy_document.assume_role_ecs.json
+  tags               = module.iam_role_ecs_labels.tags
+}
 
-  policy_enabled = true
-  policy_arn     = "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceRole"
+resource "aws_iam_role_policy_attachment" "ecs_service" {
+  count      = local.ecs_iam_role_enabled ? 1 : 0
+  role       = aws_iam_role.ecs_service[0].id
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceRole"
 }
 
 data "aws_iam_policy_document" "assume_role_ecs" {
@@ -110,7 +123,7 @@ resource "aws_ecs_service" "ec2" {
   enable_ecs_managed_tags            = var.enable_ecs_managed_tags
   health_check_grace_period_seconds  = var.health_check_grace_period_seconds
   launch_type                        = "EC2"
-  iam_role                           = var.network_mode == "bridge" ? module.iam-role-ecs.arn : ""
+  iam_role                           = var.network_mode == "bridge" ? aws_iam_role.ecs_service[0].arn : ""
   propagate_tags                     = var.propagate_tags
   scheduling_strategy                = var.scheduling_strategy
   task_definition                    = var.ec2_task_definition
@@ -132,7 +145,7 @@ resource "aws_ecs_service" "ec2" {
     }
   }
   depends_on = [
-    module.iam-role-ecs,
+    aws_iam_role_policy_attachment.ecs_service,
     module.lb
   ]
 }

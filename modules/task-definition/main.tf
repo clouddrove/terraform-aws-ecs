@@ -1,6 +1,7 @@
 locals {
-  ec2_enabled     = var.enabled && var.ec2_td_enabled ? true : false
-  fargate_enabled = var.enabled && var.fargate_td_enabled ? true : false
+  ec2_enabled         = var.enabled && var.ec2_td_enabled ? true : false
+  fargate_enabled     = var.enabled && var.fargate_td_enabled ? true : false
+  td_iam_role_enabled = var.enabled && (var.ec2_td_enabled || var.fargate_td_enabled) ? true : false
 }
 
 ##-----------------------------------------------------------------------------
@@ -21,16 +22,30 @@ module "labels" {
 ##-----------------------------------------------------
 ## When your trusted identities assume IAM roles, they are granted only the permissions scoped by those IAM roles.
 ##-----------------------------------------------------
-module "iam-role-td" {
-  source             = "clouddrove/iam-role/aws"
-  version            = "1.3.2"
-  name               = format("%s-td", var.name)
-  environment        = var.environment
-  label_order        = var.label_order
-  enabled            = var.enabled
+module "iam_role_td_labels" {
+  source  = "clouddrove/labels/aws"
+  version = "1.3.0"
+
+  enabled     = local.td_iam_role_enabled
+  name        = format("%s-td", var.name)
+  environment = var.environment
+  managedby   = var.managedby
+  delimiter   = var.delimiter
+  label_order = var.label_order
+  extra_tags  = var.extra_tags
+}
+
+resource "aws_iam_role" "task_execution" {
+  count              = local.td_iam_role_enabled ? 1 : 0
+  name               = module.iam_role_td_labels.id
   assume_role_policy = data.aws_iam_policy_document.assume_role_td.json
-  policy_enabled     = true
-  policy_arn         = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+  tags               = module.iam_role_td_labels.tags
+}
+
+resource "aws_iam_role_policy_attachment" "task_execution" {
+  count      = local.td_iam_role_enabled ? 1 : 0
+  role       = aws_iam_role.task_execution[0].id
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
 }
 
 data "aws_iam_policy_document" "assume_role_td" {
@@ -53,7 +68,7 @@ resource "aws_ecs_task_definition" "ec2" {
   family                   = module.labels.id
   container_definitions    = file(var.file_name)
   task_role_arn            = var.task_role_arn
-  execution_role_arn       = module.iam-role-td.arn
+  execution_role_arn       = aws_iam_role.task_execution[0].arn
   network_mode             = var.network_mode
   ipc_mode                 = var.ipc_mode
   pid_mode                 = var.pid_mode
@@ -82,7 +97,7 @@ resource "aws_ecs_task_definition" "fargate" {
   family                   = module.labels.id
   container_definitions    = file(var.file_name)
   task_role_arn            = var.task_role_arn
-  execution_role_arn       = module.iam-role-td.arn
+  execution_role_arn       = aws_iam_role.task_execution[0].arn
   network_mode             = "awsvpc"
   cpu                      = var.cpu
   memory                   = var.memory
