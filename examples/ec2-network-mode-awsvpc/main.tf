@@ -16,13 +16,12 @@ locals {
 ##--------------------------------------------------------------------------------------------------------------------------
 module "keypair" {
   source  = "clouddrove/keypair/aws"
-  version = "1.3.1"
+  version = "1.3.4"
 
   name                       = "key"
   environment                = local.environment
   label_order                = ["environment", "name"]
   public_key                 = ""
-  create_private_key_enabled = true
   enable_key_pair            = true
 }
 
