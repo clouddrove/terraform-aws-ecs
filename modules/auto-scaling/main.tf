@@ -12,6 +12,7 @@ module "labels" {
   managedby   = var.managedby
   attributes  = compact(concat(var.attributes, ["autoscaling"]))
   label_order = var.label_order
+  extra_tags  = var.extra_tags
 }
 
 ##-----------------------------------------------------

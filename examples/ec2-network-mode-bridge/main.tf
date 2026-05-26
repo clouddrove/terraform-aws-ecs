@@ -8,8 +8,8 @@ provider "aws" {
 locals {
   vpc_cidr_block        = module.vpc.vpc_cidr_block
   additional_cidr_block = "172.16.0.0/16"
-  environment = "test"
-  label_order = ["name", "environment"]
+  environment           = "test"
+  label_order           = ["name", "environment"]
 }
 ##---------------------------------------------------------------------------------------------------------------------------
 ## A key pair is a combination of a public key that is used to encrypt data and a private key that is used to decrypt data.
@@ -18,12 +18,11 @@ module "keypair" {
   source  = "clouddrove/keypair/aws"
   version = "1.3.4"
 
-  name                       = "key"
-  environment                = local.environment
-  label_order                = ["environment", "name"]
-  public_key                 = ""
-  create_private_key_enabled = true
-  enable_key_pair            = true
+  name            = "key"
+  environment     = local.environment
+  label_order     = ["environment", "name"]
+  public_key      = ""
+  enable_key_pair = true
 }
 
 ##---------------------------------------------------------------------------------------------------------------------------
@@ -159,7 +158,6 @@ module "kms_key" {
   key_usage                = "ENCRYPT_DECRYPT"
   customer_master_key_spec = "SYMMETRIC_DEFAULT"
   deletion_window_in_days  = 7
-  is_enabled               = true
   enable_key_rotation      = false
   policy                   = data.aws_iam_policy_document.default.json
 }

@@ -53,6 +53,7 @@ module "auto-scaling" {
   kms_key_arn                               = var.kms_key_arn
   fargate_cluster_enabled                   = var.fargate_cluster_enabled
   cluster_name                              = module.ecs.ec2_name
+  extra_tags                                = var.extra_tags
 }
 
 ##-----------------------------------------------------------------------------
@@ -71,6 +72,7 @@ module "ecs" {
   fargate_cluster_enabled = var.fargate_cluster_enabled
   ecs_settings_enabled    = var.ecs_settings_enabled
   fargate_cluster_cp      = var.fargate_cluster_cp
+  extra_tags              = var.extra_tags
 }
 
 ##-----------------------------------------------------------------------------
@@ -114,6 +116,7 @@ module "service" {
   target_type                        = var.target_type
   network_mode                       = var.network_mode
   listener_certificate_arn           = var.listener_certificate_arn
+  extra_tags                         = var.extra_tags
 }
 
 ##-----------------------------------------------------------------------------
@@ -139,4 +142,5 @@ module "task-definition" {
   network_mode             = var.network_mode
   kms_key_arn              = var.kms_key_arn
   retention_in_days        = var.retention_in_days
+  extra_tags               = var.extra_tags
 }

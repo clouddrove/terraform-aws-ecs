@@ -16,6 +16,7 @@ module "labels" {
   delimiter   = var.delimiter
   attributes  = compact(concat(var.attributes, ["cluster"]))
   label_order = var.label_order
+  extra_tags  = var.extra_tags
 }
 
 ##-----------------------------------------------------------------------------
