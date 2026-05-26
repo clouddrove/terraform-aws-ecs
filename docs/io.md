@@ -26,6 +26,7 @@
 | enable\_ecs\_managed\_tags | Specifies whether to enable Amazon ECS managed tags for the tasks within the service. | `bool` | `false` | no |
 | enabled | Whether to create the resources. Set to `false` to prevent the module from creating any resources. | `bool` | `false` | no |
 | environment | Environment (e.g. `prod`, `dev`, `staging`). | `string` | `""` | no |
+| extra\_tags | Additional tags (e.g. map(`CostCenter`,`platform`)). | `map(string)` | `{}` | no |
 | fargate\_capacity\_provider\_simple | The name of the capacity provider. | `string` | `""` | no |
 | fargate\_capacity\_provider\_spot | The name of the capacity provider. | `string` | `""` | no |
 | fargate\_cluster\_cp | The name of the capacity provider. | `list(string)` | `[]` | no |
