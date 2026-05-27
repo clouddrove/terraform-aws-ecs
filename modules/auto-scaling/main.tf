@@ -1,7 +1,7 @@
 locals {
-    userdata = var.enabled ? templatefile("${path.module}/user-data.tpl", {
-    cluster_name               = var.cluster_name
-    cloudwatch_prefix          = var.cloudwatch_prefix
+  userdata = var.enabled ? templatefile("${path.module}/user-data.tpl", {
+    cluster_name      = var.cluster_name
+    cloudwatch_prefix = var.cloudwatch_prefix
   }) : null
 }
 
@@ -167,7 +167,7 @@ resource "aws_launch_configuration" "spot" {
   key_name                    = var.key_name
   security_groups             = compact(concat([join("", aws_security_group.default[*].id)], var.additional_security_group_ids))
   associate_public_ip_address = var.associate_public_ip_address
-  user_data_base64 = base64encode(local.userdata)
+  user_data_base64            = base64encode(local.userdata)
   enable_monitoring           = var.enable_monitoring
   ebs_optimized               = var.ebs_optimized
   spot_price                  = var.spot_price
