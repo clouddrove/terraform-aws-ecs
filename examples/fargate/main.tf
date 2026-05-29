@@ -16,7 +16,7 @@ locals {
 ##--------------------------------------------------------------------------------------------------------------------------
 module "vpc" {
   source  = "clouddrove/vpc/aws"
-  version = "2.0.4"
+  version = "2.0.5"
 
   name        = "vpc"
   repository  = "https://github.com/clouddrove/terraform-aws-vpc"
