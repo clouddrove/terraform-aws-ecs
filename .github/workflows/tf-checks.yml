@@ -1,23 +1,39 @@
 name: tf-checks
+
+permissions:
+  id-token: write
+  contents: read
+
 on:
-  push:
-    branches: [ master ]
   pull_request:
-  workflow_dispatch:
+    paths:
+      - '**/*.tf'
+      - '*.tf'
 jobs:
   ec2-network-mode-awsvpc:
-    uses: clouddrove/github-shared-workflows/.github/workflows/tf-checks.yml@master
+    uses: clouddrove/github-shared-workflows/.github/workflows/tf-checks.yml@v2
     with:
       working_directory: './examples/ec2-network-mode-awsvpc/'
-      provider: none
+      provider: aws
+      enable_plan: true
+      show_plan: false
+    secrets:
+      BUILD_ROLE: ${{ secrets.BUILD_ROLE }}
   ec2-network-mode-bridge:
-    uses: clouddrove/github-shared-workflows/.github/workflows/tf-checks.yml@master
+    uses: clouddrove/github-shared-workflows/.github/workflows/tf-checks.yml@v2
     with:
       working_directory: './examples/ec2-network-mode-bridge/'
-      provider: none
+      provider: aws
+      enable_plan: true
+      show_plan: false
+    secrets:
+      BUILD_ROLE: ${{ secrets.BUILD_ROLE }}
   fargate:
-    uses: clouddrove/github-shared-workflows/.github/workflows/tf-checks.yml@master
+    uses: clouddrove/github-shared-workflows/.github/workflows/tf-checks.yml@v2
     with:
       working_directory: './examples/fargate/'
-      provider: none
-
+      provider: aws
+      enable_plan: true
+      show_plan: false
+    secrets:
+      BUILD_ROLE: ${{ secrets.BUILD_ROLE }}
