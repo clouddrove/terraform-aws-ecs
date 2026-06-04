@@ -57,24 +57,60 @@ module "sg_lb" {
   environment = local.environment
   label_order = local.label_order
   vpc_id      = module.vpc.vpc_id
-  new_sg_ingress_rules_with_cidr_blocks = [{
-    rule_count  = 1
-    from_port   = 22
-    protocol    = "tcp"
-    to_port     = 22
-    cidr_blocks = [local.vpc_cidr_block, local.additional_cidr_block]
-    description = "Allow ssh traffic."
-  }]
 
-  ## EGRESS Rules
-  new_sg_egress_rules_with_cidr_blocks = [{
-    rule_count  = 1
-    from_port   = 22
-    protocol    = "tcp"
-    to_port     = 22
-    cidr_blocks = [local.vpc_cidr_block, local.additional_cidr_block]
-    description = "Allow ssh outbound traffic."
-  }]
+  new_sg_ingress_rules = [
+    {
+      key                          = "lb-ssh-vpc"
+      ip_protocol                  = "tcp"
+      from_port                    = 22
+      to_port                      = 22
+      cidr_ipv4                    = local.vpc_cidr_block
+      cidr_ipv6                    = null
+      prefix_list_id               = null
+      referenced_security_group_id = null
+      description                  = "Allow ssh traffic from VPC"
+      tags                         = {}
+    },
+    {
+      key                          = "lb-ssh-additional"
+      ip_protocol                  = "tcp"
+      from_port                    = 22
+      to_port                      = 22
+      cidr_ipv4                    = local.additional_cidr_block
+      cidr_ipv6                    = null
+      prefix_list_id               = null
+      referenced_security_group_id = null
+      description                  = "Allow ssh traffic from additional CIDR"
+      tags                         = {}
+    }
+  ]
+
+  new_sg_egress_rules = [
+    {
+      key                          = "lb-egress-vpc"
+      ip_protocol                  = "tcp"
+      from_port                    = 22
+      to_port                      = 22
+      cidr_ipv4                    = local.vpc_cidr_block
+      cidr_ipv6                    = null
+      prefix_list_id               = null
+      referenced_security_group_id = null
+      description                  = "Allow ssh outbound traffic to VPC"
+      tags                         = {}
+    },
+    {
+      key                          = "lb-egress-additional"
+      ip_protocol                  = "tcp"
+      from_port                    = 22
+      to_port                      = 22
+      cidr_ipv4                    = local.additional_cidr_block
+      cidr_ipv6                    = null
+      prefix_list_id               = null
+      referenced_security_group_id = null
+      description                  = "Allow ssh outbound traffic"
+      tags                         = {}
+    }
+  ]
 }
 
 ####----------------------------------------------------------------------------------
@@ -89,10 +125,10 @@ module "acm" {
   label_order = local.label_order
 
   enable_aws_certificate    = true
-  domain_name               = "clouddrove.ca"
-  subject_alternative_names = ["*.clouddrove.ca"]
+  domain_name               = "ld.clouddrove.ca"
+  subject_alternative_names = ["*.ld.clouddrove.ca"]
   validation_method         = "DNS"
-  enable_dns_validation     = false
+  enable_dns_validation     = true
 }
 
 ##-----------------------------------------------------------------------------
