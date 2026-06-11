@@ -1,3 +1,10 @@
+locals {
+  userdata = var.enabled ? templatefile("${path.module}/user-data.tpl", {
+    cluster_name      = var.cluster_name
+    cloudwatch_prefix = var.cloudwatch_prefix
+  }) : null
+}
+
 ##-----------------------------------------------------------------------------
 ## Labels module callled that will be used for naming and tags.
 ##-----------------------------------------------------------------------------
@@ -20,7 +27,7 @@ module "labels" {
 ##-----------------------------------------------------
 module "iam-role" {
   source  = "clouddrove/iam-role/aws"
-  version = "1.3.2"
+  version = "1.4.0"
 
   name               = format("%s-instance-role", var.name)
   repository         = var.repository
@@ -122,16 +129,6 @@ resource "aws_security_group_rule" "ingress_alb" {
   type                     = "ingress"
 }
 
-data "template_file" "ec2" {
-  count    = local.autoscaling_enabled ? 1 : 0
-  template = file("${path.module}/user-data.tpl")
-
-  vars = {
-    cluster_name      = var.cluster_name
-    cloudwatch_prefix = var.cloudwatch_prefix
-  }
-}
-
 ##-----------------------------------------------------
 ##  Provides a resource to create a new launch configuration, used for autoscaling groups.
 ##-----------------------------------------------------
@@ -145,7 +142,7 @@ resource "aws_launch_configuration" "default" {
   key_name                    = var.key_name
   security_groups             = compact(concat([join("", aws_security_group.default[*].id)], var.additional_security_group_ids))
   associate_public_ip_address = var.associate_public_ip_address
-  user_data_base64            = base64encode(join("", data.template_file.ec2[*].rendered))
+  user_data_base64            = base64encode(local.userdata)
   enable_monitoring           = var.enable_monitoring
   ebs_optimized               = var.ebs_optimized
 
@@ -170,7 +167,7 @@ resource "aws_launch_configuration" "spot" {
   key_name                    = var.key_name
   security_groups             = compact(concat([join("", aws_security_group.default[*].id)], var.additional_security_group_ids))
   associate_public_ip_address = var.associate_public_ip_address
-  user_data_base64            = base64encode(join("", data.template_file.ec2[*].rendered))
+  user_data_base64            = base64encode(local.userdata)
   enable_monitoring           = var.enable_monitoring
   ebs_optimized               = var.ebs_optimized
   spot_price                  = var.spot_price

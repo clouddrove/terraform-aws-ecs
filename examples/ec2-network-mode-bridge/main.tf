@@ -18,12 +18,14 @@ module "keypair" {
   source  = "clouddrove/keypair/aws"
   version = "1.3.4"
 
-  name            = "key"
-  environment     = local.environment
-  label_order     = ["environment", "name"]
-  public_key      = ""
-  enable_key_pair = true
+  name               = "key"
+  environment        = local.environment
+  label_order        = ["environment", "name"]
+  public_key         = ""
+  enable_key_pair    = true
+  enable_private_key = true
 }
+
 
 ##---------------------------------------------------------------------------------------------------------------------------
 ## A VPC is a virtual network that closely resembles a traditional network that you'd operate in your own data center.
@@ -71,24 +73,60 @@ module "ssh" {
   environment = local.environment
   label_order = local.label_order
   vpc_id      = module.vpc.vpc_id
-  new_sg_ingress_rules_with_cidr_blocks = [{
-    rule_count  = 1
-    from_port   = 22
-    protocol    = "tcp"
-    to_port     = 22
-    cidr_blocks = [local.vpc_cidr_block, local.additional_cidr_block]
-    description = "Allow ssh traffic."
-  }]
 
-  ## EGRESS Rules
-  new_sg_egress_rules_with_cidr_blocks = [{
-    rule_count  = 1
-    from_port   = 22
-    protocol    = "tcp"
-    to_port     = 22
-    cidr_blocks = [local.vpc_cidr_block, local.additional_cidr_block]
-    description = "Allow ssh outbound traffic."
-  }]
+  new_sg_ingress_rules = [
+    {
+      key                          = "ssh-vpc"
+      ip_protocol                  = "tcp"
+      from_port                    = 22
+      to_port                      = 22
+      cidr_ipv4                    = local.vpc_cidr_block
+      cidr_ipv6                    = null
+      prefix_list_id               = null
+      referenced_security_group_id = null
+      description                  = "Allow ssh traffic from VPC"
+      tags                         = {}
+    },
+    {
+      key                          = "ssh-additional"
+      ip_protocol                  = "tcp"
+      from_port                    = 22
+      to_port                      = 22
+      cidr_ipv4                    = local.additional_cidr_block
+      cidr_ipv6                    = null
+      prefix_list_id               = null
+      referenced_security_group_id = null
+      description                  = "Allow ssh traffic from additional CIDR"
+      tags                         = {}
+    }
+  ]
+
+  new_sg_egress_rules = [
+    {
+      key                          = "ssh-egress-vpc"
+      ip_protocol                  = "tcp"
+      from_port                    = 22
+      to_port                      = 22
+      cidr_ipv4                    = local.vpc_cidr_block
+      cidr_ipv6                    = null
+      prefix_list_id               = null
+      referenced_security_group_id = null
+      description                  = "Allow ssh outbound traffic to VPC"
+      tags                         = {}
+    },
+    {
+      key                          = "ssh-egress-additional"
+      ip_protocol                  = "tcp"
+      from_port                    = 22
+      to_port                      = 22
+      cidr_ipv4                    = local.additional_cidr_block
+      cidr_ipv6                    = null
+      prefix_list_id               = null
+      referenced_security_group_id = null
+      description                  = "Allow ssh outbound traffic"
+      tags                         = {}
+    }
+  ]
 }
 
 #tfsec:ignore:aws-ec2-no-public-egress-sgr
@@ -101,42 +139,70 @@ module "http_https" {
   label_order = local.label_order
 
   vpc_id = module.vpc.vpc_id
-  ## INGRESS Rules
-  new_sg_ingress_rules_with_cidr_blocks = [{
-    rule_count  = 1
-    from_port   = 22
-    protocol    = "tcp"
-    to_port     = 22
-    cidr_blocks = [local.vpc_cidr_block]
-    description = "Allow ssh traffic."
+
+  new_sg_ingress_rules = [
+    {
+      key                          = "ssh"
+      ip_protocol                  = "tcp"
+      from_port                    = 22
+      to_port                      = 22
+      cidr_ipv4                    = local.vpc_cidr_block
+      cidr_ipv6                    = null
+      prefix_list_id               = null
+      referenced_security_group_id = null
+      description                  = "Allow ssh traffic."
+      tags                         = {}
     },
     {
-      rule_count  = 2
-      from_port   = 80
-      protocol    = "tcp"
-      to_port     = 80
-      cidr_blocks = [local.vpc_cidr_block]
-      description = "Allow http traffic."
+      key                          = "http"
+      ip_protocol                  = "tcp"
+      from_port                    = 80
+      to_port                      = 80
+      cidr_ipv4                    = local.vpc_cidr_block
+      cidr_ipv6                    = null
+      prefix_list_id               = null
+      referenced_security_group_id = null
+      description                  = "Allow http traffic."
+      tags                         = {}
     },
     {
-      rule_count  = 3
-      from_port   = 443
-      protocol    = "tcp"
-      to_port     = 443
-      cidr_blocks = [local.vpc_cidr_block]
-      description = "Allow https traffic."
+      key                          = "https"
+      ip_protocol                  = "tcp"
+      from_port                    = 443
+      to_port                      = 443
+      cidr_ipv4                    = local.vpc_cidr_block
+      cidr_ipv6                    = null
+      prefix_list_id               = null
+      referenced_security_group_id = null
+      description                  = "Allow https traffic."
+      tags                         = {}
     }
   ]
 
-  ## EGRESS Rules
-  new_sg_egress_rules_with_cidr_blocks = [{
-    rule_count       = 1
-    from_port        = 0
-    protocol         = "-1"
-    to_port          = 0
-    cidr_blocks      = ["0.0.0.0/0"]
-    ipv6_cidr_blocks = ["::/0"]
-    description      = "Allow all traffic."
+  new_sg_egress_rules = [
+    {
+      key                          = "all-ipv4"
+      ip_protocol                  = "-1"
+      from_port                    = null
+      to_port                      = null
+      cidr_ipv4                    = "0.0.0.0/0"
+      cidr_ipv6                    = null
+      prefix_list_id               = null
+      referenced_security_group_id = null
+      description                  = "Allow all IPv4 traffic."
+      tags                         = {}
+    },
+    {
+      key                          = "all-ipv6"
+      ip_protocol                  = "-1"
+      from_port                    = null
+      to_port                      = null
+      cidr_ipv4                    = null
+      cidr_ipv6                    = "::/0"
+      prefix_list_id               = null
+      referenced_security_group_id = null
+      description                  = "Allow all IPv6 traffic."
+      tags                         = {}
     }
   ]
 }
@@ -146,7 +212,7 @@ module "http_https" {
 ##-----------------------------------------------------
 module "kms_key" {
   source  = "clouddrove/kms/aws"
-  version = "1.3.3"
+  version = "1.3.4"
 
   name                     = "kms"
   repository               = "https://github.com/clouddrove/terraform-aws-kms"
@@ -188,10 +254,10 @@ module "acm" {
   label_order = local.label_order
 
   enable_aws_certificate    = true
-  domain_name               = "clouddrove.ca"
-  subject_alternative_names = ["*.clouddrove.ca"]
+  domain_name               = "ld.clouddrove.ca"
+  subject_alternative_names = ["*.ld.clouddrove.ca"]
   validation_method         = "DNS"
-  enable_dns_validation     = false
+  enable_dns_validation     = true
 }
 
 ##-----------------------------------------------------------------------------
